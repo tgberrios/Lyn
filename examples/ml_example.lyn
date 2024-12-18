@@ -1,0 +1,6 @@
+data = load_csv("data.csv")
+model = NeuralNet([
+    Dense(32, activation: "relu"),
+    Dense(1, activation: "sigmoid")
+])
+model.fit(data, labels, epochs: 10)

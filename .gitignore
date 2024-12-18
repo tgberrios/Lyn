@@ -1,0 +1,1 @@
+build/\n*.exe\n*.obj\n*.o\n*.log\n*.tmp
