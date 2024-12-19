@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#pragma once
 
 using namespace std;
 
@@ -13,7 +14,7 @@ enum class TokenType {
     ABSTRACT, ASYNC, AWAIT, BREAK, CASE, CATCH, CLASS, CONTINUE, DEFAULT, DO, ELSE, ENUM, EXPORT, EXTENDS, FALSE, FINALLY, FOR, FUNCTION, IF, IMPLEMENTS, IMPORT, INTERFACE, MODULE, NAMESPACE, NULL_VALUE, RETURN, SEALED, STRUCT, SUPER, SWITCH, THIS, THROW, TRUE, TRY, UNDEFINED_VALUE, WHILE, YIELD,
 
     // Operators
-    AND, ASSIGN, ASSIGN_DIVIDE, ASSIGN_MINUS, ASSIGN_MULTIPLY, ASSIGN_PLUS, BITWISE_AND, DIVIDE, EQUAL, GREATER_EQUAL, GREATER_THAN, LESS_EQUAL, LESS_THAN, MINUS, MULTIPLY, NOT, NOT_EQUAL, OR, PLUS,
+    ERROR,AND, ASSIGN, ASSIGN_DIVIDE, ASSIGN_MINUS, ASSIGN_MULTIPLY, ASSIGN_PLUS, BITWISE_AND, DIVIDE, EQUAL, GREATER_EQUAL, GREATER_THAN, LESS_EQUAL, LESS_THAN, MINUS, MULTIPLY, NOT, NOT_EQUAL, OR, PLUS,
 
     // Punctuation
     AT_SYMBOL, CLOSE_BRACE, CLOSE_PARENTHESIS, COLON, COMMA, DOT, OPEN_BRACE, OPEN_PARENTHESIS, SEMICOLON,
@@ -22,7 +23,7 @@ enum class TokenType {
     FLOAT, IDENTIFIER, NUMBER, STRING,
 
     // Other
-    END_OF_FILE, UNKNOWN
+    END_OF_FILE, UNKNOWN, VAR, PRINT
 };
 
 // ESTRUCTURA DE TOKENS
@@ -39,7 +40,7 @@ struct Token
 
 class Lexer {
     public:
-        Lexer(std::string &source);
+         Lexer(const std::string& source);
         Token nextToken();
 
     private:
@@ -52,4 +53,11 @@ class Lexer {
     char peek(int offset);
     char advance();
     bool isAtEnd();
+    void skipWhitespace();
+    Token makeToken(TokenType type, std::string value, int line, int column);
+    Token indentifierOrKeyword();
+    Token numberToken();
+    Token stringToken();
+    Token operatorOrSymbol();
+
 };
