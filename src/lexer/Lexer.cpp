@@ -34,6 +34,10 @@ bool Lexer::isAtEnd() {
   return currentIndex >= source.size();
 };
 
+void Lexer::putBack(const Token& token) {
+    tokenBuffer.push(token);
+}
+
 Token Lexer::nextToken() {
   //VARIALBLES
   char c = peek();
@@ -47,6 +51,8 @@ Token Lexer::nextToken() {
     return makeToken(TokenType::END_OF_FILE, "", line, column);
   }
 
+  
+
   //3. Si empieza con letra o '_', es un IDENTIFIER
   if (isalpha(c) || c == '_') { 
     return indentifierOrKeyword();
@@ -57,10 +63,14 @@ Token Lexer::nextToken() {
     return numberToken();
   }
 
-  //5. Si es un string, es un STRING
-  if (c == '"') {
-    return stringToken();
-  }
+  
+
+
+    //5. Si es un string, es un STRING
+    if (c == '"')
+{
+  return stringToken();
+}
 
   // Si no es ninguno de los anteriores, es un  operador o simbolo especial
   return operatorOrSymbol();
@@ -245,8 +255,5 @@ Token Lexer::operatorOrSymbol() {
       return makeToken(TokenType::UNKNOWN, std::string(1, current), line, column);
   }
 }
-
-
-
 
 
