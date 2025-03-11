@@ -1,0 +1,8 @@
+class Shape
+    x: float;
+    y: float;
+end
+
+class Circle : Shape
+    radius: float;
+end

@@ -1,0 +1,98 @@
+main
+    // Primera clase: Point
+    class Point
+        x: float;
+        y: float;
+        
+        func init(self: Point, x: float, y: float) -> void
+            self.x = x;
+            self.y = y;
+        end
+        
+        func distance(self: Point, other: Point) -> float
+            dx = self.x - other.x;
+            dy = self.y - other.y;
+            return sqrt(dx * dx + dy * dy);
+        end
+    end
+    
+    // Segunda clase: Vector3
+    class Vector3
+        x: float;
+        y: float;
+        z: float;
+        
+        func init(self: Vector3, x: float, y: float, z: float) -> void
+            self.x = x;
+            self.y = y;
+            self.z = z;
+        end
+        
+        func magnitude(self: Vector3) -> float
+            return sqrt(self.x * self.x + self.y * self.y + self.z * self.z);
+        end
+        
+        func add(self: Vector3, other: Vector3) -> Vector3
+            result = new_Vector3();
+            Vector3_init(result, self.x + other.x, self.y + other.y, self.z + other.z);
+            return result;
+        end
+    end
+    
+    // Tercera clase: Shape y Circle
+    class Shape
+        x: float;
+        y: float;
+        
+        func init(self: Shape, x: float, y: float) -> void
+            self.x = x;
+            self.y = y;
+        end
+        
+        func area(self: Shape) -> float
+            return 0.0;
+        end
+    end
+    
+    class Circle : Shape
+        radius: float;
+        
+        func init(self: Circle, x: float, y: float, r: float) -> void
+            Shape_init(self, x, y);  // Llamada al constructor padre
+            self.radius = r;
+        end
+        
+        func area(self: Circle) -> float
+            return 3.14159 * self.radius * self.radius;
+        end
+        
+        func scale(self: Circle, factor: float) -> void
+            self.radius = self.radius * factor;
+        end
+    end
+    
+    // Test Point
+    print("=== Testing Point ===");
+    p1 = new_Point();
+    Point_init(p1, 0, 0);
+    p2 = new_Point();
+    Point_init(p2, 3, 4);
+    print(Point_distance(p1, p2));  // Debería imprimir 5
+    
+    // Test Vector3
+    print("=== Testing Vector3 ===");
+    v1 = new_Vector3();
+    Vector3_init(v1, 1, 2, 2);
+    v2 = new_Vector3();
+    Vector3_init(v2, 2, 3, 6);
+    print(Vector3_magnitude(v1));  // Debería imprimir 3
+    print(Vector3_magnitude(v2));  // Debería imprimir 7
+    
+    // Test Circle
+    print("=== Testing Circle ===");
+    c1 = new_Circle();
+    Circle_init(c1, 0, 0, 5);  // Actualizar llamada con x, y, r
+    print(Circle_area(c1));    // Debería imprimir ~78.54
+    Circle_scale(c1, 2);
+    print(Circle_area(c1));    // Debería imprimir ~314.16
+end

@@ -1,0 +1,33 @@
+echo 'main
+    class Shape
+        x: float;
+        y: float;
+        
+        func init(self: Shape, x: float, y: float) -> void
+            self.x = x;
+            self.y = y;
+        end
+        
+        func area(self: Shape) -> float
+            return 0.0;
+        end
+    end
+    
+    class Circle : Shape
+        radius: float;
+        
+        func init(self: Circle, x: float, y: float, r: float) -> void
+            Shape_init(self, x, y);
+            self.radius = r;
+        end
+        
+        func area(self: Circle) -> float
+            return 3.14159 * self.radius * self.radius;
+        end
+    end
+
+    # Test de herencia
+    c = new_Circle();
+    Circle_init(c, 0, 0, 5);
+    print(Circle_area(c));  # Imprime: 78.53975
+end' > examples/inheritance.lyn

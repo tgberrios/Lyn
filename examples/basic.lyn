@@ -1,0 +1,26 @@
+echo 'main
+    class Point
+        x: float;
+        y: float;
+        
+        func init(self: Point, x: float, y: float) -> void
+            self.x = x;
+            self.y = y;
+        end
+        
+        func distance(self: Point, other: Point) -> float
+            dx = self.x - other.x;
+            dy = self.y - other.y;
+            return sqrt(dx * dx + dy * dy);
+        end
+    end
+    
+    # Test básico
+    p1 = new_Point();
+    Point_init(p1, 0, 0);
+    
+    p2 = new_Point();
+    Point_init(p2, 3, 4);
+    
+    print(Point_distance(p1, p2));  # Imprime: 5
+end' > examples/basic.lyn
