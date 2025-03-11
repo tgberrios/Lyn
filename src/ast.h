@@ -1,163 +1,190 @@
 #ifndef AST_H
 #define AST_H
 
-#include <stddef.h>
+#include <stdbool.h>
+#include "types.h"  // Para usar el tipo Type
 
-/* Enumeración de los tipos de nodos del AST */
+// Enumerador de tipos de nodo AST adaptado a parser.c y compiler.c
 typedef enum {
     AST_PROGRAM,
     AST_NUMBER_LITERAL,
     AST_STRING_LITERAL,
     AST_IDENTIFIER,
-    AST_BINARY_OP,
-    AST_FUNC_CALL,
-    AST_FUNC_DEF,
-    AST_RETURN_STMT,
     AST_VAR_DECL,
     AST_VAR_ASSIGN,
+    AST_FUNC_DEF,         // Definición de función
+    AST_EXPR_STMT,
+    AST_IF_STMT,
+    AST_WHILE_STMT,
+    AST_FOR_STMT,
+    AST_RETURN_STMT,
+    AST_BINARY_OP,        // Expresión binaria
+    AST_FUNC_CALL,
     AST_MEMBER_ACCESS,
     AST_PRINT_STMT,
-    AST_IF_STMT,
-    AST_FOR_STMT,
-    AST_CLASS_DEF,
+    AST_CLASS_DEF,        // Definición de clase
     AST_LAMBDA,
     AST_ARRAY_LITERAL,
-    AST_MODULE_DECL,  // <-- Asegurarse de que estas estén definidas
-    AST_MODULE_IMPORT, // <-- Asegurarse de que estas estén definidas
-    AST_IMPORT,
-    AST_METHOD_CALL,   // Añadido
-    AST_EXPORT         // Añadido
+    AST_MODULE_DECL,
+    AST_IMPORT            // Nodo para importaciones
 } AstNodeType;
 
-/* Declaración adelantada para usar en MethodCallNode */
-typedef struct AstNode AstNode;
+// Enumerador para operadores binarios (usando el carácter)
+typedef enum {
+    OP_PLUS = '+',
+    OP_MINUS = '-',
+    OP_MULTIPLY = '*',
+    OP_DIVIDE = '/'
+} BinaryOperator;
 
-/* Nodo para llamadas a métodos */
-typedef struct {
-    AstNode *object;
-    char method[256];
-    AstNode **arguments;
-    int argCount;
-} MethodCallNode;
-
-/* Definición del nodo AST */
-struct AstNode {
+// Definición de la estructura AST usando una unión para cada variante
+typedef struct AstNode {
     AstNodeType type;
+    int line;
+    Type* inferredType; // Opcional
     union {
+        // Nodo programa: lista de sentencias o declaraciones
         struct {
-            AstNode **statements;
+            struct AstNode** statements;
             int statementCount;
         } program;
+        
+        // Número literal
         struct {
             double value;
         } numberLiteral;
+        
+        // Cadena literal
         struct {
-            char value[1024];
+            char value[256];
         } stringLiteral;
+        
+        // Identificador
         struct {
             char name[256];
         } identifier;
-        struct {
-            AstNode *left;
-            char op;
-            AstNode *right;
-        } binaryOp;
+        
+        // Declaración de variable
         struct {
             char name[256];
-            AstNode **arguments;
-            int argCount;
-        } funcCall;
+            char type[128];  // Tipo en forma de cadena
+            struct AstNode* initializer;
+        } varDecl;
+        
+        // Asignación de variable
         struct {
             char name[256];
-            AstNode **parameters;
+            struct AstNode* initializer;
+        } varAssign;
+        
+        // Definición de función
+        struct {
+            char name[256];
+            struct AstNode** parameters;  // Lista de identificadores (AST_IDENTIFIER)
             int paramCount;
             char returnType[64];
-            AstNode **body;
+            struct AstNode** body;        // Lista de sentencias
             int bodyCount;
         } funcDef;
+        
+        // Sentencia de expresión
         struct {
-            AstNode *expr;
-        } returnStmt;
+            struct AstNode* expr;
+        } exprStmt;
+        
+        // Sentencia if
         struct {
-            char name[256];
-            char type[256];
-            AstNode *initializer;
-        } varDecl;
-        struct {
-            char name[256];
-            AstNode *initializer;
-        } varAssign;
-        struct {
-            AstNode *object;
-            char member[256];
-        } memberAccess;
-        struct {
-            AstNode *expr;
-        } printStmt;
-        struct {
-            AstNode *condition;
-            AstNode **thenBranch;
+            struct AstNode* condition;
+            struct AstNode** thenBranch;  // Lista de sentencias en la rama then
             int thenCount;
-            AstNode **elseBranch;
+            struct AstNode** elseBranch;  // Lista de sentencias en la rama else (opcional)
             int elseCount;
         } ifStmt;
+        
+        // Sentencia while
+        struct {
+            struct AstNode* condition;
+            struct AstNode* body;
+        } whileStmt;
+        
+        // Sentencia for
         struct {
             char iterator[256];
-            AstNode *rangeStart;
-            AstNode *rangeEnd;
-            AstNode **body;
+            struct AstNode* rangeStart;
+            struct AstNode* rangeEnd;
+            struct AstNode** body;  // Lista de sentencias dentro del for
             int bodyCount;
         } forStmt;
+        
+        // Sentencia return
+        struct {
+            struct AstNode* expr;
+        } returnStmt;
+        
+        // Expresión binaria
+        struct {
+            struct AstNode* left;
+            char op; // Operador (por ejemplo, '+', '-', etc.)
+            struct AstNode* right;
+        } binaryOp;
+        
+        // Llamada a función
         struct {
             char name[256];
-            char baseClassName[256];
-            AstNode **members;
+            struct AstNode** arguments;
+            int argCount;
+        } funcCall;
+        
+        // Acceso a miembro
+        struct {
+            struct AstNode* object;
+            char member[256];
+        } memberAccess;
+        
+        // Sentencia print
+        struct {
+            struct AstNode* expr;
+        } printStmt;
+        
+        // Definición de clase
+        struct {
+            char name[256];
+            char baseClassName[256];  // Nombre de la clase base (si existe)
+            struct AstNode** members; // Lista de miembros (variables, funciones, etc.)
             int memberCount;
         } classDef;
+        
+        // Expresión lambda
         struct {
-            AstNode **parameters;
+            struct AstNode** parameters;  // Lista de identificadores
             int paramCount;
             char returnType[64];
-            AstNode *body;
+            struct AstNode* body;
         } lambda;
+        
+        // Literal de arreglo
         struct {
-            AstNode **elements;
+            struct AstNode** elements;
             int elementCount;
         } arrayLiteral;
+        
+        // Declaración de módulo
         struct {
             char name[256];
             struct AstNode** declarations;
             int declarationCount;
         } moduleDecl;
+        
+        // Importación de módulo
         struct {
-            char moduleName[256];
-        } moduleImport;
-        struct {
-            char moduleType[64];
+            char moduleType[64];   // Por ejemplo: "ui" o "css"
             char moduleName[256];
         } importStmt;
-        struct {
-            AstNode *object;
-            char method[256];
-            AstNode **arguments;
-            int argCount;
-        } methodCall;
     };
-};
+} AstNode;
 
-/**
- * @brief Crea un nuevo nodo AST del tipo especificado.
- *
- * @param type Tipo del nodo AST.
- * @return AstNode* Puntero al nodo AST creado.
- */
-AstNode *createAstNode(AstNodeType type);
+AstNode* createAstNode(AstNodeType type);
+void freeAstNode(AstNode* node);
+void freeAst(AstNode* root);
 
-/**
- * @brief Libera la memoria utilizada por un nodo AST y sus descendientes.
- *
- * @param node Puntero al nodo AST a liberar.
- */
-void freeAstNode(AstNode *node);
-
-#endif /* AST_H */
+#endif

@@ -813,14 +813,11 @@ static AstNode* parseImport(void) {
         parserError("Expected module name");
     }
     
-    AstNode* importNode = createAstNode(AST_MODULE_IMPORT);
-    strncpy(importNode->moduleImport.moduleName, currentToken.lexeme,
-            sizeof(importNode->moduleImport.moduleName));
+    AstNode* importNode = createAstNode(AST_IMPORT); // Cambiado de AST_MODULE_IMPORT a AST_IMPORT
+    // Asigna el nombre del módulo al campo importStmt.moduleName
+    strncpy(importNode->importStmt.moduleName, currentToken.lexeme, sizeof(importNode->importStmt.moduleName));
     
     advanceToken(); // consume module name
     return importNode;
 }
 
-void freeAst(AstNode *root) {
-    freeAstNode(root);
-}

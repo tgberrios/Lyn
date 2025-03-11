@@ -5,11 +5,13 @@
 
 // Agregar la enumeración de tipos de error
 typedef enum {
+    ERROR_NONE,
     ERROR_SYNTAX,
+    ERROR_SEMANTIC,
     ERROR_TYPE,
-    ERROR_UNDEFINED,
     ERROR_MEMORY,
     ERROR_IO,
+    ERROR_UNDEFINED,
     ERROR_RUNTIME
 } ErrorType;
 

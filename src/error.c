@@ -1,14 +1,20 @@
 #include "error.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 
 #define MAX_ERRORS 100
 #define CONTEXT_SIZE 80
+#define MAX_ERROR_LEN 1024
 
 static ErrorInfo errors[MAX_ERRORS];
 static int errorCount = 0;
+static char errorBuffer[MAX_ERROR_LEN];
 static const char* sourceCode = NULL;
+static int errorLine = 0;
+static int errorCol = 0;
+static ErrorType errorType = ERROR_NONE;
 
 void error_init(void) {
     errorCount = 0;
@@ -50,16 +56,22 @@ static void extract_context(ErrorInfo* error) {
     error->errorPosition = error->column - 1;
 }
 
-void error_report(const char* file, int line, int column, const char* message) {
+void error_report(const char* module, int line, int col, const char* message) {
     if (errorCount >= MAX_ERRORS) return;
 
     ErrorInfo* error = &errors[errorCount++];
-    error->file = file;
+    error->file = module;
     error->line = line;
-    error->column = column;
+    error->column = col;
     error->message = strdup(message);
     
     extract_context(error);
+
+    snprintf(errorBuffer, MAX_ERROR_LEN, "[%s:%d:%d] %s", 
+             module, line, col, message);
+    errorLine = line;
+    errorCol = col;
+    errorType = ERROR_SYNTAX;
 }
 
 void error_set_source(const char* source) {
@@ -80,6 +92,45 @@ void error_print_current(void) {
             fprintf(stderr, " ");
         }
         fprintf(stderr, "^\n");
+    }
+
+    if (errorBuffer[0] != '\0') {
+        fprintf(stderr, "ERROR: %s\n", errorBuffer);
+        
+        // Si tenemos el código fuente y la posición, mostrar contexto
+        if (sourceCode && errorLine > 0) {
+            // Encontrar la línea correcta
+            int curLine = 1;
+            const char* ptr = sourceCode;
+            while (curLine < errorLine && *ptr) {
+                if (*ptr == '\n') curLine++;
+                ptr++;
+            }
+            
+            // Encontrar el inicio de la línea
+            const char* lineStart = ptr;
+            while (lineStart > sourceCode && *(lineStart-1) != '\n') {
+                lineStart--;
+            }
+            
+            // Encontrar el final de la línea
+            const char* lineEnd = ptr;
+            while (*lineEnd && *lineEnd != '\n') lineEnd++;
+            
+            // Mostrar la línea
+            fprintf(stderr, "Line %d: ", errorLine);
+            for (const char* p = lineStart; p < lineEnd; p++) {
+                putc(*p, stderr);
+            }
+            fprintf(stderr, "\n");
+            
+            // Mostrar el indicador de posición
+            fprintf(stderr, "       ");
+            for (int i = 1; i < errorCol; i++) {
+                fprintf(stderr, " ");
+            }
+            fprintf(stderr, "^\n");
+        }
     }
 }
 
