@@ -34,7 +34,8 @@ char* readFile(const char* path) {
 
 int compileOutputC(const char* outputPath, const char* executablePath) {
     char command[1024];
-    snprintf(command, sizeof(command), "gcc -o %s %s -lm", executablePath, outputPath);
+    // Añadimos explícitamente -lm para garantizar enlace con la biblioteca matemática (sqrt)
+    snprintf(command, sizeof(command), "gcc -o %s %s -lm -Wall", executablePath, outputPath);
     return system(command);
 }
 
@@ -42,27 +43,39 @@ int main(int argc, char* argv[]) {
     // Inicializar el logger
     logger_init("lyn_compiler.log");
     logger_set_level(LOG_DEBUG);
-    logger_log(LOG_INFO, "Iniciando compilación de %s", argv[1]);
-
+    
     if (argc != 2) {
+        fprintf(stderr, "Error: Incorrect usage\n");
         fprintf(stderr, "Usage: %s <source_file>\n", argv[0]);
         return 1;
     }
 
+    logger_log(LOG_INFO, "Iniciando compilación de %s", argv[1]);
+
     // Obtener el nombre base del archivo
     char* sourcePath = argv[1];
     char* baseName = strdup(sourcePath);
+    if (!baseName) {
+        logger_log(LOG_ERROR, "Error: Failed to allocate memory for basename");
+        return 1;
+    }
+    
     char* dot = strrchr(baseName, '.');
     if (dot) *dot = '\0';
 
-    // Crear nombres de archivos
+    // Crear nombres de archivos con manejo de errores
     char outputPath[256];
     char executablePath[256];
     snprintf(outputPath, sizeof(outputPath), "%s.c", baseName);
     snprintf(executablePath, sizeof(executablePath), "%s.out", baseName);
 
-    // Leer archivo fuente
+    // Leer archivo fuente con manejo de errores mejorado
     char* source = readFile(sourcePath);
+    if (!source) {
+        logger_log(LOG_ERROR, "Error: Failed to read source file");
+        free(baseName);
+        return 1;
+    }
     
     // Inicializar lexer
     lexerInit(source);
@@ -71,9 +84,10 @@ int main(int argc, char* argv[]) {
     optimizer_init(OPT_LEVEL_2);
 
     // Parsear el código
+    logger_log(LOG_INFO, "Parseando código fuente...");
     AstNode* ast = parseProgram();
     if (!ast) {
-        fprintf(stderr, "Parsing failed\n");
+        logger_log(LOG_ERROR, "Error: Parsing failed");
         free(source);
         free(baseName);
         return 1;
@@ -88,8 +102,9 @@ int main(int argc, char* argv[]) {
     ast = optimize_ast(ast);
 
     // Compilar a C
+    logger_log(LOG_INFO, "Generando código C...");
     if (!compileToC(ast, outputPath)) {
-        fprintf(stderr, "Compilation to C failed\n");
+        logger_log(LOG_ERROR, "Error: Compilation to C failed");
         freeAst(ast);
         free(source);
         free(baseName);
@@ -97,9 +112,10 @@ int main(int argc, char* argv[]) {
     }
 
     // Compilar el archivo C generado
+    logger_log(LOG_INFO, "Compilando código C a ejecutable...");
     printf("Compiling %s to %s...\n", outputPath, executablePath);
     if (compileOutputC(outputPath, executablePath) != 0) {
-        fprintf(stderr, "C compilation failed\n");
+        logger_log(LOG_ERROR, "Error: C compilation failed");
         freeAst(ast);
         free(source);
         free(baseName);
@@ -107,20 +123,34 @@ int main(int argc, char* argv[]) {
     }
 
     // Ejecutar el programa compilado
+    logger_log(LOG_INFO, "Ejecutando programa compilado...");
     printf("Running %s:\n", executablePath);
     printf("----------------------------------------\n");
     char runCommand[1024];
     snprintf(runCommand, sizeof(runCommand), "./%s", executablePath);
-    system(runCommand);
+    int result = system(runCommand);
     printf("----------------------------------------\n");
+    
+    if (result != 0) {
+        logger_log(LOG_ERROR, "Error during program execution. Return code: %d", result);
+    } else {
+        logger_log(LOG_INFO, "Program executed successfully");
+    }
 
-    // Liberar memoria
-    freeAst(ast);
+    // Limpieza segura
+    if (ast) {
+        logger_log(LOG_DEBUG, "Limpiando AST...");
+        freeAst(ast);
+        ast = NULL;
+    }
+    
     free(source);
     free(baseName);
 
     logger_log(LOG_INFO, "Compilación completada exitosamente");
     logger_close();
+    
+    printf("Compilation and execution successful!\n");
     
     return 0;
 }

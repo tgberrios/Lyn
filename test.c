@@ -3,152 +3,214 @@
 #include <string.h>
 #include <math.h>
 
-// Forward declarations
-struct Point;
-struct Shape;
-struct Circle;
-struct Vector3;
-void* new_Point();
-void Point_init(void* self, double x, double y);
-double Point_distance(void* self, void* other);
-void* new_Shape();
-void Shape_init(void* self, double x, double y);
-double Shape_area(void* self);
-void* new_Circle();
-void Circle_init(void* self, double x, double y, double r);
-double Circle_area(void* self);
-void Circle_scale(void* self, double factor);
-void* new_Vector3();
-void Vector3_init(void* self, double x, double y, double z);
-double Vector3_magnitude(void* self);
-void* Vector3_add(void* self, void* other);
-
-struct Point {
+// Estructuras de datos para los objetos
+typedef struct {
     double x;
     double y;
-};
-struct Shape {
-    double x;
-    double y;
-};
-struct Circle {
-    double x;
-    double y;
-    double radius;
-};
-struct Vector3 {
+} Point;
+typedef struct {
     double x;
     double y;
     double z;
-};
+} Vector3;
+typedef struct {
+    int type;     // 0 = base Shape, 1 = Circle, etc.
+    double x;
+    double y;
+} Shape;
+typedef struct {
+    int type;     // Will always be 1 for Circle
+    double x;
+    double y;
+    double radius;
+} Circle;
 
-void* new_Point() {
-    void* ptr = malloc(sizeof(struct Point));
-    if (ptr) memset(ptr, 0, sizeof(struct Point));
-    return ptr;
+// Funciones para crear objetos
+Point* new_Point() {
+    Point* p = (Point*)malloc(sizeof(Point));
+    if (!p) {
+        fprintf(stderr, "Error: Memory allocation failed for Point\n");
+        exit(1);
+    }
+    p->x = 0.0;
+    p->y = 0.0;
+    return p;
 }
-void* new_Shape() {
-    void* ptr = malloc(sizeof(struct Shape));
-    if (ptr) memset(ptr, 0, sizeof(struct Shape));
-    return ptr;
+Vector3* new_Vector3() {
+    Vector3* v = (Vector3*)malloc(sizeof(Vector3));
+    if (!v) {
+        fprintf(stderr, "Error: Memory allocation failed for Vector3\n");
+        exit(1);
+    }
+    v->x = 0.0;
+    v->y = 0.0;
+    v->z = 0.0;
+    return v;
 }
-void* new_Circle() {
-    void* ptr = malloc(sizeof(struct Circle));
-    if (ptr) memset(ptr, 0, sizeof(struct Circle));
-    return ptr;
+Shape* new_Shape() {
+    Shape* s = (Shape*)malloc(sizeof(Shape));
+    if (!s) {
+        fprintf(stderr, "Error: Memory allocation failed for Shape\n");
+        exit(1);
+    }
+    s->type = 0;  // Base Shape type
+    s->x = 0.0;
+    s->y = 0.0;
+    return s;
 }
-void* new_Vector3() {
-    void* ptr = malloc(sizeof(struct Vector3));
-    if (ptr) memset(ptr, 0, sizeof(struct Vector3));
-    return ptr;
+Circle* new_Circle() {
+    Circle* c = (Circle*)malloc(sizeof(Circle));
+    if (!c) {
+        fprintf(stderr, "Error: Memory allocation failed for Circle\n");
+        exit(1);
+    }
+    c->type = 1;  // Circle type
+    c->x = 0.0;
+    c->y = 0.0;
+    c->radius = 0.0;
+    return c;
 }
-
-// Class declaration: Point
-// Class declaration: Vector3
-// Class declaration: Shape
-// Class declaration: Circle
-void Point_init(void* self, double x, double y) {
-    if (!self) return;
-    struct Point* p = (struct Point*)self;
-    p->x = x;
-    p->y = y;
+// Funciones de clases
+void Point_init(Point* self, double x, double y) {
+    if (!self) {
+        fprintf(stderr, "Error: NULL pointer in Point_init\n");
+        return;
+    }
+    self->x = x;
+    self->y = y;
 }
-void Vector3_init(void* self, double x, double y, double z) {
-    if (!self) return;
-    struct Vector3* v = (struct Vector3*)self;
-    v->x = x;
-    v->y = y;
-    v->z = z;
-}
-void Shape_init(void* self, double x, double y) {
-    if (!self) return;
-    struct Shape* s = (struct Shape*)self;
-    s->x = x;
-    s->y = y;
-}
-void Circle_init(void* self, double x, double y, double r) {
-    if (!self) return;
-    struct Circle* circle = (struct Circle*)self;
-    circle->x = x;
-    circle->y = y;
-    circle->radius = r;
-}
-double Point_distance(void* self, void* other) {
-    if (!self || !other) return 0.0;
-    struct Point* p1 = (struct Point*)self;
-    struct Point* p2 = (struct Point*)other;
-    double dx = p1->x - p2->x;
-    double dy = p1->y - p2->y;
-    return sqrt(dx * dx + dy * dy);
-}
-double Vector3_magnitude(void* self) {
-    if (!self) return 0.0;
-    struct Vector3* v = (struct Vector3*)self;
-    return sqrt(v->x * v->x + v->y * v->y + v->z * v->z);
-}
-double Circle_area(void* self) {
-    if (!self) return 0.0;
-    struct Circle* circle = (struct Circle*)self;
-    return 3.14159 * circle->radius * circle->radius;
-}
-void Circle_scale(void* self, double factor) {
-    if (!self) return;
-    struct Circle* circle = (struct Circle*)self;
-    circle->radius *= factor;
-}
-double Shape_area(void* self) {
-    if (!self) return 0.0;
-    return 0.0; // Base Shape has no area
-}
-void* Vector3_add(void* self, void* other) {
-    if (!self || !other) return NULL;
-    struct Vector3* v1 = (struct Vector3*)self;
-    struct Vector3* v2 = (struct Vector3*)other;
-    struct Vector3* result = malloc(sizeof(struct Vector3));
-    if (!result) return NULL; // Verificar asignación de memoria
-    memset(result, 0, sizeof(struct Vector3)); // Inicializar a cero
-    result->x = v1->x + v2->x;
-    result->y = v1->y + v2->y;
-    result->z = v1->z + v2->z;
+double Point_distance(Point* self, Point* other) {
+    if (!self || !other) {
+        fprintf(stderr, "Error: NULL pointer in Point_distance\n");
+        return 0.0;
+    }
+    double dx = self->x - other->x;
+    double dy = self->y - other->y;
+    double result = sqrt(dx * dx + dy * dy);
     return result;
 }
-
+void Vector3_init(Vector3* self, double x, double y, double z) {
+    if (!self) {
+        fprintf(stderr, "Error: NULL pointer in Vector3_init\n");
+        return;
+    }
+    self->x = x;
+    self->y = y;
+    self->z = z;
+}
+double Vector3_magnitude(Vector3* self) {
+    if (!self) {
+        fprintf(stderr, "Error: NULL pointer in Vector3_magnitude\n");
+        return 0.0;
+    }
+    double x2 = self->x * self->x;
+    double y2 = self->y * self->y;
+    double z2 = self->z * self->z;
+    double sum = x2 + y2 + z2;
+    double result = sqrt(sum);
+    return result;
+}
+Vector3* Vector3_add(Vector3* self, Vector3* other) {
+    if (!self || !other) {
+        fprintf(stderr, "Error: NULL pointer in Vector3_add\n");
+        return NULL;
+    }
+    Vector3* result = new_Vector3();
+    if (!result) {
+        fprintf(stderr, "Error: Memory allocation failed in Vector3_add\n");
+        return NULL;
+    }
+    result->x = self->x + other->x;
+    result->y = self->y + other->y;
+    result->z = self->z + other->z;
+    return result;
+}
+void Shape_init(Shape* self, double x, double y) {
+    if (!self) {
+        fprintf(stderr, "Error: NULL pointer in Shape_init\n");
+        return;
+    }
+    self->x = x;
+    self->y = y;
+}
+double Shape_area(Shape* self) {
+    if (!self) {
+        fprintf(stderr, "Error: NULL pointer in Shape_area\n");
+        return 0.0;
+    }
+    return 0.0; // Base shape has no area
+}
+void Circle_init(Circle* self, double x, double y, double r) {
+    if (!self) {
+        fprintf(stderr, "Error: NULL pointer in Circle_init\n");
+        return;
+    }
+    self->type = 1;  // Circle type
+    self->x = x;
+    self->y = y;
+    self->radius = r;
+}
+double Circle_area(Circle* self) {
+    if (!self) {
+        fprintf(stderr, "Error: NULL pointer in Circle_area\n");
+        return 0.0;
+    }
+    const double PI = 3.14159265358979323846;
+    double r = self->radius;
+    double area = PI * r * r;
+    return area;
+}
+void Circle_scale(Circle* self, double factor) {
+    if (!self) {
+        fprintf(stderr, "Error: NULL pointer in Circle_scale\n");
+        return;
+    }
+    self->radius = self->radius * factor;
+}
 int main() {
-    void *p1 = NULL, *p2 = NULL, *v1 = NULL, *v2 = NULL, *c1 = NULL;
-    printf("%s\n", "=== Testing Point ===");
-    p1 =     new_Point()    ;
-    p2 =     new_Point()    ;
-    if (p1) printf("%g\n",     Point_distance(    p1    ,     p2    )    ); else printf("NULL\n");
-    printf("%s\n", "=== Testing Vector3 ===");
-    v1 =     new_Vector3()    ;
-    v2 =     new_Vector3()    ;
-    if (v1) printf("%g\n",     Vector3_magnitude(    v1    )    ); else printf("NULL\n");
-    if (v2) printf("%g\n",     Vector3_magnitude(    v2    )    ); else printf("NULL\n");
-    printf("%s\n", "=== Testing Circle ===");
-    c1 =     new_Circle()    ;
-    if (c1) printf("%g\n",     Circle_area(    c1    )    ); else printf("NULL\n");
-    if (c1) printf("%g\n",     Circle_area(    c1    )    ); else printf("NULL\n");
-    // Limpieza de memoria antes de salir
+    Point* p1 = NULL;
+    Point* p2 = NULL;
+    Vector3* v1 = NULL;
+    Vector3* v2 = NULL;
+    Circle* c1 = NULL;
+    printf("=== Testing Point ===\n");
+    p1 = new_Point();
+    p2 = new_Point();
+    if (!p1 || !p2) {
+        fprintf(stderr, "Error: Failed to allocate Points\n");
+        goto cleanup;
+    }
+    Point_init(p1, 0.0, 0.0);
+    Point_init(p2, 3.0, 4.0);
+    // Calculando distancia euclidiana entre (0,0) y (3,4): sqrt(3^2 + 4^2) = sqrt(9 + 16) = sqrt(25) = 5
+    printf("Point distance (0,0) to (3,4): ");
+    printf("%.6f\n", Point_distance(p1, p2));
+    printf("=== Testing Vector3 ===\n");
+    v1 = new_Vector3();
+    v2 = new_Vector3();
+    if (!v1 || !v2) {
+        fprintf(stderr, "Error: Failed to allocate Vectors\n");
+        goto cleanup;
+    }
+    Vector3_init(v1, 1.0, 2.0, 2.0);
+    Vector3_init(v2, 2.0, 3.0, 6.0);
+    printf("Vector3 (1,2,2) magnitude: ");
+    printf("%.6f\n", Vector3_magnitude(v1));
+    printf("Vector3 (2,3,6) magnitude: ");
+    printf("%.6f\n", Vector3_magnitude(v2));
+    printf("=== Testing Circle ===\n");
+    c1 = new_Circle();
+    if (!c1) {
+        fprintf(stderr, "Error: Failed to allocate Circle\n");
+        goto cleanup;
+    }
+    Circle_init(c1, 0.0, 0.0, 5.0);
+    printf("Circle area with radius=5: ");
+    printf("%.6f\n", Circle_area(c1));
+    Circle_scale(c1, 2.0);
+    printf("Circle area after scale(2) with radius=10: ");
+    printf("%.6f\n", Circle_area(c1));
+    cleanup:
     if (p1) free(p1);
     if (p2) free(p2);
     if (v1) free(v1);
