@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
     logger_log(LOG_DEBUG, "Archivo fuente leído: %d bytes", strlen(source));
     logger_log(LOG_INFO, "Compilando a C: %s", outputPath);
 
-    // Optimizando AST
+    // Optimizando AST - asegurarse de limpiar auto-asignaciones
     logger_log(LOG_INFO, "Optimizando AST...");
     ast = optimize_ast(ast);
 

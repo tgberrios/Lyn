@@ -45,7 +45,7 @@ void freeAstNode(AstNode* node) {
     // This is a cautious approach to avoid dereferencing bad pointers
     AstNodeType type;
     if (!memcpy(&type, &node->type, sizeof(AstNodeType)) || 
-        (type < AST_PROGRAM || type > AST_IMPORT)) {
+        (type < AST_PROGRAM || type > AST_BREAK_STMT)) {  // Updated to include new types
         fprintf(stderr, "Warning: Detected invalid node type %d at address %p\n", type, (void*)node);
         return;
     }
@@ -104,7 +104,12 @@ void freeAstNode(AstNode* node) {
             break;
         case AST_WHILE_STMT:
             freeAstNode(node->whileStmt.condition);
-            freeAstNode(node->whileStmt.body);
+            if (node->whileStmt.body) {
+                for (int i = 0; i < node->whileStmt.bodyCount; i++) {
+                    freeAstNode(node->whileStmt.body[i]);
+                }
+                free(node->whileStmt.body);
+            }
             break;
         case AST_FOR_STMT:
             freeAstNode(node->forStmt.rangeStart);
@@ -176,6 +181,71 @@ void freeAstNode(AstNode* node) {
             break;
         case AST_IMPORT:
             break;
+        case AST_DO_WHILE_STMT:
+            freeAstNode(node->doWhileStmt.condition);
+            if (node->doWhileStmt.body) {
+                for (int i = 0; i < node->doWhileStmt.bodyCount; i++) {
+                    freeAstNode(node->doWhileStmt.body[i]);
+                }
+                free(node->doWhileStmt.body);
+            }
+            break;
+        
+        case AST_SWITCH_STMT:
+            freeAstNode(node->switchStmt.expr);
+            if (node->switchStmt.cases) {
+                for (int i = 0; i < node->switchStmt.caseCount; i++) {
+                    freeAstNode(node->switchStmt.cases[i]);
+                }
+                free(node->switchStmt.cases);
+            }
+            if (node->switchStmt.defaultCase) {
+                for (int i = 0; i < node->switchStmt.defaultCaseCount; i++) {
+                    freeAstNode(node->switchStmt.defaultCase[i]);
+                }
+                free(node->switchStmt.defaultCase);
+            }
+            break;
+        
+        case AST_CASE_STMT:
+            freeAstNode(node->caseStmt.expr);
+            if (node->caseStmt.body) {
+                for (int i = 0; i < node->caseStmt.bodyCount; i++) {
+                    freeAstNode(node->caseStmt.body[i]);
+                }
+                free(node->caseStmt.body);
+            }
+            break;
+        
+        case AST_TRY_CATCH_STMT:
+            if (node->tryCatchStmt.tryBody) {
+                for (int i = 0; i < node->tryCatchStmt.tryCount; i++) {
+                    freeAstNode(node->tryCatchStmt.tryBody[i]);
+                }
+                free(node->tryCatchStmt.tryBody);
+            }
+            if (node->tryCatchStmt.catchBody) {
+                for (int i = 0; i < node->tryCatchStmt.catchCount; i++) {
+                    freeAstNode(node->tryCatchStmt.catchBody[i]);
+                }
+                free(node->tryCatchStmt.catchBody);
+            }
+            if (node->tryCatchStmt.finallyBody) {
+                for (int i = 0; i < node->tryCatchStmt.finallyCount; i++) {
+                    freeAstNode(node->tryCatchStmt.finallyBody[i]);
+                }
+                free(node->tryCatchStmt.finallyBody);
+            }
+            break;
+        
+        case AST_THROW_STMT:
+            freeAstNode(node->throwStmt.expr);
+            break;
+        
+        case AST_BREAK_STMT:
+            // No additional fields to free
+            break;
+            
         default:
             break;
     }

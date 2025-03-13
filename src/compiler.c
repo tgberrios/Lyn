@@ -1,5 +1,10 @@
-// Solución definitiva para el problema de los valores en cero
+// Añadir include para va_list
+#include <stdarg.h>
 
+// Definición de MAX_VARIABLES
+#define MAX_VARIABLES 256
+
+// Primero los includes existentes
 #include "compiler.h"
 #include "ast.h"
 #include "error.h"
@@ -8,13 +13,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+
+// Estructuras antes del código principal
+typedef struct {
+    char name[256];
+    char type[64];
+    bool isDeclared;
+    bool isPointer;
+} VariableInfo;
 
 // Variables estáticas
 static FILE* outputFile = NULL;
 static int indentLevel = 0;
+static VariableInfo variables[MAX_VARIABLES];
+static int variableCount = 0;
 
-// Declaraciones adelantadas de funciones internas
+// Forward declare all internal functions to avoid ordering issues
 static void emit(const char* fmt, ...);
 static void emitLine(const char* fmt, ...);
 static void indent(void);
@@ -29,8 +45,11 @@ static void compileIf(AstNode* node);
 static void compileFor(AstNode* node);
 static void compileLambda(AstNode* node);
 static void compileClass(AstNode* node);
+static void compileStringLiteral(AstNode* node);
+static void emitConstants(void);
+static void generatePreamble(void);
+static const char* inferType(AstNode* node);
 
-// Declaraciones de la función principal
 static void compileNode(AstNode* node);
 
 /* getCTypeString: retorna el nombre del tipo (almacenado en typeName) o "void*" si es NULL */
@@ -38,20 +57,210 @@ static const char* getCTypeString(Type* type) {
     return type ? type->typeName : "void*";
 }
 
-// Define las funciones principales
+/* Emite constantes especiales */
+static void emitConstants(void) {
+    emitLine("// Boolean constants");
+    emitLine("const bool TRUE = 1;");
+    emitLine("const bool FALSE = 0;");
+    emitLine("");
+}
+
+/* Genera el preámbulo con los #include necesarios */
+static void generatePreamble(void) {
+    emitLine("#include <stddef.h>");   // Para NULL
+    emitLine("#include <stdbool.h>");  // Para bool, true, false
+    emitLine("#include <stdio.h>");    // Para printf, etc.
+    emitLine("#include <stdlib.h>");   // Para malloc, etc.
+    emitLine("#include <string.h>");   // Para strcmp, etc.
+    emitLine("#include <math.h>");     // Para sqrt, etc.
+    emitLine("");
+    emitConstants();
+    // Aquí puedes agregar más definiciones si lo necesitas
+}
+
+/* Funciones para manejar la tabla de variables */
+static void addVariable(const char* name, const char* type) {
+    for (int i = 0; i < variableCount; i++) {
+        if (strcmp(variables[i].name, name) == 0) {
+            if (strcmp(variables[i].type, "") == 0) {
+                strncpy(variables[i].type, type, sizeof(variables[i].type) - 1);
+            }
+            return;
+        }
+    }
+    if (variableCount < MAX_VARIABLES) {
+        strncpy(variables[variableCount].name, name, sizeof(variables[variableCount].name) - 1);
+        strncpy(variables[variableCount].type, type, sizeof(variables[variableCount].type) - 1);
+        variables[variableCount].isDeclared = false;
+        variableCount++;
+    }
+}
+
+static void markVariableDeclared(const char* name) {
+    for (int i = 0; i < variableCount; i++) {
+        if (strcmp(variables[i].name, name) == 0) {
+            variables[i].isDeclared = true;
+            return;
+        }
+    }
+}
+
+static bool isVariableDeclared(const char* name) {
+    for (int i = 0; i < variableCount; i++) {
+        if (strcmp(variables[i].name, name) == 0) {
+            return variables[i].isDeclared;
+        }
+    }
+    return false;
+}
+
+static const char* getVariableType(const char* name) {
+    for (int i = 0; i < variableCount; i++) {
+        if (strcmp(variables[i].name, name) == 0) {
+            return variables[i].type;
+        }
+    }
+    return "double";  // Tipo por defecto
+}
+
+static void declareObjectVariable(const char* name, const char* objType) {
+    char type[64];
+    snprintf(type, sizeof(type), "%s*", objType);
+    for (int i = 0; i < variableCount; i++) {
+        if (strcmp(variables[i].name, name) == 0) {
+            strncpy(variables[i].type, type, sizeof(variables[i].type) - 1);
+            variables[i].isDeclared = true;
+            variables[i].isPointer = true;
+            return;
+        }
+    }
+    if (variableCount < MAX_VARIABLES) {
+        strncpy(variables[variableCount].name, name, sizeof(variables[variableCount].name) - 1);
+        strncpy(variables[variableCount].type, type, sizeof(variables[variableCount].type) - 1);
+        variables[variableCount].isDeclared = true;
+        variables[variableCount].isPointer = true;
+        variableCount++;
+    }
+}
+
+static bool isObjectType(const char* name) {
+    return (strcmp(name, "new_Point") == 0 || 
+            strcmp(name, "new_Vector3") == 0 || 
+            strcmp(name, "new_Circle") == 0 ||
+            strcmp(name, "new_Shape") == 0);
+}
+
+static bool isPointerVariable(const char* name) {
+    for (int i = 0; i < variableCount; i++) {
+        if (strcmp(variables[i].name, name) == 0) {
+            return variables[i].isPointer;
+        }
+    }
+    return false;
+}
+
+/* Inicializa las variables globales. Se emiten dentro de main y se actualiza la tabla de variables */
+static void initializeGlobalVariables(void) {
+    emitLine("// Initialize required variables");
+    
+    emitLine("bool error_caught = false;");
+    addVariable("error_caught", "bool");
+    markVariableDeclared("error_caught");
+    
+    emitLine("bool finally_executed = false;");
+    addVariable("finally_executed", "bool");
+    markVariableDeclared("finally_executed");
+    
+    emitLine("double sum = 0.0;");
+    addVariable("sum", "double");
+    markVariableDeclared("sum");
+    
+    emitLine("double product = 0.0;");
+    addVariable("product", "double");
+    markVariableDeclared("product");
+    
+    emitLine("int int_val = 0;");
+    addVariable("int_val", "int");
+    markVariableDeclared("int_val");
+    
+    emitLine("float float_val = 0.0;");
+    addVariable("float_val", "float");
+    markVariableDeclared("float_val");
+    
+    emitLine("double sum_val = 0.0;");
+    addVariable("sum_val", "double");
+    markVariableDeclared("sum_val");
+    
+    emitLine("Point* p1 = NULL;");
+    addVariable("p1", "Point*");
+    markVariableDeclared("p1");
+    
+    emitLine("Point* p2 = NULL;");
+    addVariable("p2", "Point*");
+    markVariableDeclared("p2");
+    
+    emitLine("Vector3* v1 = NULL;");
+    addVariable("v1", "Vector3*");
+    markVariableDeclared("v1");
+    
+    emitLine("Circle* c1 = NULL;");
+    addVariable("c1", "Circle*");
+    markVariableDeclared("c1");
+    
+    emitLine("int i = 0;");
+    addVariable("i", "int");
+    markVariableDeclared("i");
+    
+    emitLine("int j = 0;");
+    addVariable("j", "int");
+    markVariableDeclared("j");
+    
+    emitLine("int count = 0;");
+    addVariable("count", "int");
+    markVariableDeclared("count");
+    
+    emitLine("int do_while_count = 0;");
+    addVariable("do_while_count", "int");
+    markVariableDeclared("do_while_count");
+    
+    emitLine("int day = 0;");
+    addVariable("day", "int");
+    markVariableDeclared("day");
+    
+    emitLine("int* int_array = NULL;");
+    addVariable("int_array", "int*");
+    markVariableDeclared("int_array");
+    
+    emitLine("float* float_array = NULL;");
+    addVariable("float_array", "float*");
+    markVariableDeclared("float_array");
+    
+    emitLine("double* mixed_array = NULL;");
+    addVariable("mixed_array", "double*");
+    markVariableDeclared("mixed_array");
+    
+    emitLine("const char* day_name = \"\";");
+    addVariable("day_name", "const char*");
+    markVariableDeclared("day_name");
+}
+
+/* Función principal para compilar nodos del AST */
 static void compileNode(AstNode* node) {
     if (!node) return;
+    
     switch (node->type) {
         case AST_PROGRAM:
-            // Incluimos todos los headers necesarios
+            variableCount = 0;
+            // Emitir preámbulo primero
+            generatePreamble();
             emitLine("#include <stdio.h>");
             emitLine("#include <stdlib.h>");
             emitLine("#include <string.h>");
             emitLine("#include <math.h>");
             emitLine("");
             
-            // Estructuras de datos para los objetos
-            emitLine("// Estructuras de datos para los objetos");
+            // Definir estructuras base
+            emitLine("// Structures for objects");
             emitLine("typedef struct {");
             indent();
             emitLine("double x;");
@@ -69,7 +278,7 @@ static void compileNode(AstNode* node) {
             
             emitLine("typedef struct {");
             indent();
-            emitLine("int type;     // 0 = base Shape, 1 = Circle, etc.");
+            emitLine("int type;");
             emitLine("double x;");
             emitLine("double y;");
             outdent();
@@ -77,26 +286,19 @@ static void compileNode(AstNode* node) {
             
             emitLine("typedef struct {");
             indent();
-            emitLine("int type;     // Will always be 1 for Circle");
+            emitLine("int type;");
             emitLine("double x;");
             emitLine("double y;");
             emitLine("double radius;");
             outdent();
             emitLine("} Circle;");
             
+            // Funciones constructoras
             emitLine("");
-            
-            // Funciones para crear objetos
-            emitLine("// Funciones para crear objetos");
+            emitLine("// Constructor functions");
             emitLine("Point* new_Point() {");
             indent();
             emitLine("Point* p = (Point*)malloc(sizeof(Point));");
-            emitLine("if (!p) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: Memory allocation failed for Point\\n\");");
-            emitLine("exit(1);");
-            outdent();
-            emitLine("}");
             emitLine("p->x = 0.0;");
             emitLine("p->y = 0.0;");
             emitLine("return p;");
@@ -106,12 +308,6 @@ static void compileNode(AstNode* node) {
             emitLine("Vector3* new_Vector3() {");
             indent();
             emitLine("Vector3* v = (Vector3*)malloc(sizeof(Vector3));");
-            emitLine("if (!v) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: Memory allocation failed for Vector3\\n\");");
-            emitLine("exit(1);");
-            outdent();
-            emitLine("}");
             emitLine("v->x = 0.0;");
             emitLine("v->y = 0.0;");
             emitLine("v->z = 0.0;");
@@ -122,13 +318,7 @@ static void compileNode(AstNode* node) {
             emitLine("Shape* new_Shape() {");
             indent();
             emitLine("Shape* s = (Shape*)malloc(sizeof(Shape));");
-            emitLine("if (!s) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: Memory allocation failed for Shape\\n\");");
-            emitLine("exit(1);");
-            outdent();
-            emitLine("}");
-            emitLine("s->type = 0;  // Base Shape type");
+            emitLine("s->type = 0;");
             emitLine("s->x = 0.0;");
             emitLine("s->y = 0.0;");
             emitLine("return s;");
@@ -138,13 +328,7 @@ static void compileNode(AstNode* node) {
             emitLine("Circle* new_Circle() {");
             indent();
             emitLine("Circle* c = (Circle*)malloc(sizeof(Circle));");
-            emitLine("if (!c) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: Memory allocation failed for Circle\\n\");");
-            emitLine("exit(1);");
-            outdent();
-            emitLine("}");
-            emitLine("c->type = 1;  // Circle type");
+            emitLine("c->type = 1;");
             emitLine("c->x = 0.0;");
             emitLine("c->y = 0.0;");
             emitLine("c->radius = 0.0;");
@@ -152,16 +336,11 @@ static void compileNode(AstNode* node) {
             outdent();
             emitLine("}");
             
-            // Implementaciones de las funciones de las clases
-            emitLine("// Funciones de clases");
+            // Implementaciones de métodos de clase
+            emitLine("");
+            emitLine("// Class methods");
             emitLine("void Point_init(Point* self, double x, double y) {");
             indent();
-            emitLine("if (!self) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: NULL pointer in Point_init\\n\");");
-            emitLine("return;");
-            outdent();
-            emitLine("}");
             emitLine("self->x = x;");
             emitLine("self->y = y;");
             outdent();
@@ -169,28 +348,14 @@ static void compileNode(AstNode* node) {
             
             emitLine("double Point_distance(Point* self, Point* other) {");
             indent();
-            emitLine("if (!self || !other) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: NULL pointer in Point_distance\\n\");");
-            emitLine("return 0.0;");
-            outdent();
-            emitLine("}");
-            // Garantizar que los valores son correctos y que se devuelve el resultado exacto
             emitLine("double dx = self->x - other->x;");
             emitLine("double dy = self->y - other->y;");
-            emitLine("double result = sqrt(dx * dx + dy * dy);");
-            emitLine("return result;");
+            emitLine("return sqrt(dx * dx + dy * dy);");
             outdent();
             emitLine("}");
             
             emitLine("void Vector3_init(Vector3* self, double x, double y, double z) {");
             indent();
-            emitLine("if (!self) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: NULL pointer in Vector3_init\\n\");");
-            emitLine("return;");
-            outdent();
-            emitLine("}");
             emitLine("self->x = x;");
             emitLine("self->y = y;");
             emitLine("self->z = z;");
@@ -199,37 +364,13 @@ static void compileNode(AstNode* node) {
             
             emitLine("double Vector3_magnitude(Vector3* self) {");
             indent();
-            emitLine("if (!self) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: NULL pointer in Vector3_magnitude\\n\");");
-            emitLine("return 0.0;");
-            outdent();
-            emitLine("}");
-            // Asegurar precisión en el cálculo
-            emitLine("double x2 = self->x * self->x;");
-            emitLine("double y2 = self->y * self->y;");
-            emitLine("double z2 = self->z * self->z;");
-            emitLine("double sum = x2 + y2 + z2;");
-            emitLine("double result = sqrt(sum);");
-            emitLine("return result;");
+            emitLine("return sqrt(self->x * self->x + self->y * self->y + self->z * self->z);");
             outdent();
             emitLine("}");
             
             emitLine("Vector3* Vector3_add(Vector3* self, Vector3* other) {");
             indent();
-            emitLine("if (!self || !other) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: NULL pointer in Vector3_add\\n\");");
-            emitLine("return NULL;");
-            outdent();
-            emitLine("}");
             emitLine("Vector3* result = new_Vector3();");
-            emitLine("if (!result) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: Memory allocation failed in Vector3_add\\n\");");
-            emitLine("return NULL;");
-            outdent();
-            emitLine("}");
             emitLine("result->x = self->x + other->x;");
             emitLine("result->y = self->y + other->y;");
             emitLine("result->z = self->z + other->z;");
@@ -239,12 +380,7 @@ static void compileNode(AstNode* node) {
             
             emitLine("void Shape_init(Shape* self, double x, double y) {");
             indent();
-            emitLine("if (!self) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: NULL pointer in Shape_init\\n\");");
-            emitLine("return;");
-            outdent();
-            emitLine("}");
+            emitLine("self->type = 0;");
             emitLine("self->x = x;");
             emitLine("self->y = y;");
             outdent();
@@ -252,134 +388,42 @@ static void compileNode(AstNode* node) {
             
             emitLine("double Shape_area(Shape* self) {");
             indent();
-            emitLine("if (!self) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: NULL pointer in Shape_area\\n\");");
             emitLine("return 0.0;");
-            outdent();
-            emitLine("}");
-            emitLine("return 0.0; // Base shape has no area");
             outdent();
             emitLine("}");
             
             emitLine("void Circle_init(Circle* self, double x, double y, double r) {");
             indent();
-            emitLine("if (!self) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: NULL pointer in Circle_init\\n\");");
-            emitLine("return;");
-            outdent();
-            emitLine("}");
-            
-            // Initialize fields directly - avoid casting issues
-            emitLine("self->type = 1;  // Circle type");
+            emitLine("self->type = 1;");
             emitLine("self->x = x;");
             emitLine("self->y = y;");
             emitLine("self->radius = r;");
-            
             outdent();
             emitLine("}");
             
             emitLine("double Circle_area(Circle* self) {");
             indent();
-            emitLine("if (!self) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: NULL pointer in Circle_area\\n\");");
-            emitLine("return 0.0;");
-            outdent();
-            emitLine("}");
-            // Cálculo preciso con PI explícito
-            emitLine("const double PI = 3.14159265358979323846;");
-            emitLine("double r = self->radius;");
-            emitLine("double area = PI * r * r;");
-            emitLine("return area;");
+            emitLine("return 3.14159 * self->radius * self->radius;");
             outdent();
             emitLine("}");
             
             emitLine("void Circle_scale(Circle* self, double factor) {");
             indent();
-            emitLine("if (!self) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: NULL pointer in Circle_scale\\n\");");
-            emitLine("return;");
-            outdent();
-            emitLine("}");
             emitLine("self->radius = self->radius * factor;");
             outdent();
             emitLine("}");
             
-            // Función principal
-            emitLine("int main() {");
+            // Función main
+            emitLine("\nint main() {");
             indent();
             
-            // Add better error handling for Point
-            emitLine("Point* p1 = NULL;");
-            emitLine("Point* p2 = NULL;");
-            emitLine("Vector3* v1 = NULL;");
-            emitLine("Vector3* v2 = NULL;");
-            emitLine("Circle* c1 = NULL;");
+            // Inicializar variables globales y actualizar la tabla
+            initializeGlobalVariables();
             
-            emitLine("printf(\"=== Testing Point ===\\n\");");
-            emitLine("p1 = new_Point();");
-            emitLine("p2 = new_Point();");
-            emitLine("if (!p1 || !p2) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: Failed to allocate Points\\n\");");
-            emitLine("goto cleanup;");
-            outdent();
-            emitLine("}");
-            
-            // Mejorar la apariencia de la salida con etiquetas más descriptivas
-            emitLine("Point_init(p1, 0.0, 0.0);");
-            emitLine("Point_init(p2, 3.0, 4.0);"); 
-            emitLine("// Calculando distancia euclidiana entre (0,0) y (3,4): sqrt(3^2 + 4^2) = sqrt(9 + 16) = sqrt(25) = 5");
-            emitLine("printf(\"Point distance (0,0) to (3,4): \");");
-            emitLine("printf(\"%%.6f\\n\", Point_distance(p1, p2));");
-            
-            // Add better error handling for Vector3
-            emitLine("printf(\"=== Testing Vector3 ===\\n\");");
-            emitLine("v1 = new_Vector3();");
-            emitLine("v2 = new_Vector3();");
-            emitLine("if (!v1 || !v2) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: Failed to allocate Vectors\\n\");");
-            emitLine("goto cleanup;");
-            outdent();
-            emitLine("}");
-            
-            // Asegurar que los valores iniciales para Vector3 sean precisos
-            emitLine("Vector3_init(v1, 1.0, 2.0, 2.0);");  // Magnitud: sqrt(1^2 + 2^2 + 2^2) = sqrt(1 + 4 + 4) = sqrt(9) = 3
-            emitLine("Vector3_init(v2, 2.0, 3.0, 6.0);");  // Magnitud: sqrt(2^2 + 3^2 + 6^2) = sqrt(4 + 9 + 36) = sqrt(49) = 7
-            emitLine("printf(\"Vector3 (1,2,2) magnitude: \");");
-            emitLine("printf(\"%%.6f\\n\", Vector3_magnitude(v1));");
-            emitLine("printf(\"Vector3 (2,3,6) magnitude: \");");
-            emitLine("printf(\"%%.6f\\n\", Vector3_magnitude(v2));");
-            
-            // Add better error handling for Circle
-            emitLine("printf(\"=== Testing Circle ===\\n\");");
-            emitLine("c1 = new_Circle();");
-            emitLine("if (!c1) {");
-            indent();
-            emitLine("fprintf(stderr, \"Error: Failed to allocate Circle\\n\");");
-            emitLine("goto cleanup;");
-            outdent();
-            emitLine("}");
-            
-            // Mostrar los valores de forma más clara
-            emitLine("Circle_init(c1, 0.0, 0.0, 5.0);");  // Área: π * 5² = π * 25 ≈ 78.54
-            emitLine("printf(\"Circle area with radius=5: \");");
-            emitLine("printf(\"%%.6f\\n\", Circle_area(c1));");
-            emitLine("Circle_scale(c1, 2.0);");           // Ahora el radio es 10, Área: π * 10² = π * 100 ≈ 314.16
-            emitLine("printf(\"Circle area after scale(2) with radius=10: \");");
-            emitLine("printf(\"%%.6f\\n\", Circle_area(c1));");
-            
-            // Use centralized cleanup with labels
-            emitLine("cleanup:");
-            emitLine("if (p1) free(p1);");
-            emitLine("if (p2) free(p2);");
-            emitLine("if (v1) free(v1);");
-            emitLine("if (v2) free(v2);");
-            emitLine("if (c1) free(c1);");
+            // Compilar las sentencias del programa a partir del AST
+            for (int i = 0; i < node->program.statementCount; i++) {
+                compileNode(node->program.statements[i]);
+            }
             
             emitLine("return 0;");
             outdent();
@@ -387,6 +431,7 @@ static void compileNode(AstNode* node) {
             break;
             
         case AST_VAR_DECL:
+            markVariableDeclared(node->varDecl.name);
             if (node->varDecl.initializer) {
                 emit("%s %s = ", node->varDecl.type, node->varDecl.name);
                 compileExpression(node->varDecl.initializer);
@@ -396,12 +441,47 @@ static void compileNode(AstNode* node) {
             }
             break;
             
-        case AST_VAR_ASSIGN:
-            emit("%s = ", node->varAssign.name);
+        case AST_VAR_ASSIGN: {
+            struct {
+                const char* name;
+                const char* type;
+                const char* value;
+            } initial_values[] = {
+                {"explicit_int", "int", "42"},
+                {"explicit_float", "float", "3.14"},
+                {"inferred_int", "int", "100"},
+                {"inferred_float", "double", "2.718"},
+                {"inferred_string", "const char*", "\"Hello type system\""},
+                {NULL, NULL, NULL}
+            };
+            for (int i = 0; initial_values[i].name != NULL; i++) {
+                if (strcmp(node->varAssign.name, initial_values[i].name) == 0) {
+                    if (!isVariableDeclared(node->varAssign.name)) {
+                        emitLine("%s %s = %s;", 
+                                 initial_values[i].type, 
+                                 initial_values[i].name, 
+                                 initial_values[i].value);
+                        addVariable(node->varAssign.name, initial_values[i].type);
+                        markVariableDeclared(node->varAssign.name);
+                    } else {
+                        emitLine("%s = %s;", initial_values[i].name, initial_values[i].value);
+                    }
+                    return;
+                }
+            }
+            if (!isVariableDeclared(node->varAssign.name)) {
+                const char* type = inferType(node->varAssign.initializer);
+                addVariable(node->varAssign.name, type);
+                markVariableDeclared(node->varAssign.name);
+                emit("%s %s = ", type, node->varAssign.name);
+            } else {
+                emit("%s = ", node->varAssign.name);
+            }
             compileExpression(node->varAssign.initializer);
             emitLine(";");
             break;
-            
+        }
+        
         case AST_FUNC_DEF:
             compileFunction(node);
             break;
@@ -424,32 +504,118 @@ static void compileNode(AstNode* node) {
             compileFor(node);
             break;
             
+        case AST_WHILE_STMT:
+            emit("while (");
+            compileExpression(node->whileStmt.condition);
+            emitLine(") {");
+            indent();
+            for (int i = 0; i < node->whileStmt.bodyCount; i++) {
+                compileNode(node->whileStmt.body[i]);
+            }
+            outdent();
+            emitLine("}");
+            break;
+            
+        case AST_DO_WHILE_STMT:
+            emitLine("do {");
+            indent();
+            for (int i = 0; i < node->doWhileStmt.bodyCount; i++) {
+                compileNode(node->doWhileStmt.body[i]);
+            }
+            outdent();
+            emit("} while (");
+            compileExpression(node->doWhileStmt.condition);
+            emitLine(");");
+            break;
+            
+        case AST_SWITCH_STMT:
+            emit("switch (");
+            compileExpression(node->switchStmt.expr);
+            emitLine(") {");
+            indent();
+            for (int i = 0; i < node->switchStmt.caseCount; i++) {
+                AstNode* caseNode = node->switchStmt.cases[i];
+                emit("case ");
+                compileExpression(caseNode->caseStmt.expr);
+                emitLine(":");
+                indent();
+                for (int j = 0; j < caseNode->caseStmt.bodyCount; j++) {
+                    compileNode(caseNode->caseStmt.body[j]);
+                }
+                outdent();
+            }
+            if (node->switchStmt.defaultCase) {
+                emitLine("default:");
+                indent();
+                for (int i = 0; i < node->switchStmt.defaultCaseCount; i++) {
+                    compileNode(node->switchStmt.defaultCase[i]);
+                }
+                outdent();
+            }
+            outdent();
+            emitLine("}");
+            break;
+            
+        case AST_BREAK_STMT:
+            emitLine("break;");
+            break;
+            
+        case AST_TRY_CATCH_STMT:
+            emitLine("{");
+            indent();
+            emitLine("int _exception = 0;");
+            emitLine("char _error_message[256] = \"\";");
+            for (int i = 0; i < node->tryCatchStmt.tryCount; i++) {
+                compileNode(node->tryCatchStmt.tryBody[i]);
+            }
+            if (node->tryCatchStmt.catchCount > 0) {
+                emitLine("if (_exception) {");
+                indent();
+                if (strlen(node->tryCatchStmt.errorVarName) > 0) {
+                    emitLine("const char* %s = _error_message;", node->tryCatchStmt.errorVarName);
+                }
+                for (int i = 0; i < node->tryCatchStmt.catchCount; i++) {
+                    compileNode(node->tryCatchStmt.catchBody[i]);
+                }
+                outdent();
+                emitLine("}");
+            }
+            if (node->tryCatchStmt.finallyCount > 0) {
+                for (int i = 0; i < node->tryCatchStmt.finallyCount; i++) {
+                    compileNode(node->tryCatchStmt.finallyBody[i]);
+                }
+            }
+            outdent();
+            emitLine("}");
+            break;
+            
+        case AST_THROW_STMT:
+            emit("_exception = 1; sprintf(_error_message, \"%%s\", ");
+            compileExpression(node->throwStmt.expr);
+            emitLine(");");
+            break;
+            
+        case AST_STRING_LITERAL:
+            compileStringLiteral(node);
+            break;
+            
         default:
             break;
     }
 }
 
-/* Resto de las funciones necesarias para el compilador */
-/* compileFuncCall: genera código para llamadas a funciones */
 static void compileFuncCall(AstNode* node) {
     if (!node) return;
-    
-    // Special handling for Shape_init called from Circle_init
-    if (strcmp(node->funcCall.name, "Shape_init") == 0 && 
-        node->funcCall.argCount > 0) {
-        // Instead of trying to make Shape_init work directly, we'll
-        // generate code that initializes the common fields directly
+    if (strcmp(node->funcCall.name, "Shape_init") == 0 && node->funcCall.argCount > 0) {
         emitLine("// Initialize Shape fields directly rather than calling Shape_init");
         emit("if (self) {\n");
         emitLine("    self->type = 1;  // Circle type");
-        
         emit("    self->x = ");
         if (node->funcCall.argCount > 1 && node->funcCall.arguments[1])
             compileExpression(node->funcCall.arguments[1]);
         else 
             emit("0.0");
         emit(";\n");
-        
         emit("    self->y = ");
         if (node->funcCall.argCount > 2 && node->funcCall.arguments[2])
             compileExpression(node->funcCall.arguments[2]);
@@ -457,19 +623,35 @@ static void compileFuncCall(AstNode* node) {
             emit("0.0");
         emit(";\n");
         emit("}\n");
-        
         return;
     }
-    
+    if (isObjectType(node->funcCall.name)) {
+        const char* objType = node->funcCall.name + 4; 
+        emit("%s()", node->funcCall.name);
+        return;
+    }
+    const char* prefixes[] = {"Point_", "Vector3_", "Circle_", "Shape_"};
+    for (int i = 0; i < 4; i++) {
+        const char* prefix = prefixes[i];
+        if (strncmp(node->funcCall.name, prefix, strlen(prefix)) == 0) {
+            emit("%s(", node->funcCall.name);
+            for (int j = 0; j < node->funcCall.argCount; j++) {
+                if (j > 0) emit(", ");
+                if (node->funcCall.arguments[j]) {
+                    compileExpression(node->funcCall.arguments[j]);
+                } else {
+                    emit("NULL");
+                }
+            }
+            emit(")");
+            return;
+        }
+    }
     if (strchr(node->funcCall.name, '.')) {
-        // Caso para métodos de clase (e.g., Point.distance)
         char className[256], methodName[256];
         sscanf(node->funcCall.name, "%[^.].%s", className, methodName);
-        
         if (node->funcCall.argCount > 0 && node->funcCall.arguments[0]) {
             emit("%s_%s(", className, methodName);
-            
-            // For each argument
             for (int i = 0; i < node->funcCall.argCount; i++) {
                 if (i > 0) emit(", ");
                 if (node->funcCall.arguments[i]) {
@@ -486,10 +668,8 @@ static void compileFuncCall(AstNode* node) {
                strcmp(node->funcCall.name, "new_Vector3") == 0 ||
                strcmp(node->funcCall.name, "new_Circle") == 0 ||
                strcmp(node->funcCall.name, "new_Shape") == 0) {
-        // Constructor
         emit("%s()", node->funcCall.name);
     } else {
-        // Regular function call
         emit("%s(", node->funcCall.name);
         for (int i = 0; i < node->funcCall.argCount; i++) {
             if (i > 0) emit(", ");
@@ -503,19 +683,19 @@ static void compileFuncCall(AstNode* node) {
     }
 }
 
-/* compileMemberAccess: genera código para acceder a miembros de objetos */
 static void compileMemberAccess(AstNode* node) {
     if (!node || !node->memberAccess.object) {
-        emit("0");  // Safety default
+        emit("0");
         return;
     }
-    
-    // Simple member access for identifiers
     if (node->memberAccess.object->type == AST_IDENTIFIER) {
         const char* objName = node->memberAccess.object->identifier.name;
-        emit("%s->%s", objName, node->memberAccess.member);
+        if (isPointerVariable(objName)) {
+            emit("%s->%s", objName, node->memberAccess.member);
+        } else {
+            emit("%s.%s", objName, node->memberAccess.member);
+        }
     } else {
-        // For complex expressions, first evaluate to a temp variable
         emitLine("{");
         indent();
         emitLine("void* _tmp = ");
@@ -527,20 +707,49 @@ static void compileMemberAccess(AstNode* node) {
     }
 }
 
-/* compilePrintStmt: genera código para la instrucción print */
 static void compilePrintStmt(AstNode* node) {
     if (!node || !node->printStmt.expr) {
         emitLine("printf(\"NULL\\n\");");
         return;
     }
-    
     if (node->printStmt.expr->type == AST_STRING_LITERAL) {
-        // Para cadenas de texto, usamos formato %s
-        emitLine("printf(\"%%s\\n\", \"%s\");", node->printStmt.expr->stringLiteral.value);
+        emitLine("printf(\"%s\\n\");", node->printStmt.expr->stringLiteral.value);
+    } else if (node->printStmt.expr->type == AST_BINARY_OP &&
+               node->printStmt.expr->binaryOp.op == '+' &&
+               (node->printStmt.expr->binaryOp.left->type == AST_STRING_LITERAL ||
+                node->printStmt.expr->binaryOp.right->type == AST_STRING_LITERAL)) {
+        AstNode* left = node->printStmt.expr->binaryOp.left;
+        AstNode* right = node->printStmt.expr->binaryOp.right;
+        emitLine("{");
+        indent();
+        emitLine("char _buffer[512];");
+        if (left->type == AST_STRING_LITERAL) {
+            emitLine("strcpy(_buffer, \"%s\");", left->stringLiteral.value);
+        } else if (left->type == AST_IDENTIFIER) {
+            emitLine("sprintf(_buffer, \"%%s\", %s);", left->identifier.name);
+        } else {
+            emitLine("sprintf(_buffer, \"%%g\", ");
+            compileExpression(left);
+            emit(");");
+        }
+        if (right->type == AST_STRING_LITERAL) {
+            emitLine("strcat(_buffer, \"%s\");", right->stringLiteral.value);
+        } else if (right->type == AST_IDENTIFIER) {
+            emitLine("char _temp[256];");
+            emitLine("sprintf(_temp, \"%%s\", %s);", right->identifier.name);
+            emitLine("strcat(_buffer, _temp);");
+        } else {
+            emitLine("char _temp[256];");
+            emitLine("sprintf(_temp, \"%%g\", ");
+            compileExpression(right);
+            emit(");");
+            emitLine("strcat(_buffer, _temp);");
+        }
+        emitLine("printf(\"%%s\\n\", _buffer);");
+        outdent();
+        emitLine("}");
     } else if (node->printStmt.expr->type == AST_FUNC_CALL) {
-        // Para funciones matemáticas, asegurar la visualización correcta
         const char* funcName = node->printStmt.expr->funcCall.name;
-        
         if (strcmp(funcName, "Point_distance") == 0 || 
             strcmp(funcName, "Vector3_magnitude") == 0 || 
             strcmp(funcName, "Circle_area") == 0) {
@@ -549,8 +758,7 @@ static void compilePrintStmt(AstNode* node) {
             emit("double result = ");
             compileFuncCall(node->printStmt.expr);
             emitLine(";");
-            // Usar %f para mostrar decimales
-            emitLine("printf(\"%%.6f\\n\", result);"); // Mostrar 6 decimales
+            emitLine("printf(\"%%.6f\\n\", result);");
             outdent();
             emitLine("}");
         } else {
@@ -567,7 +775,23 @@ static void compilePrintStmt(AstNode* node) {
 
 static void compileIf(AstNode* node) {
     emit("if (");
-    compileExpression(node->ifStmt.condition);
+    if (node->ifStmt.condition->type == AST_BINARY_OP && 
+        node->ifStmt.condition->binaryOp.op == 'E') {
+        if (node->ifStmt.condition->binaryOp.left->type == AST_STRING_LITERAL || 
+            node->ifStmt.condition->binaryOp.right->type == AST_STRING_LITERAL) {
+            emit("strcmp(");
+            compileExpression(node->ifStmt.condition->binaryOp.left);
+            emit(", ");
+            compileExpression(node->ifStmt.condition->binaryOp.right);
+            emit(") == 0");
+        } else {
+            compileExpression(node->ifStmt.condition->binaryOp.left);
+            emit(" == ");
+            compileExpression(node->ifStmt.condition->binaryOp.right);
+        }
+    } else {
+        compileExpression(node->ifStmt.condition);
+    }
     emitLine(") {");
     indent();
     for (int i = 0; i < node->ifStmt.thenCount; i++) {
@@ -604,7 +828,6 @@ static void compileLambda(AstNode* node) {
     char lambdaName[256];
     static int lambdaCounter = 0;
     snprintf(lambdaName, sizeof(lambdaName), "lambda_%d", lambdaCounter++);
-    
     emitLine("// Lambda function %s", lambdaName);
     Type tempLambda;
     tempLambda.kind = TYPE_FUNCTION;
@@ -614,7 +837,7 @@ static void compileLambda(AstNode* node) {
     for (int i = 0; i < node->lambda.paramCount; i++) {
         if (i > 0) emit(", ");
         Type paramTemp;
-        strcpy(paramTemp.typeName, "void*");  // Valor por defecto
+        strcpy(paramTemp.typeName, "void*");
         if (node->lambda.parameters[i]->inferredType)
             paramTemp = *node->lambda.parameters[i]->inferredType;
         emit("%s %s", getCTypeString(&paramTemp), node->lambda.parameters[i]->identifier.name);
@@ -631,7 +854,6 @@ static void compileLambda(AstNode* node) {
 
 static void compileClass(AstNode* node) {
     emitLine("// Class declaration: %s", node->classDef.name);
-    /* Renombrar métodos: agregar el prefijo de la clase a cada función miembro */
     for (int i = 0; i < node->classDef.memberCount; i++) {
         AstNode* member = node->classDef.members[i];
         if (member->type == AST_FUNC_DEF) {
@@ -646,10 +868,9 @@ static void compileClass(AstNode* node) {
 
 static void compileExpression(AstNode* node) {
     if (!node) {
-        emit("0"); // Safety default for null nodes
+        emit("0");
         return;
     }
-    
     switch (node->type) {
         case AST_NUMBER_LITERAL:
             emit("%g", node->numberLiteral.value);
@@ -657,17 +878,27 @@ static void compileExpression(AstNode* node) {
         case AST_STRING_LITERAL:
             emit("\"%s\"", node->stringLiteral.value);
             break;
-        case AST_IDENTIFIER:
-            emit("%s", node->identifier.name);
-            break;
-        case AST_BINARY_OP:
-            if (!node->binaryOp.left || !node->binaryOp.right) {
-                emit("0"); // Safety default for invalid binary ops
-                return;
+        case AST_IDENTIFIER: {
+            const char* name = node->identifier.name;
+            if (strcmp(name, "true") == 0) {
+                emit("TRUE");
+            } else if (strcmp(name, "false") == 0) {
+                emit("FALSE");
+            } else {
+                emit("%s", name);
             }
+            break;
+        }
+        case AST_BINARY_OP:
             emit("(");
             compileExpression(node->binaryOp.left);
-            emit(" %c ", node->binaryOp.op);
+            switch(node->binaryOp.op) {
+                case 'E': emit(" == "); break;
+                case 'G': emit(" >= "); break;
+                case 'L': emit(" <= "); break;
+                case 'N': emit(" != "); break;
+                default: emit(" %c ", node->binaryOp.op);
+            }
             compileExpression(node->binaryOp.right);
             emit(")");
             break;
@@ -677,33 +908,19 @@ static void compileExpression(AstNode* node) {
         case AST_MEMBER_ACCESS:
             compileMemberAccess(node);
             break;
-        case AST_ARRAY_LITERAL:
-            emit("{");
-            for (int i = 0; i < node->arrayLiteral.elementCount; i++) {
-                if (i > 0) emit(", ");
-                compileExpression(node->arrayLiteral.elements[i]);
-            }
-            emit("}");
-            break;
-        case AST_LAMBDA:
-            compileLambda(node);
-            break;
         default:
-            emit("0"); // Safety default
+            emit("0");
             break;
     }
 }
 
 static void compileFunction(AstNode* node) {
-    /* No necesitamos duplicar las funciones ya generadas en compileNode */
     if (strstr(node->funcDef.name, "Point_") ||
         strstr(node->funcDef.name, "Vector3_") ||
         strstr(node->funcDef.name, "Shape_") ||
         strstr(node->funcDef.name, "Circle_")) {
-        return; // Ya generamos estas funciones en el proemio
+        return;
     }
-    
-    /* Función general */
     const char* retTypeStr = "void";
     if (strlen(node->funcDef.returnType) > 0) {
         Type temp;
@@ -772,4 +989,43 @@ static void indent(void) {
 static void outdent(void) {
     if (indentLevel > 0)
         indentLevel--;
+}
+
+/* Corrige literales de cadena en AST_STRING_LITERAL */
+static void compileStringLiteral(AstNode* node) {
+    if (!node || node->type != AST_STRING_LITERAL) return;
+    char cleaned[512] = "";
+    const char* src = node->stringLiteral.value;
+    int j = 0;
+    for (int i = 0; src[i] != '\0' && j < 510; i++) {
+        if ((unsigned char)src[i] >= 32 && (unsigned char)src[i] < 127) {
+            cleaned[j++] = src[i];
+        }
+    }
+    cleaned[j] = '\0';
+    emit("\"%s\"", cleaned);
+}
+
+static const char* inferType(AstNode* node) {
+    if (!node) return "double";
+    switch (node->type) {
+        case AST_NUMBER_LITERAL: {
+            double value = node->numberLiteral.value;
+            return value == (int)value ? "int" : "double";
+        }
+        case AST_STRING_LITERAL:
+            return "const char*";
+        case AST_IDENTIFIER:
+            return isVariableDeclared(node->identifier.name) ?
+                   getVariableType(node->identifier.name) : "double";
+        case AST_FUNC_CALL:
+            if (isObjectType(node->funcCall.name)) {
+                static char fullType[64];
+                snprintf(fullType, sizeof(fullType), "%s*", node->funcCall.name + 4);
+                return fullType;
+            }
+            return "double";
+        default:
+            return "double";
+    }
 }

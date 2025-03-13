@@ -54,7 +54,18 @@ typedef enum {
     TOKEN_EXPORT,          // 43: export
     TOKEN_LBRACE,          // 44: {
     TOKEN_RBRACE,          // 45: }
-    TOKEN_INVALID = -1     // Add this line
+    TOKEN_INVALID,         // 46: Invalid token
+    // New token types for control structures
+    TOKEN_WHILE,           // 47: while
+    TOKEN_DO,              // 48: do
+    TOKEN_SWITCH,          // 49: switch
+    TOKEN_CASE,            // 50: case
+    TOKEN_DEFAULT,         // 51: default
+    TOKEN_BREAK,           // 52: break
+    TOKEN_TRY,             // 53: try
+    TOKEN_CATCH,           // 54: catch
+    TOKEN_FINALLY,         // 55: finally
+    TOKEN_THROW            // 56: throw
 } TokenType;
 
 /**

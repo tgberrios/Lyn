@@ -28,6 +28,12 @@ static AstNode *parseArrayLiteral(void);
 static void skipStatementSeparators(void);
 static AstNode* parseModuleDecl(void);
 static AstNode* parseImport(void);
+static AstNode *parseWhileStmt(void);
+static AstNode *parseDoWhileStmt(void);
+static AstNode *parseSwitchStmt(void);
+static AstNode *parseBreakStmt(void);
+static AstNode *parseTryCatchStmt(void);
+static AstNode *parseThrowStmt(void);
 
 /* Avanza al siguiente token */
 static void advanceToken(void) {
@@ -242,6 +248,18 @@ static AstNode *parseStatement(void) {
         return parseIfStmt();
     } else if (currentToken.type == TOKEN_FOR) {
         return parseForStmt();
+    } else if (currentToken.type == TOKEN_WHILE) {
+        return parseWhileStmt();
+    } else if (currentToken.type == TOKEN_DO) {
+        return parseDoWhileStmt();
+    } else if (currentToken.type == TOKEN_SWITCH) {
+        return parseSwitchStmt();
+    } else if (currentToken.type == TOKEN_BREAK) {
+        return parseBreakStmt();
+    } else if (currentToken.type == TOKEN_TRY) {
+        return parseTryCatchStmt();
+    } else if (currentToken.type == TOKEN_THROW) {
+        return parseThrowStmt();
     } else if (currentToken.type == TOKEN_CLASS) {
         return parseClassDef();
     } else if (currentToken.type == TOKEN_IMPORT) {
@@ -829,5 +847,222 @@ static AstNode* parseImport(void) {
     
     advanceToken(); // consume module name
     return importNode;
+}
+
+/* parseWhileStmt: while condition ... end */
+static AstNode *parseWhileStmt(void) {
+    advanceToken(); // consume 'while'
+    AstNode *condition = parseExpression();
+    skipStatementSeparators();
+    
+    AstNode **body = NULL;
+    int bodyCount = 0;
+    
+    while (currentToken.type != TOKEN_END && currentToken.type != TOKEN_EOF) {
+        AstNode *stmt = parseStatement();
+        body = memory_realloc(body, (bodyCount + 1) * sizeof(AstNode *));
+        body[bodyCount++] = stmt;
+        skipStatementSeparators();
+    }
+    
+    if (currentToken.type != TOKEN_END)
+        parserError("Expected 'end' to close while loop");
+    advanceToken(); // consume 'end'
+    
+    AstNode *whileNode = createAstNode(AST_WHILE_STMT);
+    whileNode->whileStmt.condition = condition;
+    whileNode->whileStmt.body = body;
+    whileNode->whileStmt.bodyCount = bodyCount;
+    
+    return whileNode;
+}
+
+/* parseDoWhileStmt: do ... while condition end */
+static AstNode *parseDoWhileStmt(void) {
+    advanceToken(); // consume 'do'
+    skipStatementSeparators();
+    
+    AstNode **body = NULL;
+    int bodyCount = 0;
+    
+    while (currentToken.type != TOKEN_WHILE && currentToken.type != TOKEN_EOF) {
+        AstNode *stmt = parseStatement();
+        body = memory_realloc(body, (bodyCount + 1) * sizeof(AstNode *));
+        body[bodyCount++] = stmt;
+        skipStatementSeparators();
+    }
+    
+    if (currentToken.type != TOKEN_WHILE)
+        parserError("Expected 'while' after do block");
+    advanceToken(); // consume 'while'
+    
+    AstNode *condition = parseExpression();
+    
+    if (currentToken.type != TOKEN_END)
+        parserError("Expected 'end' to close do-while loop");
+    advanceToken(); // consume 'end'
+    
+    AstNode *doWhileNode = createAstNode(AST_DO_WHILE_STMT);
+    doWhileNode->doWhileStmt.condition = condition;
+    doWhileNode->doWhileStmt.body = body;
+    doWhileNode->doWhileStmt.bodyCount = bodyCount;
+    
+    return doWhileNode;
+}
+
+/* parseSwitchStmt: switch expression case expr ... case expr ... [default ...] end */
+static AstNode *parseSwitchStmt(void) {
+    advanceToken(); // consume 'switch'
+    AstNode *expr = parseExpression();
+    skipStatementSeparators();
+    
+    AstNode **cases = NULL;
+    int caseCount = 0;
+    
+    AstNode **defaultCase = NULL;
+    int defaultCaseCount = 0;
+    
+    while (currentToken.type == TOKEN_CASE || currentToken.type == TOKEN_DEFAULT) {
+        if (currentToken.type == TOKEN_CASE) {
+            advanceToken(); // consume 'case'
+            AstNode *caseExpr = parseExpression();
+            skipStatementSeparators();
+            
+            AstNode **caseBody = NULL;
+            int caseBodyCount = 0;
+            
+            while (currentToken.type != TOKEN_CASE && 
+                   currentToken.type != TOKEN_DEFAULT && 
+                   currentToken.type != TOKEN_END) {
+                AstNode *stmt = parseStatement();
+                caseBody = memory_realloc(caseBody, (caseBodyCount + 1) * sizeof(AstNode *));
+                caseBody[caseBodyCount++] = stmt;
+                skipStatementSeparators();
+            }
+            
+            AstNode *caseNode = createAstNode(AST_CASE_STMT);
+            caseNode->caseStmt.expr = caseExpr;
+            caseNode->caseStmt.body = caseBody;
+            caseNode->caseStmt.bodyCount = caseBodyCount;
+            
+            cases = memory_realloc(cases, (caseCount + 1) * sizeof(AstNode *));
+            cases[caseCount++] = caseNode;
+        } else { // TOKEN_DEFAULT
+            advanceToken(); // consume 'default'
+            skipStatementSeparators();
+            
+            while (currentToken.type != TOKEN_CASE && 
+                   currentToken.type != TOKEN_END) {
+                AstNode *stmt = parseStatement();
+                defaultCase = memory_realloc(defaultCase, (defaultCaseCount + 1) * sizeof(AstNode *));
+                defaultCase[defaultCaseCount++] = stmt;
+                skipStatementSeparators();
+            }
+        }
+    }
+    
+    if (currentToken.type != TOKEN_END)
+        parserError("Expected 'end' to close switch statement");
+    advanceToken(); // consume 'end'
+    
+    AstNode *switchNode = createAstNode(AST_SWITCH_STMT);
+    switchNode->switchStmt.expr = expr;
+    switchNode->switchStmt.cases = cases;
+    switchNode->switchStmt.caseCount = caseCount;
+    switchNode->switchStmt.defaultCase = defaultCase;
+    switchNode->switchStmt.defaultCaseCount = defaultCaseCount;
+    
+    return switchNode;
+}
+
+/* parseBreakStmt: break */
+static AstNode *parseBreakStmt(void) {
+    advanceToken(); // consume 'break'
+    return createAstNode(AST_BREAK_STMT);
+}
+
+/* parseTryCatchStmt: try ... catch err ... [finally ...] end */
+static AstNode *parseTryCatchStmt(void) {
+    advanceToken(); // consume 'try'
+    skipStatementSeparators();
+    
+    AstNode **tryBody = NULL;
+    int tryCount = 0;
+    
+    while (currentToken.type != TOKEN_CATCH && 
+           currentToken.type != TOKEN_FINALLY && 
+           currentToken.type != TOKEN_END &&
+           currentToken.type != TOKEN_EOF) {
+        AstNode *stmt = parseStatement();
+        tryBody = memory_realloc(tryBody, (tryCount + 1) * sizeof(AstNode *));
+        tryBody[tryCount++] = stmt;
+        skipStatementSeparators();
+    }
+    
+    AstNode **catchBody = NULL;
+    int catchCount = 0;
+    char errorVarName[256] = "";
+    
+    if (currentToken.type == TOKEN_CATCH) {
+        advanceToken(); // consume 'catch'
+        
+        // Parse error variable name if provided
+        if (currentToken.type == TOKEN_IDENTIFIER) {
+            strncpy(errorVarName, currentToken.lexeme, sizeof(errorVarName) - 1);
+            advanceToken(); // consume error variable name
+        }
+        
+        skipStatementSeparators();
+        
+        while (currentToken.type != TOKEN_FINALLY && 
+               currentToken.type != TOKEN_END &&
+               currentToken.type != TOKEN_EOF) {
+            AstNode *stmt = parseStatement();
+            catchBody = memory_realloc(catchBody, (catchCount + 1) * sizeof(AstNode *));
+            catchBody[catchCount++] = stmt;
+            skipStatementSeparators();
+        }
+    }
+    
+    AstNode **finallyBody = NULL;
+    int finallyCount = 0;
+    
+    if (currentToken.type == TOKEN_FINALLY) {
+        advanceToken(); // consume 'finally'
+        skipStatementSeparators();
+        
+        while (currentToken.type != TOKEN_END && currentToken.type != TOKEN_EOF) {
+            AstNode *stmt = parseStatement();
+            finallyBody = memory_realloc(finallyBody, (finallyCount + 1) * sizeof(AstNode *));
+            finallyBody[finallyCount++] = stmt;
+            skipStatementSeparators();
+        }
+    }
+    
+    if (currentToken.type != TOKEN_END)
+        parserError("Expected 'end' to close try-catch-finally block");
+    advanceToken(); // consume 'end'
+    
+    AstNode *tryCatchNode = createAstNode(AST_TRY_CATCH_STMT);
+    tryCatchNode->tryCatchStmt.tryBody = tryBody;
+    tryCatchNode->tryCatchStmt.tryCount = tryCount;
+    tryCatchNode->tryCatchStmt.catchBody = catchBody;
+    tryCatchNode->tryCatchStmt.catchCount = catchCount;
+    strncpy(tryCatchNode->tryCatchStmt.errorVarName, errorVarName, sizeof(tryCatchNode->tryCatchStmt.errorVarName) - 1);
+    tryCatchNode->tryCatchStmt.finallyBody = finallyBody;
+    tryCatchNode->tryCatchStmt.finallyCount = finallyCount;
+    
+    return tryCatchNode;
+}
+
+/* parseThrowStmt: throw expression */
+static AstNode *parseThrowStmt(void) {
+    advanceToken(); // consume 'throw'
+    AstNode *expr = parseExpression();
+    
+    AstNode *throwNode = createAstNode(AST_THROW_STMT);
+    throwNode->throwStmt.expr = expr;
+    
+    return throwNode;
 }
 

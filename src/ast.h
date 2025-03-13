@@ -26,7 +26,14 @@ typedef enum {
     AST_LAMBDA,
     AST_ARRAY_LITERAL,
     AST_MODULE_DECL,
-    AST_IMPORT            // Nodo para importaciones
+    AST_IMPORT,           // Nodo para importaciones
+    // New AST node types for control structures
+    AST_DO_WHILE_STMT,    // Do-while statement
+    AST_SWITCH_STMT,      // Switch statement
+    AST_CASE_STMT,        // Case statement
+    AST_TRY_CATCH_STMT,   // Try-catch statement
+    AST_THROW_STMT,       // Throw statement
+    AST_BREAK_STMT        // Break statement
 } AstNodeType;
 
 // Enumerador para operadores binarios (usando el carácter)
@@ -104,7 +111,8 @@ typedef struct AstNode {
         // Sentencia while
         struct {
             struct AstNode* condition;
-            struct AstNode* body;
+            struct AstNode** body;  // Change from single body to array of statements
+            int bodyCount;          // Add bodyCount field to match other statement types
         } whileStmt;
         
         // Sentencia for
@@ -180,6 +188,50 @@ typedef struct AstNode {
             char moduleType[64];   // Por ejemplo: "ui" o "css"
             char moduleName[256];
         } importStmt;
+        
+        // Do-while statement
+        struct {
+            struct AstNode* condition;
+            struct AstNode** body;  // List of statements in the do-while body
+            int bodyCount;
+        } doWhileStmt;
+        
+        // Switch statement
+        struct {
+            struct AstNode* expr;  // Expression to switch on
+            struct AstNode** cases;  // List of case statements
+            int caseCount;
+            struct AstNode** defaultCase;  // Default case statements
+            int defaultCaseCount;
+        } switchStmt;
+        
+        // Case statement
+        struct {
+            struct AstNode* expr;  // Case value expression
+            struct AstNode** body;  // List of statements in the case
+            int bodyCount;
+        } caseStmt;
+        
+        // Try-catch statement
+        struct {
+            struct AstNode** tryBody;  // List of statements in the try block
+            int tryCount;
+            struct AstNode** catchBody;  // List of statements in the catch block
+            int catchCount;
+            char errorVarName[256];  // Name of the error variable
+            struct AstNode** finallyBody;  // List of statements in the finally block
+            int finallyCount;
+        } tryCatchStmt;
+        
+        // Throw statement
+        struct {
+            struct AstNode* expr;  // Expression to throw
+        } throwStmt;
+        
+        // Break statement
+        struct {
+            // No additional fields needed
+        } breakStmt;
     };
 } AstNode;
 

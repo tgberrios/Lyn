@@ -172,6 +172,17 @@ Token getNextToken(void) {
         else if (strcmp(token.lexeme, "float") == 0) token.type = TOKEN_FLOAT;
         else if (strcmp(token.lexeme, "module") == 0) token.type = TOKEN_MODULE;
         else if (strcmp(token.lexeme, "export") == 0) token.type = TOKEN_EXPORT;
+        // New keywords for control structures
+        else if (strcmp(token.lexeme, "while") == 0) token.type = TOKEN_WHILE;
+        else if (strcmp(token.lexeme, "do") == 0) token.type = TOKEN_DO;
+        else if (strcmp(token.lexeme, "switch") == 0) token.type = TOKEN_SWITCH;
+        else if (strcmp(token.lexeme, "case") == 0) token.type = TOKEN_CASE;
+        else if (strcmp(token.lexeme, "default") == 0) token.type = TOKEN_DEFAULT;
+        else if (strcmp(token.lexeme, "break") == 0) token.type = TOKEN_BREAK;
+        else if (strcmp(token.lexeme, "try") == 0) token.type = TOKEN_TRY;
+        else if (strcmp(token.lexeme, "catch") == 0) token.type = TOKEN_CATCH;
+        else if (strcmp(token.lexeme, "finally") == 0) token.type = TOKEN_FINALLY;
+        else if (strcmp(token.lexeme, "throw") == 0) token.type = TOKEN_THROW;
         else token.type = TOKEN_IDENTIFIER;
         return token;
     }
