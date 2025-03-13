@@ -1,6 +1,9 @@
 // Añadir include para va_list
 #include <stdarg.h>
 
+// Añadir include para setjmp/longjmp al inicio del archivo
+#include <setjmp.h>
+
 // Definición de MAX_VARIABLES
 #define MAX_VARIABLES 256
 
@@ -73,6 +76,7 @@ static void generatePreamble(void) {
     emitLine("#include <stdlib.h>");   // Para malloc, etc.
     emitLine("#include <string.h>");   // Para strcmp, etc.
     emitLine("#include <math.h>");     // Para sqrt, etc.
+    emitLine("#include <setjmp.h>");   // Para try/catch con setjmp/longjmp
     emitLine("");
     emitConstants();
     // Aquí puedes agregar más definiciones si lo necesitas
@@ -528,11 +532,13 @@ static void compileNode(AstNode* node) {
             emitLine(");");
             break;
             
-        case AST_SWITCH_STMT:
+       case AST_SWITCH_STMT:
             emit("switch (");
             compileExpression(node->switchStmt.expr);
             emitLine(") {");
             indent();
+            
+            // Compilar cada case y agregar break; al final
             for (int i = 0; i < node->switchStmt.caseCount; i++) {
                 AstNode* caseNode = node->switchStmt.cases[i];
                 emit("case ");
@@ -542,58 +548,76 @@ static void compileNode(AstNode* node) {
                 for (int j = 0; j < caseNode->caseStmt.bodyCount; j++) {
                     compileNode(caseNode->caseStmt.body[j]);
                 }
+                emitLine("break;");
                 outdent();
             }
+            
+            // Compilar el default si existe
             if (node->switchStmt.defaultCase) {
                 emitLine("default:");
                 indent();
                 for (int i = 0; i < node->switchStmt.defaultCaseCount; i++) {
                     compileNode(node->switchStmt.defaultCase[i]);
                 }
+                emitLine("break;");
                 outdent();
             }
+            
             outdent();
             emitLine("}");
             break;
             
-        case AST_BREAK_STMT:
-            emitLine("break;");
-            break;
-            
-        case AST_TRY_CATCH_STMT:
+        case AST_THROW_STMT:
             emitLine("{");
             indent();
+            emit("sprintf(_error_message, \"%%s\", ");
+            compileExpression(node->throwStmt.expr);
+            emitLine(");");
+            emitLine("longjmp(_env, 1);");
+            outdent();
+            emitLine("}");
+            break;
+        
+        case AST_TRY_CATCH_STMT:
+        {
+            emitLine("{");
+            indent();
+            emitLine("jmp_buf _env;");
             emitLine("int _exception = 0;");
             emitLine("char _error_message[256] = \"\";");
+            emitLine("if (setjmp(_env) == 0) {");
+            indent();
+            // Genera el código del bloque try
             for (int i = 0; i < node->tryCatchStmt.tryCount; i++) {
                 compileNode(node->tryCatchStmt.tryBody[i]);
             }
-            if (node->tryCatchStmt.catchCount > 0) {
-                emitLine("if (_exception) {");
-                indent();
-                if (strlen(node->tryCatchStmt.errorVarName) > 0) {
-                    emitLine("const char* %s = _error_message;", node->tryCatchStmt.errorVarName);
-                }
-                for (int i = 0; i < node->tryCatchStmt.catchCount; i++) {
-                    compileNode(node->tryCatchStmt.catchBody[i]);
-                }
-                outdent();
-                emitLine("}");
+            outdent();
+            emitLine("} else {");
+            indent();
+            emitLine("_exception = 1;");  // Marca que se atrapó una excepción
+            // Si se ha definido un nombre para la variable de error, declárala aquí
+            if (strlen(node->tryCatchStmt.errorVarName) > 0) {
+                emitLine("const char* %s = _error_message;", node->tryCatchStmt.errorVarName);
             }
+            // Genera el código del bloque catch
+            for (int i = 0; i < node->tryCatchStmt.catchCount; i++) {
+                compileNode(node->tryCatchStmt.catchBody[i]);
+            }
+            outdent();
+            emitLine("}");
+            
+            // Código del bloque finally (si existe)
             if (node->tryCatchStmt.finallyCount > 0) {
+                // Aquí actualizamos la variable finally_executed
+                emitLine("finally_executed = true;");
                 for (int i = 0; i < node->tryCatchStmt.finallyCount; i++) {
                     compileNode(node->tryCatchStmt.finallyBody[i]);
                 }
             }
             outdent();
             emitLine("}");
-            break;
-            
-        case AST_THROW_STMT:
-            emit("_exception = 1; sprintf(_error_message, \"%%s\", ");
-            compileExpression(node->throwStmt.expr);
-            emitLine(");");
-            break;
+        }
+        break;
             
         case AST_STRING_LITERAL:
             compileStringLiteral(node);

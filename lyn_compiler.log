@@ -13344,3 +13344,1342 @@
 [2025-03-13 00:00:53] [INFO] Compilación completada exitosamente
 
 ========== SESIÓN DE LOG FINALIZADA 2025-03-13 00:00:53 ==========
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-13 15:45:14 ==========
+
+[2025-03-13 15:45:14] [INFO] Iniciando compilación de test.lyn
+[2025-03-13 15:45:14] [INFO] Parseando código fuente...
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860cc1c0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860cc1c0 a 0x5f39860cc1c0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860cc640
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860cc640 a 0x5f39860cc640
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860cc640 a 0x5f39860cc640
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860ce460
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860ce460 a 0x5f39860ce460
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860cc1c0 a 0x5f39860cc1c0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860cc660
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860cc660 a 0x5f39860cc660
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860ce6b0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860ce6b0 a 0x5f39860ce6b0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860ce6d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860ce6b0 a 0x5f39860ce6b0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860cc1c0 a 0x5f39860ce6f0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860cc1c0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860ce720
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860ce720 a 0x5f39860ce720
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860ce720 a 0x5f39860ce720
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860d3ff0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860d3ff0 a 0x5f39860d3ff0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860d3ff0 a 0x5f39860d3ff0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860d3ff0 a 0x5f39860d46a0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860d3ff0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860d3ff0 a 0x5f39860d3ff0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860d3ff0 a 0x5f39860d3ff0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860ce720 a 0x5f39860ce720
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860d5850
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860d7fd0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860d8220
+[2025-03-13 15:45:14] [DEBUG] Reasignados 40 bytes de 0x5f39860ce720 a 0x5f39860ce720
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860d86a0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860d86a0 a 0x5f39860d86a0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860d8d50
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860d91d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860d91d0 a 0x5f39860d91d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860d91d0 a 0x5f39860d91d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860d91d0 a 0x5f39860db2c0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860d8d50 a 0x5f39860d8d50
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860d8d50 a 0x5f39860d8d50
+[2025-03-13 15:45:14] [DEBUG] Reasignados 48 bytes de 0x5f39860ce720 a 0x5f39860db980
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860cc1c0 a 0x5f39860cc1c0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860d91d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860d91d0 a 0x5f39860d91d0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860dc280
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860dc280 a 0x5f39860dc280
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860dc280 a 0x5f39860dc280
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860dcfc0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860dcfc0 a 0x5f39860dcfc0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860d91d0 a 0x5f39860d91d0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860dd440
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860dd8c0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860d91d0 a 0x5f39860ddb10
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860cc1c0 a 0x5f39860cc1c0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860d91d0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860de1d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860de1d0 a 0x5f39860de1d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860de1d0 a 0x5f39860de1d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860de1d0 a 0x5f39860de880
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860de1d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860de1d0 a 0x5f39860de1d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860de1d0 a 0x5f39860de1d0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860df170
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860df170 a 0x5f39860df170
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860d91d0 a 0x5f39860d91d0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860dfa50
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860e0bf0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860d91d0 a 0x5f39860d91d0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860e1070
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860e1070 a 0x5f39860e1070
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860e2210
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860d91d0 a 0x5f39860e2230
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860cc1c0 a 0x5f39860e2260
+[2025-03-13 15:45:14] [DEBUG] Reasignados 40 bytes de 0x5f39860e2260 a 0x5f39860e2260
+[2025-03-13 15:45:14] [DEBUG] Reasignados 48 bytes de 0x5f39860e2260 a 0x5f39860e2920
+[2025-03-13 15:45:14] [DEBUG] Reasignados 56 bytes de 0x5f39860e2920 a 0x5f39860e2920
+[2025-03-13 15:45:14] [DEBUG] Reasignados 64 bytes de 0x5f39860e2920 a 0x5f39860e3220
+[2025-03-13 15:45:14] [DEBUG] Reasignados 72 bytes de 0x5f39860e3220 a 0x5f39860e3220
+[2025-03-13 15:45:14] [DEBUG] Reasignados 80 bytes de 0x5f39860e3220 a 0x5f39860e3b30
+[2025-03-13 15:45:14] [DEBUG] Reasignados 88 bytes de 0x5f39860e3b30 a 0x5f39860e3b30
+[2025-03-13 15:45:14] [DEBUG] Reasignados 96 bytes de 0x5f39860e3b30 a 0x5f39860e4d10
+[2025-03-13 15:45:14] [DEBUG] Reasignados 104 bytes de 0x5f39860e4d10 a 0x5f39860e4d10
+[2025-03-13 15:45:14] [DEBUG] Reasignados 112 bytes de 0x5f39860e4d10 a 0x5f39860e5f00
+[2025-03-13 15:45:14] [DEBUG] Reasignados 120 bytes de 0x5f39860e5f00 a 0x5f39860e5f00
+[2025-03-13 15:45:14] [DEBUG] Reasignados 128 bytes de 0x5f39860e5f00 a 0x5f39860e6840
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860cc1c0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860cc1c0 a 0x5f39860cc1c0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860cc1c0 a 0x5f39860cc1c0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 136 bytes de 0x5f39860e6840 a 0x5f39860e6840
+[2025-03-13 15:45:14] [DEBUG] Reasignados 144 bytes de 0x5f39860e6840 a 0x5f39860e75f0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860d91d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860d91d0 a 0x5f39860d91d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860d91d0 a 0x5f39860d91d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 152 bytes de 0x5f39860e75f0 a 0x5f39860e75f0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860e83b0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860e83b0 a 0x5f39860e83b0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 160 bytes de 0x5f39860e75f0 a 0x5f39860e8830
+[2025-03-13 15:45:14] [DEBUG] Reasignados 168 bytes de 0x5f39860e8830 a 0x5f39860e8830
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860e91a0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860e91a0 a 0x5f39860e91a0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860e91a0 a 0x5f39860e91a0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860e91a0 a 0x5f39860e9850
+[2025-03-13 15:45:14] [DEBUG] Reasignados 176 bytes de 0x5f39860e8830 a 0x5f39860e9880
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860e91a0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 184 bytes de 0x5f39860e9880 a 0x5f39860e9880
+[2025-03-13 15:45:14] [DEBUG] Reasignados 192 bytes de 0x5f39860e9880 a 0x5f39860ea430
+[2025-03-13 15:45:14] [DEBUG] Reasignados 200 bytes de 0x5f39860ea430 a 0x5f39860ea430
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860eadc0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860eadc0 a 0x5f39860eadc0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860eadc0 a 0x5f39860eadc0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860eadc0 a 0x5f39860eb470
+[2025-03-13 15:45:14] [DEBUG] Reasignados 208 bytes de 0x5f39860ea430 a 0x5f39860eb4a0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860eadc0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 216 bytes de 0x5f39860eb4a0 a 0x5f39860eb4a0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 224 bytes de 0x5f39860eb4a0 a 0x5f39860ec070
+[2025-03-13 15:45:14] [DEBUG] Reasignados 232 bytes de 0x5f39860ec070 a 0x5f39860ec070
+[2025-03-13 15:45:14] [DEBUG] Reasignados 240 bytes de 0x5f39860ec070 a 0x5f39860ece80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 248 bytes de 0x5f39860ece80 a 0x5f39860ece80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 256 bytes de 0x5f39860ece80 a 0x5f39860ed840
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860edb80 a 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860edb80 a 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860edb80 a 0x5f39860ee230
+[2025-03-13 15:45:14] [DEBUG] Reasignados 40 bytes de 0x5f39860ee230 a 0x5f39860ee230
+[2025-03-13 15:45:14] [DEBUG] Reasignados 264 bytes de 0x5f39860ed840 a 0x5f39860ed840
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860edb80 a 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860edb80 a 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860edb80 a 0x5f39860ef1b0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 272 bytes de 0x5f39860ed840 a 0x5f39860ef640
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860edb80 a 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860edb80 a 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860edb80 a 0x5f39860f0020
+[2025-03-13 15:45:14] [DEBUG] Reasignados 280 bytes de 0x5f39860ef640 a 0x5f39860ef640
+[2025-03-13 15:45:14] [DEBUG] Reasignados 288 bytes de 0x5f39860ef640 a 0x5f39860f0910
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860edb80 a 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860edb80 a 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860edb80 a 0x5f39860f1530
+[2025-03-13 15:45:14] [DEBUG] Reasignados 296 bytes de 0x5f39860f0910 a 0x5f39860f0910
+[2025-03-13 15:45:14] [DEBUG] Reasignados 304 bytes de 0x5f39860f0910 a 0x5f39860f19c0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860edb80 a 0x5f39860edb80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 312 bytes de 0x5f39860f19c0 a 0x5f39860f19c0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860f25f0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 320 bytes de 0x5f39860f19c0 a 0x5f39860f2840
+[2025-03-13 15:45:14] [DEBUG] Reasignados 328 bytes de 0x5f39860f2840 a 0x5f39860f2840
+[2025-03-13 15:45:14] [DEBUG] Reasignados 336 bytes de 0x5f39860f2840 a 0x5f39860f3250
+[2025-03-13 15:45:14] [DEBUG] Reasignados 344 bytes de 0x5f39860f3250 a 0x5f39860f3250
+[2025-03-13 15:45:14] [DEBUG] Reasignados 352 bytes de 0x5f39860f3250 a 0x5f39860f3c70
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860f4d30
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860f4d30 a 0x5f39860f4d30
+[2025-03-13 15:45:14] [DEBUG] Reasignados 360 bytes de 0x5f39860f3c70 a 0x5f39860f3c70
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860f6330
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860f67b0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 368 bytes de 0x5f39860f3c70 a 0x5f39860f6a00
+[2025-03-13 15:45:14] [DEBUG] Reasignados 376 bytes de 0x5f39860f6a00 a 0x5f39860f6a00
+[2025-03-13 15:45:14] [DEBUG] Reasignados 384 bytes de 0x5f39860f6a00 a 0x5f39860f7440
+[2025-03-13 15:45:14] [DEBUG] Reasignados 392 bytes de 0x5f39860f7440 a 0x5f39860f7440
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860f82f0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860f82f0 a 0x5f39860f82f0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 400 bytes de 0x5f39860f7440 a 0x5f39860f9490
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860fa120
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860fa5a0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 408 bytes de 0x5f39860f9490 a 0x5f39860f9490
+[2025-03-13 15:45:14] [DEBUG] Reasignados 416 bytes de 0x5f39860f9490 a 0x5f39860fac50
+[2025-03-13 15:45:14] [DEBUG] Reasignados 424 bytes de 0x5f39860fac50 a 0x5f39860fac50
+[2025-03-13 15:45:14] [DEBUG] Reasignados 432 bytes de 0x5f39860fac50 a 0x5f39860fb6c0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860fc140
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860fc390
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860fca40
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f39860fc390 a 0x5f39860fc390
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860fd320
+[2025-03-13 15:45:14] [DEBUG] Reasignados 24 bytes de 0x5f39860fc390 a 0x5f39860fc390
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860fdc00
+[2025-03-13 15:45:14] [DEBUG] Reasignados 32 bytes de 0x5f39860fc390 a 0x5f39860fde50
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860fc390
+[2025-03-13 15:45:14] [DEBUG] Reasignados 40 bytes de 0x5f39860fde50 a 0x5f39860fde50
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860feba0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 440 bytes de 0x5f39860fb6c0 a 0x5f39860fb6c0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860ff8e0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39860ffd60
+[2025-03-13 15:45:14] [DEBUG] Reasignados 448 bytes de 0x5f39860fb6c0 a 0x5f39860fffb0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 456 bytes de 0x5f39860fffb0 a 0x5f39860fffb0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 464 bytes de 0x5f39860fffb0 a 0x5f3986100a40
+[2025-03-13 15:45:14] [DEBUG] Reasignados 472 bytes de 0x5f3986100a40 a 0x5f3986100a40
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f3986101b70
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f3986101dc0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f3986102240
+[2025-03-13 15:45:14] [DEBUG] Reasignados 16 bytes de 0x5f3986102240 a 0x5f3986102240
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f3986102f80
+[2025-03-13 15:45:14] [DEBUG] Reasignados 480 bytes de 0x5f3986100a40 a 0x5f39861031d0
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f3986103c80
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f3986104100
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f3986104350
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f3986104a00
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f3986104e80
+[2025-03-13 15:45:14] [DEBUG] Asignados 8 bytes en 0x5f39861050d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 488 bytes de 0x5f39861031d0 a 0x5f39861031d0
+[2025-03-13 15:45:14] [DEBUG] Reasignados 496 bytes de 0x5f39861031d0 a 0x5f3986105780
+[2025-03-13 15:45:14] [DEBUG] Reasignados 504 bytes de 0x5f3986105780 a 0x5f3986105780
+[2025-03-13 15:45:14] [DEBUG] Reasignados 512 bytes de 0x5f3986105780 a 0x5f3986106240
+[2025-03-13 15:45:14] [DEBUG] Reasignados 520 bytes de 0x5f3986106240 a 0x5f3986106240
+[2025-03-13 15:45:14] [DEBUG] Reasignados 528 bytes de 0x5f3986106240 a 0x5f3986106d10
+[2025-03-13 15:45:14] [DEBUG] Reasignados 536 bytes de 0x5f3986106d10 a 0x5f3986106d10
+[2025-03-13 15:45:14] [DEBUG] Reasignados 544 bytes de 0x5f3986106d10 a 0x5f39861077f0
+[2025-03-13 15:45:14] [DEBUG] Archivo fuente leído: 6432 bytes
+[2025-03-13 15:45:14] [INFO] Compilando a C: test.c
+[2025-03-13 15:45:14] [INFO] Optimizando AST...
+[2025-03-13 15:45:14] [INFO] Generando código C...
+[2025-03-13 15:45:14] [INFO] Compilando código C a ejecutable...
+[2025-03-13 15:45:14] [INFO] Ejecutando programa compilado...
+[2025-03-13 15:45:14] [INFO] Program executed successfully
+[2025-03-13 15:45:14] [DEBUG] Limpiando AST...
+[2025-03-13 15:45:14] [INFO] Compilación completada exitosamente
+
+========== SESIÓN DE LOG FINALIZADA 2025-03-13 15:45:14 ==========
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-13 15:50:16 ==========
+
+[2025-03-13 15:50:16] [INFO] Iniciando compilación de test.lyn
+[2025-03-13 15:50:16] [INFO] Parseando código fuente...
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f050a1c0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f050a1c0 a 0x64e6f050a1c0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f050a640
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f050a640 a 0x64e6f050a640
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f050a640 a 0x64e6f050a640
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f050c460
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f050c460 a 0x64e6f050c460
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f050a1c0 a 0x64e6f050a1c0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f050a660
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f050a660 a 0x64e6f050a660
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f050c6b0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f050c6b0 a 0x64e6f050c6b0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f050c6d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f050c6b0 a 0x64e6f050c6b0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f050a1c0 a 0x64e6f050c6f0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f050a1c0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f050c720
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f050c720 a 0x64e6f050c720
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f050c720 a 0x64e6f050c720
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0511ff0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f0511ff0 a 0x64e6f0511ff0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f0511ff0 a 0x64e6f0511ff0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f0511ff0 a 0x64e6f05126a0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0511ff0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f0511ff0 a 0x64e6f0511ff0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f0511ff0 a 0x64e6f0511ff0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f050c720 a 0x64e6f050c720
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0513850
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0515fd0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0516220
+[2025-03-13 15:50:16] [DEBUG] Reasignados 40 bytes de 0x64e6f050c720 a 0x64e6f050c720
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05166a0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f05166a0 a 0x64e6f05166a0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0516d50
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05171d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f05171d0 a 0x64e6f05171d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f05171d0 a 0x64e6f05171d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f05171d0 a 0x64e6f05192c0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f0516d50 a 0x64e6f0516d50
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f0516d50 a 0x64e6f0516d50
+[2025-03-13 15:50:16] [DEBUG] Reasignados 48 bytes de 0x64e6f050c720 a 0x64e6f0519980
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f050a1c0 a 0x64e6f050a1c0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05171d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f05171d0 a 0x64e6f05171d0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f051a280
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f051a280 a 0x64e6f051a280
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f051a280 a 0x64e6f051a280
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f051afc0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f051afc0 a 0x64e6f051afc0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f05171d0 a 0x64e6f05171d0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f051b440
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f051b8c0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f05171d0 a 0x64e6f051bb10
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f050a1c0 a 0x64e6f050a1c0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05171d0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f051c1d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f051c1d0 a 0x64e6f051c1d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f051c1d0 a 0x64e6f051c1d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f051c1d0 a 0x64e6f051c880
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f051c1d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f051c1d0 a 0x64e6f051c1d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f051c1d0 a 0x64e6f051c1d0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f051d170
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f051d170 a 0x64e6f051d170
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f05171d0 a 0x64e6f05171d0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f051da50
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f051ebf0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f05171d0 a 0x64e6f05171d0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f051f070
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f051f070 a 0x64e6f051f070
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0520210
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f05171d0 a 0x64e6f0520230
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f050a1c0 a 0x64e6f0520260
+[2025-03-13 15:50:16] [DEBUG] Reasignados 40 bytes de 0x64e6f0520260 a 0x64e6f0520260
+[2025-03-13 15:50:16] [DEBUG] Reasignados 48 bytes de 0x64e6f0520260 a 0x64e6f0520920
+[2025-03-13 15:50:16] [DEBUG] Reasignados 56 bytes de 0x64e6f0520920 a 0x64e6f0520920
+[2025-03-13 15:50:16] [DEBUG] Reasignados 64 bytes de 0x64e6f0520920 a 0x64e6f0521220
+[2025-03-13 15:50:16] [DEBUG] Reasignados 72 bytes de 0x64e6f0521220 a 0x64e6f0521220
+[2025-03-13 15:50:16] [DEBUG] Reasignados 80 bytes de 0x64e6f0521220 a 0x64e6f0521b30
+[2025-03-13 15:50:16] [DEBUG] Reasignados 88 bytes de 0x64e6f0521b30 a 0x64e6f0521b30
+[2025-03-13 15:50:16] [DEBUG] Reasignados 96 bytes de 0x64e6f0521b30 a 0x64e6f0522d10
+[2025-03-13 15:50:16] [DEBUG] Reasignados 104 bytes de 0x64e6f0522d10 a 0x64e6f0522d10
+[2025-03-13 15:50:16] [DEBUG] Reasignados 112 bytes de 0x64e6f0522d10 a 0x64e6f0523f00
+[2025-03-13 15:50:16] [DEBUG] Reasignados 120 bytes de 0x64e6f0523f00 a 0x64e6f0523f00
+[2025-03-13 15:50:16] [DEBUG] Reasignados 128 bytes de 0x64e6f0523f00 a 0x64e6f0524840
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f050a1c0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f050a1c0 a 0x64e6f050a1c0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f050a1c0 a 0x64e6f050a1c0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 136 bytes de 0x64e6f0524840 a 0x64e6f0524840
+[2025-03-13 15:50:16] [DEBUG] Reasignados 144 bytes de 0x64e6f0524840 a 0x64e6f05255f0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05171d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f05171d0 a 0x64e6f05171d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f05171d0 a 0x64e6f05171d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 152 bytes de 0x64e6f05255f0 a 0x64e6f05255f0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05263b0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f05263b0 a 0x64e6f05263b0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 160 bytes de 0x64e6f05255f0 a 0x64e6f0526830
+[2025-03-13 15:50:16] [DEBUG] Reasignados 168 bytes de 0x64e6f0526830 a 0x64e6f0526830
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05271a0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f05271a0 a 0x64e6f05271a0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f05271a0 a 0x64e6f05271a0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f05271a0 a 0x64e6f0527850
+[2025-03-13 15:50:16] [DEBUG] Reasignados 176 bytes de 0x64e6f0526830 a 0x64e6f0527880
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05271a0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 184 bytes de 0x64e6f0527880 a 0x64e6f0527880
+[2025-03-13 15:50:16] [DEBUG] Reasignados 192 bytes de 0x64e6f0527880 a 0x64e6f0528430
+[2025-03-13 15:50:16] [DEBUG] Reasignados 200 bytes de 0x64e6f0528430 a 0x64e6f0528430
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0528dc0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f0528dc0 a 0x64e6f0528dc0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f0528dc0 a 0x64e6f0528dc0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f0528dc0 a 0x64e6f0529470
+[2025-03-13 15:50:16] [DEBUG] Reasignados 208 bytes de 0x64e6f0528430 a 0x64e6f05294a0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0528dc0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 216 bytes de 0x64e6f05294a0 a 0x64e6f05294a0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 224 bytes de 0x64e6f05294a0 a 0x64e6f052a070
+[2025-03-13 15:50:16] [DEBUG] Reasignados 232 bytes de 0x64e6f052a070 a 0x64e6f052a070
+[2025-03-13 15:50:16] [DEBUG] Reasignados 240 bytes de 0x64e6f052a070 a 0x64e6f052ae80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 248 bytes de 0x64e6f052ae80 a 0x64e6f052ae80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 256 bytes de 0x64e6f052ae80 a 0x64e6f052b840
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f052bb80 a 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f052bb80 a 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f052bb80 a 0x64e6f052c230
+[2025-03-13 15:50:16] [DEBUG] Reasignados 40 bytes de 0x64e6f052c230 a 0x64e6f052c230
+[2025-03-13 15:50:16] [DEBUG] Reasignados 264 bytes de 0x64e6f052b840 a 0x64e6f052b840
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f052bb80 a 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f052bb80 a 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f052bb80 a 0x64e6f052d1b0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 272 bytes de 0x64e6f052b840 a 0x64e6f052d640
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f052bb80 a 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f052bb80 a 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f052bb80 a 0x64e6f052e020
+[2025-03-13 15:50:16] [DEBUG] Reasignados 280 bytes de 0x64e6f052d640 a 0x64e6f052d640
+[2025-03-13 15:50:16] [DEBUG] Reasignados 288 bytes de 0x64e6f052d640 a 0x64e6f052e910
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f052bb80 a 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f052bb80 a 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f052bb80 a 0x64e6f052f530
+[2025-03-13 15:50:16] [DEBUG] Reasignados 296 bytes de 0x64e6f052e910 a 0x64e6f052e910
+[2025-03-13 15:50:16] [DEBUG] Reasignados 304 bytes de 0x64e6f052e910 a 0x64e6f052f9c0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f052bb80 a 0x64e6f052bb80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 312 bytes de 0x64e6f052f9c0 a 0x64e6f052f9c0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05305f0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 320 bytes de 0x64e6f052f9c0 a 0x64e6f0530840
+[2025-03-13 15:50:16] [DEBUG] Reasignados 328 bytes de 0x64e6f0530840 a 0x64e6f0530840
+[2025-03-13 15:50:16] [DEBUG] Reasignados 336 bytes de 0x64e6f0530840 a 0x64e6f0531250
+[2025-03-13 15:50:16] [DEBUG] Reasignados 344 bytes de 0x64e6f0531250 a 0x64e6f0531250
+[2025-03-13 15:50:16] [DEBUG] Reasignados 352 bytes de 0x64e6f0531250 a 0x64e6f0531c70
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0532d30
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f0532d30 a 0x64e6f0532d30
+[2025-03-13 15:50:16] [DEBUG] Reasignados 360 bytes de 0x64e6f0531c70 a 0x64e6f0531c70
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0534330
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05347b0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 368 bytes de 0x64e6f0531c70 a 0x64e6f0534a00
+[2025-03-13 15:50:16] [DEBUG] Reasignados 376 bytes de 0x64e6f0534a00 a 0x64e6f0534a00
+[2025-03-13 15:50:16] [DEBUG] Reasignados 384 bytes de 0x64e6f0534a00 a 0x64e6f0535440
+[2025-03-13 15:50:16] [DEBUG] Reasignados 392 bytes de 0x64e6f0535440 a 0x64e6f0535440
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05362f0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f05362f0 a 0x64e6f05362f0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 400 bytes de 0x64e6f0535440 a 0x64e6f0537490
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0538120
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05385a0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 408 bytes de 0x64e6f0537490 a 0x64e6f0537490
+[2025-03-13 15:50:16] [DEBUG] Reasignados 416 bytes de 0x64e6f0537490 a 0x64e6f0538c50
+[2025-03-13 15:50:16] [DEBUG] Reasignados 424 bytes de 0x64e6f0538c50 a 0x64e6f0538c50
+[2025-03-13 15:50:16] [DEBUG] Reasignados 432 bytes de 0x64e6f0538c50 a 0x64e6f05396c0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f053a140
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f053a390
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f053aa40
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f053a390 a 0x64e6f053a390
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f053b320
+[2025-03-13 15:50:16] [DEBUG] Reasignados 24 bytes de 0x64e6f053a390 a 0x64e6f053a390
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f053bc00
+[2025-03-13 15:50:16] [DEBUG] Reasignados 32 bytes de 0x64e6f053a390 a 0x64e6f053be50
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f053a390
+[2025-03-13 15:50:16] [DEBUG] Reasignados 40 bytes de 0x64e6f053be50 a 0x64e6f053be50
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f053cba0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 440 bytes de 0x64e6f05396c0 a 0x64e6f05396c0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f053d8e0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f053dd60
+[2025-03-13 15:50:16] [DEBUG] Reasignados 448 bytes de 0x64e6f05396c0 a 0x64e6f053dfb0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 456 bytes de 0x64e6f053dfb0 a 0x64e6f053dfb0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 464 bytes de 0x64e6f053dfb0 a 0x64e6f053ea40
+[2025-03-13 15:50:16] [DEBUG] Reasignados 472 bytes de 0x64e6f053ea40 a 0x64e6f053ea40
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f053fb70
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f053fdc0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0540240
+[2025-03-13 15:50:16] [DEBUG] Reasignados 16 bytes de 0x64e6f0540240 a 0x64e6f0540240
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0540f80
+[2025-03-13 15:50:16] [DEBUG] Reasignados 480 bytes de 0x64e6f053ea40 a 0x64e6f05411d0
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0541c80
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0542100
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0542350
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0542a00
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f0542e80
+[2025-03-13 15:50:16] [DEBUG] Asignados 8 bytes en 0x64e6f05430d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 488 bytes de 0x64e6f05411d0 a 0x64e6f05411d0
+[2025-03-13 15:50:16] [DEBUG] Reasignados 496 bytes de 0x64e6f05411d0 a 0x64e6f0543780
+[2025-03-13 15:50:16] [DEBUG] Reasignados 504 bytes de 0x64e6f0543780 a 0x64e6f0543780
+[2025-03-13 15:50:16] [DEBUG] Reasignados 512 bytes de 0x64e6f0543780 a 0x64e6f0544240
+[2025-03-13 15:50:16] [DEBUG] Reasignados 520 bytes de 0x64e6f0544240 a 0x64e6f0544240
+[2025-03-13 15:50:16] [DEBUG] Reasignados 528 bytes de 0x64e6f0544240 a 0x64e6f0544d10
+[2025-03-13 15:50:16] [DEBUG] Reasignados 536 bytes de 0x64e6f0544d10 a 0x64e6f0544d10
+[2025-03-13 15:50:16] [DEBUG] Reasignados 544 bytes de 0x64e6f0544d10 a 0x64e6f05457f0
+[2025-03-13 15:50:16] [DEBUG] Archivo fuente leído: 6432 bytes
+[2025-03-13 15:50:16] [INFO] Compilando a C: test.c
+[2025-03-13 15:50:16] [INFO] Optimizando AST...
+[2025-03-13 15:50:16] [INFO] Generando código C...
+[2025-03-13 15:50:16] [INFO] Compilando código C a ejecutable...
+[2025-03-13 15:50:16] [INFO] Ejecutando programa compilado...
+[2025-03-13 15:50:16] [INFO] Program executed successfully
+[2025-03-13 15:50:16] [DEBUG] Limpiando AST...
+[2025-03-13 15:50:16] [INFO] Compilación completada exitosamente
+
+========== SESIÓN DE LOG FINALIZADA 2025-03-13 15:50:16 ==========
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-13 15:57:38 ==========
+
+[2025-03-13 15:57:38] [INFO] Iniciando compilación de test.lyn
+[2025-03-13 15:57:38] [INFO] Parseando código fuente...
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583d41c0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583d41c0 a 0x563d583d41c0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583d4640
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583d4640 a 0x563d583d4640
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583d4640 a 0x563d583d4640
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583d6460
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583d6460 a 0x563d583d6460
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583d41c0 a 0x563d583d41c0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583d4660
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583d4660 a 0x563d583d4660
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583d66b0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583d66b0 a 0x563d583d66b0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583d66d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583d66b0 a 0x563d583d66b0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583d41c0 a 0x563d583d66f0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583d41c0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583d6720
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583d6720 a 0x563d583d6720
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583d6720 a 0x563d583d6720
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583dbff0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583dbff0 a 0x563d583dbff0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583dbff0 a 0x563d583dbff0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583dbff0 a 0x563d583dc6a0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583dbff0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583dbff0 a 0x563d583dbff0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583dbff0 a 0x563d583dbff0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583d6720 a 0x563d583d6720
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583dd850
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583dffd0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e0220
+[2025-03-13 15:57:38] [DEBUG] Reasignados 40 bytes de 0x563d583d6720 a 0x563d583d6720
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e06a0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583e06a0 a 0x563d583e06a0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e0d50
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e11d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583e11d0 a 0x563d583e11d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583e11d0 a 0x563d583e11d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583e11d0 a 0x563d583e32c0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583e0d50 a 0x563d583e0d50
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583e0d50 a 0x563d583e0d50
+[2025-03-13 15:57:38] [DEBUG] Reasignados 48 bytes de 0x563d583d6720 a 0x563d583e3980
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583d41c0 a 0x563d583d41c0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e11d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583e11d0 a 0x563d583e11d0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e4280
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583e4280 a 0x563d583e4280
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583e4280 a 0x563d583e4280
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e4fc0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583e4fc0 a 0x563d583e4fc0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583e11d0 a 0x563d583e11d0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e5440
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e58c0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583e11d0 a 0x563d583e5b10
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583d41c0 a 0x563d583d41c0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e11d0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e61d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583e61d0 a 0x563d583e61d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583e61d0 a 0x563d583e61d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583e61d0 a 0x563d583e6880
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e61d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583e61d0 a 0x563d583e61d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583e61d0 a 0x563d583e61d0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e7170
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583e7170 a 0x563d583e7170
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583e11d0 a 0x563d583e11d0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e7a50
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e8bf0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583e11d0 a 0x563d583e11d0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e9070
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583e9070 a 0x563d583e9070
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583ea210
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583e11d0 a 0x563d583ea230
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583d41c0 a 0x563d583ea260
+[2025-03-13 15:57:38] [DEBUG] Reasignados 40 bytes de 0x563d583ea260 a 0x563d583ea260
+[2025-03-13 15:57:38] [DEBUG] Reasignados 48 bytes de 0x563d583ea260 a 0x563d583ea920
+[2025-03-13 15:57:38] [DEBUG] Reasignados 56 bytes de 0x563d583ea920 a 0x563d583ea920
+[2025-03-13 15:57:38] [DEBUG] Reasignados 64 bytes de 0x563d583ea920 a 0x563d583eb220
+[2025-03-13 15:57:38] [DEBUG] Reasignados 72 bytes de 0x563d583eb220 a 0x563d583eb220
+[2025-03-13 15:57:38] [DEBUG] Reasignados 80 bytes de 0x563d583eb220 a 0x563d583ebb30
+[2025-03-13 15:57:38] [DEBUG] Reasignados 88 bytes de 0x563d583ebb30 a 0x563d583ebb30
+[2025-03-13 15:57:38] [DEBUG] Reasignados 96 bytes de 0x563d583ebb30 a 0x563d583ecd10
+[2025-03-13 15:57:38] [DEBUG] Reasignados 104 bytes de 0x563d583ecd10 a 0x563d583ecd10
+[2025-03-13 15:57:38] [DEBUG] Reasignados 112 bytes de 0x563d583ecd10 a 0x563d583edf00
+[2025-03-13 15:57:38] [DEBUG] Reasignados 120 bytes de 0x563d583edf00 a 0x563d583edf00
+[2025-03-13 15:57:38] [DEBUG] Reasignados 128 bytes de 0x563d583edf00 a 0x563d583ee840
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583d41c0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583d41c0 a 0x563d583d41c0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583d41c0 a 0x563d583d41c0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 136 bytes de 0x563d583ee840 a 0x563d583ee840
+[2025-03-13 15:57:38] [DEBUG] Reasignados 144 bytes de 0x563d583ee840 a 0x563d583ef5f0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583e11d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583e11d0 a 0x563d583e11d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583e11d0 a 0x563d583e11d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 152 bytes de 0x563d583ef5f0 a 0x563d583ef5f0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583f03b0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583f03b0 a 0x563d583f03b0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 160 bytes de 0x563d583ef5f0 a 0x563d583f0830
+[2025-03-13 15:57:38] [DEBUG] Reasignados 168 bytes de 0x563d583f0830 a 0x563d583f0830
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583f11a0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583f11a0 a 0x563d583f11a0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583f11a0 a 0x563d583f11a0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583f11a0 a 0x563d583f1850
+[2025-03-13 15:57:38] [DEBUG] Reasignados 176 bytes de 0x563d583f0830 a 0x563d583f1880
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583f11a0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 184 bytes de 0x563d583f1880 a 0x563d583f1880
+[2025-03-13 15:57:38] [DEBUG] Reasignados 192 bytes de 0x563d583f1880 a 0x563d583f2430
+[2025-03-13 15:57:38] [DEBUG] Reasignados 200 bytes de 0x563d583f2430 a 0x563d583f2430
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583f2dc0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583f2dc0 a 0x563d583f2dc0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583f2dc0 a 0x563d583f2dc0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583f2dc0 a 0x563d583f3470
+[2025-03-13 15:57:38] [DEBUG] Reasignados 208 bytes de 0x563d583f2430 a 0x563d583f34a0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583f2dc0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 216 bytes de 0x563d583f34a0 a 0x563d583f34a0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 224 bytes de 0x563d583f34a0 a 0x563d583f4070
+[2025-03-13 15:57:38] [DEBUG] Reasignados 232 bytes de 0x563d583f4070 a 0x563d583f4070
+[2025-03-13 15:57:38] [DEBUG] Reasignados 240 bytes de 0x563d583f4070 a 0x563d583f4e80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 248 bytes de 0x563d583f4e80 a 0x563d583f4e80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 256 bytes de 0x563d583f4e80 a 0x563d583f5840
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583f5b80 a 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583f5b80 a 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583f5b80 a 0x563d583f6230
+[2025-03-13 15:57:38] [DEBUG] Reasignados 40 bytes de 0x563d583f6230 a 0x563d583f6230
+[2025-03-13 15:57:38] [DEBUG] Reasignados 264 bytes de 0x563d583f5840 a 0x563d583f5840
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583f5b80 a 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583f5b80 a 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583f5b80 a 0x563d583f71b0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 272 bytes de 0x563d583f5840 a 0x563d583f7640
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583f5b80 a 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583f5b80 a 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583f5b80 a 0x563d583f8020
+[2025-03-13 15:57:38] [DEBUG] Reasignados 280 bytes de 0x563d583f7640 a 0x563d583f7640
+[2025-03-13 15:57:38] [DEBUG] Reasignados 288 bytes de 0x563d583f7640 a 0x563d583f8910
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583f5b80 a 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d583f5b80 a 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d583f5b80 a 0x563d583f9530
+[2025-03-13 15:57:38] [DEBUG] Reasignados 296 bytes de 0x563d583f8910 a 0x563d583f8910
+[2025-03-13 15:57:38] [DEBUG] Reasignados 304 bytes de 0x563d583f8910 a 0x563d583f99c0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583f5b80 a 0x563d583f5b80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 312 bytes de 0x563d583f99c0 a 0x563d583f99c0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583fa5f0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 320 bytes de 0x563d583f99c0 a 0x563d583fa840
+[2025-03-13 15:57:38] [DEBUG] Reasignados 328 bytes de 0x563d583fa840 a 0x563d583fa840
+[2025-03-13 15:57:38] [DEBUG] Reasignados 336 bytes de 0x563d583fa840 a 0x563d583fb250
+[2025-03-13 15:57:38] [DEBUG] Reasignados 344 bytes de 0x563d583fb250 a 0x563d583fb250
+[2025-03-13 15:57:38] [DEBUG] Reasignados 352 bytes de 0x563d583fb250 a 0x563d583fbc70
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583fcd30
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d583fcd30 a 0x563d583fcd30
+[2025-03-13 15:57:38] [DEBUG] Reasignados 360 bytes de 0x563d583fbc70 a 0x563d583fbc70
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583fe330
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d583fe7b0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 368 bytes de 0x563d583fbc70 a 0x563d583fea00
+[2025-03-13 15:57:38] [DEBUG] Reasignados 376 bytes de 0x563d583fea00 a 0x563d583fea00
+[2025-03-13 15:57:38] [DEBUG] Reasignados 384 bytes de 0x563d583fea00 a 0x563d583ff440
+[2025-03-13 15:57:38] [DEBUG] Reasignados 392 bytes de 0x563d583ff440 a 0x563d583ff440
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d584002f0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d584002f0 a 0x563d584002f0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 400 bytes de 0x563d583ff440 a 0x563d58401490
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d58402120
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d584025a0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 408 bytes de 0x563d58401490 a 0x563d58401490
+[2025-03-13 15:57:38] [DEBUG] Reasignados 416 bytes de 0x563d58401490 a 0x563d58402c50
+[2025-03-13 15:57:38] [DEBUG] Reasignados 424 bytes de 0x563d58402c50 a 0x563d58402c50
+[2025-03-13 15:57:38] [DEBUG] Reasignados 432 bytes de 0x563d58402c50 a 0x563d584036c0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d58404140
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d58404390
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d58404a40
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d58404390 a 0x563d58404390
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d58405320
+[2025-03-13 15:57:38] [DEBUG] Reasignados 24 bytes de 0x563d58404390 a 0x563d58404390
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d58405c00
+[2025-03-13 15:57:38] [DEBUG] Reasignados 32 bytes de 0x563d58404390 a 0x563d58405e50
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d58404390
+[2025-03-13 15:57:38] [DEBUG] Reasignados 40 bytes de 0x563d58405e50 a 0x563d58405e50
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d58406ba0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 440 bytes de 0x563d584036c0 a 0x563d584036c0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d584078e0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d58407d60
+[2025-03-13 15:57:38] [DEBUG] Reasignados 448 bytes de 0x563d584036c0 a 0x563d58407fb0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 456 bytes de 0x563d58407fb0 a 0x563d58407fb0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 464 bytes de 0x563d58407fb0 a 0x563d58408a40
+[2025-03-13 15:57:38] [DEBUG] Reasignados 472 bytes de 0x563d58408a40 a 0x563d58408a40
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d58409b70
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d58409dc0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d5840a240
+[2025-03-13 15:57:38] [DEBUG] Reasignados 16 bytes de 0x563d5840a240 a 0x563d5840a240
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d5840af80
+[2025-03-13 15:57:38] [DEBUG] Reasignados 480 bytes de 0x563d58408a40 a 0x563d5840b1d0
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d5840bc80
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d5840c100
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d5840c350
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d5840ca00
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d5840ce80
+[2025-03-13 15:57:38] [DEBUG] Asignados 8 bytes en 0x563d5840d0d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 488 bytes de 0x563d5840b1d0 a 0x563d5840b1d0
+[2025-03-13 15:57:38] [DEBUG] Reasignados 496 bytes de 0x563d5840b1d0 a 0x563d5840d780
+[2025-03-13 15:57:38] [DEBUG] Reasignados 504 bytes de 0x563d5840d780 a 0x563d5840d780
+[2025-03-13 15:57:38] [DEBUG] Reasignados 512 bytes de 0x563d5840d780 a 0x563d5840e240
+[2025-03-13 15:57:38] [DEBUG] Reasignados 520 bytes de 0x563d5840e240 a 0x563d5840e240
+[2025-03-13 15:57:38] [DEBUG] Reasignados 528 bytes de 0x563d5840e240 a 0x563d5840ed10
+[2025-03-13 15:57:38] [DEBUG] Reasignados 536 bytes de 0x563d5840ed10 a 0x563d5840ed10
+[2025-03-13 15:57:38] [DEBUG] Reasignados 544 bytes de 0x563d5840ed10 a 0x563d5840f7f0
+[2025-03-13 15:57:38] [DEBUG] Archivo fuente leído: 6432 bytes
+[2025-03-13 15:57:38] [INFO] Compilando a C: test.c
+[2025-03-13 15:57:38] [INFO] Optimizando AST...
+[2025-03-13 15:57:38] [INFO] Generando código C...
+[2025-03-13 15:57:38] [INFO] Compilando código C a ejecutable...
+[2025-03-13 15:57:38] [ERROR] Error: C compilation failed
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-13 15:57:47 ==========
+
+[2025-03-13 15:57:47] [INFO] Iniciando compilación de test.lyn
+[2025-03-13 15:57:47] [INFO] Parseando código fuente...
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eede1c0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eede1c0 a 0x63ed6eede1c0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eede640
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eede640 a 0x63ed6eede640
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eede640 a 0x63ed6eede640
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eee0460
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eee0460 a 0x63ed6eee0460
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eede1c0 a 0x63ed6eede1c0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eede660
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eede660 a 0x63ed6eede660
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eee06b0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eee06b0 a 0x63ed6eee06b0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eee06d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eee06b0 a 0x63ed6eee06b0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eede1c0 a 0x63ed6eee06f0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eede1c0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eee0720
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eee0720 a 0x63ed6eee0720
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eee0720 a 0x63ed6eee0720
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eee5ff0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eee5ff0 a 0x63ed6eee5ff0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eee5ff0 a 0x63ed6eee5ff0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eee5ff0 a 0x63ed6eee66a0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eee5ff0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eee5ff0 a 0x63ed6eee5ff0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eee5ff0 a 0x63ed6eee5ff0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eee0720 a 0x63ed6eee0720
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eee7850
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eee9fd0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeea220
+[2025-03-13 15:57:47] [DEBUG] Reasignados 40 bytes de 0x63ed6eee0720 a 0x63ed6eee0720
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeea6a0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeea6a0 a 0x63ed6eeea6a0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeead50
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeeb1d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeeb1d0 a 0x63ed6eeeb1d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eeeb1d0 a 0x63ed6eeeb1d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eeeb1d0 a 0x63ed6eeed2c0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeead50 a 0x63ed6eeead50
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eeead50 a 0x63ed6eeead50
+[2025-03-13 15:57:47] [DEBUG] Reasignados 48 bytes de 0x63ed6eee0720 a 0x63ed6eeed980
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eede1c0 a 0x63ed6eede1c0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeeb1d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeeb1d0 a 0x63ed6eeeb1d0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeee280
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeee280 a 0x63ed6eeee280
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eeee280 a 0x63ed6eeee280
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeeefc0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeeefc0 a 0x63ed6eeeefc0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eeeb1d0 a 0x63ed6eeeb1d0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeef440
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeef8c0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eeeb1d0 a 0x63ed6eeefb10
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eede1c0 a 0x63ed6eede1c0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeeb1d0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eef01d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eef01d0 a 0x63ed6eef01d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eef01d0 a 0x63ed6eef01d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eef01d0 a 0x63ed6eef0880
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eef01d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eef01d0 a 0x63ed6eef01d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eef01d0 a 0x63ed6eef01d0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eef1170
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eef1170 a 0x63ed6eef1170
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeeb1d0 a 0x63ed6eeeb1d0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eef1a50
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eef2bf0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eeeb1d0 a 0x63ed6eeeb1d0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eef3070
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eef3070 a 0x63ed6eef3070
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eef4210
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eeeb1d0 a 0x63ed6eef4230
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eede1c0 a 0x63ed6eef4260
+[2025-03-13 15:57:47] [DEBUG] Reasignados 40 bytes de 0x63ed6eef4260 a 0x63ed6eef4260
+[2025-03-13 15:57:47] [DEBUG] Reasignados 48 bytes de 0x63ed6eef4260 a 0x63ed6eef4920
+[2025-03-13 15:57:47] [DEBUG] Reasignados 56 bytes de 0x63ed6eef4920 a 0x63ed6eef4920
+[2025-03-13 15:57:47] [DEBUG] Reasignados 64 bytes de 0x63ed6eef4920 a 0x63ed6eef5220
+[2025-03-13 15:57:47] [DEBUG] Reasignados 72 bytes de 0x63ed6eef5220 a 0x63ed6eef5220
+[2025-03-13 15:57:47] [DEBUG] Reasignados 80 bytes de 0x63ed6eef5220 a 0x63ed6eef5b30
+[2025-03-13 15:57:47] [DEBUG] Reasignados 88 bytes de 0x63ed6eef5b30 a 0x63ed6eef5b30
+[2025-03-13 15:57:47] [DEBUG] Reasignados 96 bytes de 0x63ed6eef5b30 a 0x63ed6eef6d10
+[2025-03-13 15:57:47] [DEBUG] Reasignados 104 bytes de 0x63ed6eef6d10 a 0x63ed6eef6d10
+[2025-03-13 15:57:47] [DEBUG] Reasignados 112 bytes de 0x63ed6eef6d10 a 0x63ed6eef7f00
+[2025-03-13 15:57:47] [DEBUG] Reasignados 120 bytes de 0x63ed6eef7f00 a 0x63ed6eef7f00
+[2025-03-13 15:57:47] [DEBUG] Reasignados 128 bytes de 0x63ed6eef7f00 a 0x63ed6eef8840
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eede1c0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eede1c0 a 0x63ed6eede1c0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eede1c0 a 0x63ed6eede1c0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 136 bytes de 0x63ed6eef8840 a 0x63ed6eef8840
+[2025-03-13 15:57:47] [DEBUG] Reasignados 144 bytes de 0x63ed6eef8840 a 0x63ed6eef95f0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeeb1d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeeb1d0 a 0x63ed6eeeb1d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eeeb1d0 a 0x63ed6eeeb1d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 152 bytes de 0x63ed6eef95f0 a 0x63ed6eef95f0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eefa3b0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eefa3b0 a 0x63ed6eefa3b0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 160 bytes de 0x63ed6eef95f0 a 0x63ed6eefa830
+[2025-03-13 15:57:47] [DEBUG] Reasignados 168 bytes de 0x63ed6eefa830 a 0x63ed6eefa830
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eefb1a0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eefb1a0 a 0x63ed6eefb1a0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eefb1a0 a 0x63ed6eefb1a0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eefb1a0 a 0x63ed6eefb850
+[2025-03-13 15:57:47] [DEBUG] Reasignados 176 bytes de 0x63ed6eefa830 a 0x63ed6eefb880
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eefb1a0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 184 bytes de 0x63ed6eefb880 a 0x63ed6eefb880
+[2025-03-13 15:57:47] [DEBUG] Reasignados 192 bytes de 0x63ed6eefb880 a 0x63ed6eefc430
+[2025-03-13 15:57:47] [DEBUG] Reasignados 200 bytes de 0x63ed6eefc430 a 0x63ed6eefc430
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eefcdc0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eefcdc0 a 0x63ed6eefcdc0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eefcdc0 a 0x63ed6eefcdc0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eefcdc0 a 0x63ed6eefd470
+[2025-03-13 15:57:47] [DEBUG] Reasignados 208 bytes de 0x63ed6eefc430 a 0x63ed6eefd4a0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eefcdc0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 216 bytes de 0x63ed6eefd4a0 a 0x63ed6eefd4a0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 224 bytes de 0x63ed6eefd4a0 a 0x63ed6eefe070
+[2025-03-13 15:57:47] [DEBUG] Reasignados 232 bytes de 0x63ed6eefe070 a 0x63ed6eefe070
+[2025-03-13 15:57:47] [DEBUG] Reasignados 240 bytes de 0x63ed6eefe070 a 0x63ed6eefee80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 248 bytes de 0x63ed6eefee80 a 0x63ed6eefee80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 256 bytes de 0x63ed6eefee80 a 0x63ed6eeff840
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeffb80 a 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eeffb80 a 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eeffb80 a 0x63ed6ef00230
+[2025-03-13 15:57:47] [DEBUG] Reasignados 40 bytes de 0x63ed6ef00230 a 0x63ed6ef00230
+[2025-03-13 15:57:47] [DEBUG] Reasignados 264 bytes de 0x63ed6eeff840 a 0x63ed6eeff840
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeffb80 a 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eeffb80 a 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eeffb80 a 0x63ed6ef011b0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 272 bytes de 0x63ed6eeff840 a 0x63ed6ef01640
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeffb80 a 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eeffb80 a 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eeffb80 a 0x63ed6ef02020
+[2025-03-13 15:57:47] [DEBUG] Reasignados 280 bytes de 0x63ed6ef01640 a 0x63ed6ef01640
+[2025-03-13 15:57:47] [DEBUG] Reasignados 288 bytes de 0x63ed6ef01640 a 0x63ed6ef02910
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeffb80 a 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6eeffb80 a 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6eeffb80 a 0x63ed6ef03530
+[2025-03-13 15:57:47] [DEBUG] Reasignados 296 bytes de 0x63ed6ef02910 a 0x63ed6ef02910
+[2025-03-13 15:57:47] [DEBUG] Reasignados 304 bytes de 0x63ed6ef02910 a 0x63ed6ef039c0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6eeffb80 a 0x63ed6eeffb80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 312 bytes de 0x63ed6ef039c0 a 0x63ed6ef039c0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef045f0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 320 bytes de 0x63ed6ef039c0 a 0x63ed6ef04840
+[2025-03-13 15:57:47] [DEBUG] Reasignados 328 bytes de 0x63ed6ef04840 a 0x63ed6ef04840
+[2025-03-13 15:57:47] [DEBUG] Reasignados 336 bytes de 0x63ed6ef04840 a 0x63ed6ef05250
+[2025-03-13 15:57:47] [DEBUG] Reasignados 344 bytes de 0x63ed6ef05250 a 0x63ed6ef05250
+[2025-03-13 15:57:47] [DEBUG] Reasignados 352 bytes de 0x63ed6ef05250 a 0x63ed6ef05c70
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef06d30
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6ef06d30 a 0x63ed6ef06d30
+[2025-03-13 15:57:47] [DEBUG] Reasignados 360 bytes de 0x63ed6ef05c70 a 0x63ed6ef05c70
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef08330
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef087b0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 368 bytes de 0x63ed6ef05c70 a 0x63ed6ef08a00
+[2025-03-13 15:57:47] [DEBUG] Reasignados 376 bytes de 0x63ed6ef08a00 a 0x63ed6ef08a00
+[2025-03-13 15:57:47] [DEBUG] Reasignados 384 bytes de 0x63ed6ef08a00 a 0x63ed6ef09440
+[2025-03-13 15:57:47] [DEBUG] Reasignados 392 bytes de 0x63ed6ef09440 a 0x63ed6ef09440
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef0a2f0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6ef0a2f0 a 0x63ed6ef0a2f0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 400 bytes de 0x63ed6ef09440 a 0x63ed6ef0b490
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef0c120
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef0c5a0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 408 bytes de 0x63ed6ef0b490 a 0x63ed6ef0b490
+[2025-03-13 15:57:47] [DEBUG] Reasignados 416 bytes de 0x63ed6ef0b490 a 0x63ed6ef0cc50
+[2025-03-13 15:57:47] [DEBUG] Reasignados 424 bytes de 0x63ed6ef0cc50 a 0x63ed6ef0cc50
+[2025-03-13 15:57:47] [DEBUG] Reasignados 432 bytes de 0x63ed6ef0cc50 a 0x63ed6ef0d6c0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef0e140
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef0e390
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef0ea40
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6ef0e390 a 0x63ed6ef0e390
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef0f320
+[2025-03-13 15:57:47] [DEBUG] Reasignados 24 bytes de 0x63ed6ef0e390 a 0x63ed6ef0e390
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef0fc00
+[2025-03-13 15:57:47] [DEBUG] Reasignados 32 bytes de 0x63ed6ef0e390 a 0x63ed6ef0fe50
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef0e390
+[2025-03-13 15:57:47] [DEBUG] Reasignados 40 bytes de 0x63ed6ef0fe50 a 0x63ed6ef0fe50
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef10ba0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 440 bytes de 0x63ed6ef0d6c0 a 0x63ed6ef0d6c0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef118e0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef11d60
+[2025-03-13 15:57:47] [DEBUG] Reasignados 448 bytes de 0x63ed6ef0d6c0 a 0x63ed6ef11fb0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 456 bytes de 0x63ed6ef11fb0 a 0x63ed6ef11fb0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 464 bytes de 0x63ed6ef11fb0 a 0x63ed6ef12a40
+[2025-03-13 15:57:47] [DEBUG] Reasignados 472 bytes de 0x63ed6ef12a40 a 0x63ed6ef12a40
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef13b70
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef13dc0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef14240
+[2025-03-13 15:57:47] [DEBUG] Reasignados 16 bytes de 0x63ed6ef14240 a 0x63ed6ef14240
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef14f80
+[2025-03-13 15:57:47] [DEBUG] Reasignados 480 bytes de 0x63ed6ef12a40 a 0x63ed6ef151d0
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef15c80
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef16100
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef16350
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef16a00
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef16e80
+[2025-03-13 15:57:47] [DEBUG] Asignados 8 bytes en 0x63ed6ef170d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 488 bytes de 0x63ed6ef151d0 a 0x63ed6ef151d0
+[2025-03-13 15:57:47] [DEBUG] Reasignados 496 bytes de 0x63ed6ef151d0 a 0x63ed6ef17780
+[2025-03-13 15:57:47] [DEBUG] Reasignados 504 bytes de 0x63ed6ef17780 a 0x63ed6ef17780
+[2025-03-13 15:57:47] [DEBUG] Reasignados 512 bytes de 0x63ed6ef17780 a 0x63ed6ef18240
+[2025-03-13 15:57:47] [DEBUG] Reasignados 520 bytes de 0x63ed6ef18240 a 0x63ed6ef18240
+[2025-03-13 15:57:47] [DEBUG] Reasignados 528 bytes de 0x63ed6ef18240 a 0x63ed6ef18d10
+[2025-03-13 15:57:47] [DEBUG] Reasignados 536 bytes de 0x63ed6ef18d10 a 0x63ed6ef18d10
+[2025-03-13 15:57:47] [DEBUG] Reasignados 544 bytes de 0x63ed6ef18d10 a 0x63ed6ef197f0
+[2025-03-13 15:57:47] [DEBUG] Archivo fuente leído: 6432 bytes
+[2025-03-13 15:57:47] [INFO] Compilando a C: test.c
+[2025-03-13 15:57:47] [INFO] Optimizando AST...
+[2025-03-13 15:57:47] [INFO] Generando código C...
+[2025-03-13 15:57:47] [INFO] Compilando código C a ejecutable...
+[2025-03-13 15:57:47] [INFO] Ejecutando programa compilado...
+[2025-03-13 15:57:47] [INFO] Program executed successfully
+[2025-03-13 15:57:47] [DEBUG] Limpiando AST...
+[2025-03-13 15:57:47] [INFO] Compilación completada exitosamente
+
+========== SESIÓN DE LOG FINALIZADA 2025-03-13 15:57:47 ==========
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-13 15:58:18 ==========
+
+[2025-03-13 15:58:18] [INFO] Iniciando compilación de test.lyn
+[2025-03-13 15:58:18] [INFO] Parseando código fuente...
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c1121c0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c1121c0 a 0x5b067c1121c0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c112640
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c112640 a 0x5b067c112640
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c112640 a 0x5b067c112640
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c114460
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c114460 a 0x5b067c114460
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c1121c0 a 0x5b067c1121c0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c112660
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c112660 a 0x5b067c112660
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c1146b0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c1146b0 a 0x5b067c1146b0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c1146d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c1146b0 a 0x5b067c1146b0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c1121c0 a 0x5b067c1146f0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c1121c0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c114720
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c114720 a 0x5b067c114720
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c114720 a 0x5b067c114720
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c119ff0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c119ff0 a 0x5b067c119ff0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c119ff0 a 0x5b067c119ff0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c119ff0 a 0x5b067c11a6a0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c119ff0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c119ff0 a 0x5b067c119ff0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c119ff0 a 0x5b067c119ff0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c114720 a 0x5b067c114720
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c11b850
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c11dfd0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c11e220
+[2025-03-13 15:58:18] [DEBUG] Reasignados 40 bytes de 0x5b067c114720 a 0x5b067c114720
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c11e6a0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c11e6a0 a 0x5b067c11e6a0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c11ed50
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c11f1d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c11f1d0 a 0x5b067c11f1d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c11f1d0 a 0x5b067c11f1d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c11f1d0 a 0x5b067c1212c0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c11ed50 a 0x5b067c11ed50
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c11ed50 a 0x5b067c11ed50
+[2025-03-13 15:58:18] [DEBUG] Reasignados 48 bytes de 0x5b067c114720 a 0x5b067c121980
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c1121c0 a 0x5b067c1121c0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c11f1d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c11f1d0 a 0x5b067c11f1d0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c122280
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c122280 a 0x5b067c122280
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c122280 a 0x5b067c122280
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c122fc0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c122fc0 a 0x5b067c122fc0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c11f1d0 a 0x5b067c11f1d0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c123440
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c1238c0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c11f1d0 a 0x5b067c123b10
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c1121c0 a 0x5b067c1121c0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c11f1d0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c1241d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c1241d0 a 0x5b067c1241d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c1241d0 a 0x5b067c1241d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c1241d0 a 0x5b067c124880
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c1241d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c1241d0 a 0x5b067c1241d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c1241d0 a 0x5b067c1241d0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c125170
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c125170 a 0x5b067c125170
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c11f1d0 a 0x5b067c11f1d0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c125a50
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c126bf0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c11f1d0 a 0x5b067c11f1d0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c127070
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c127070 a 0x5b067c127070
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c128210
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c11f1d0 a 0x5b067c128230
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c1121c0 a 0x5b067c128260
+[2025-03-13 15:58:18] [DEBUG] Reasignados 40 bytes de 0x5b067c128260 a 0x5b067c128260
+[2025-03-13 15:58:18] [DEBUG] Reasignados 48 bytes de 0x5b067c128260 a 0x5b067c128920
+[2025-03-13 15:58:18] [DEBUG] Reasignados 56 bytes de 0x5b067c128920 a 0x5b067c128920
+[2025-03-13 15:58:18] [DEBUG] Reasignados 64 bytes de 0x5b067c128920 a 0x5b067c129220
+[2025-03-13 15:58:18] [DEBUG] Reasignados 72 bytes de 0x5b067c129220 a 0x5b067c129220
+[2025-03-13 15:58:18] [DEBUG] Reasignados 80 bytes de 0x5b067c129220 a 0x5b067c129b30
+[2025-03-13 15:58:18] [DEBUG] Reasignados 88 bytes de 0x5b067c129b30 a 0x5b067c129b30
+[2025-03-13 15:58:18] [DEBUG] Reasignados 96 bytes de 0x5b067c129b30 a 0x5b067c12ad10
+[2025-03-13 15:58:18] [DEBUG] Reasignados 104 bytes de 0x5b067c12ad10 a 0x5b067c12ad10
+[2025-03-13 15:58:18] [DEBUG] Reasignados 112 bytes de 0x5b067c12ad10 a 0x5b067c12bf00
+[2025-03-13 15:58:18] [DEBUG] Reasignados 120 bytes de 0x5b067c12bf00 a 0x5b067c12bf00
+[2025-03-13 15:58:18] [DEBUG] Reasignados 128 bytes de 0x5b067c12bf00 a 0x5b067c12c840
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c1121c0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c1121c0 a 0x5b067c1121c0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c1121c0 a 0x5b067c1121c0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 136 bytes de 0x5b067c12c840 a 0x5b067c12c840
+[2025-03-13 15:58:18] [DEBUG] Reasignados 144 bytes de 0x5b067c12c840 a 0x5b067c12d5f0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c11f1d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c11f1d0 a 0x5b067c11f1d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c11f1d0 a 0x5b067c11f1d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 152 bytes de 0x5b067c12d5f0 a 0x5b067c12d5f0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c12e3b0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c12e3b0 a 0x5b067c12e3b0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 160 bytes de 0x5b067c12d5f0 a 0x5b067c12e830
+[2025-03-13 15:58:18] [DEBUG] Reasignados 168 bytes de 0x5b067c12e830 a 0x5b067c12e830
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c12f1a0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c12f1a0 a 0x5b067c12f1a0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c12f1a0 a 0x5b067c12f1a0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c12f1a0 a 0x5b067c12f850
+[2025-03-13 15:58:18] [DEBUG] Reasignados 176 bytes de 0x5b067c12e830 a 0x5b067c12f880
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c12f1a0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 184 bytes de 0x5b067c12f880 a 0x5b067c12f880
+[2025-03-13 15:58:18] [DEBUG] Reasignados 192 bytes de 0x5b067c12f880 a 0x5b067c130430
+[2025-03-13 15:58:18] [DEBUG] Reasignados 200 bytes de 0x5b067c130430 a 0x5b067c130430
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c130dc0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c130dc0 a 0x5b067c130dc0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c130dc0 a 0x5b067c130dc0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c130dc0 a 0x5b067c131470
+[2025-03-13 15:58:18] [DEBUG] Reasignados 208 bytes de 0x5b067c130430 a 0x5b067c1314a0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c130dc0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 216 bytes de 0x5b067c1314a0 a 0x5b067c1314a0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 224 bytes de 0x5b067c1314a0 a 0x5b067c132070
+[2025-03-13 15:58:18] [DEBUG] Reasignados 232 bytes de 0x5b067c132070 a 0x5b067c132070
+[2025-03-13 15:58:18] [DEBUG] Reasignados 240 bytes de 0x5b067c132070 a 0x5b067c132e80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 248 bytes de 0x5b067c132e80 a 0x5b067c132e80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 256 bytes de 0x5b067c132e80 a 0x5b067c133840
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c133b80 a 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c133b80 a 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c133b80 a 0x5b067c134230
+[2025-03-13 15:58:18] [DEBUG] Reasignados 40 bytes de 0x5b067c134230 a 0x5b067c134230
+[2025-03-13 15:58:18] [DEBUG] Reasignados 264 bytes de 0x5b067c133840 a 0x5b067c133840
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c133b80 a 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c133b80 a 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c133b80 a 0x5b067c1351b0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 272 bytes de 0x5b067c133840 a 0x5b067c135640
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c133b80 a 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c133b80 a 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c133b80 a 0x5b067c136020
+[2025-03-13 15:58:18] [DEBUG] Reasignados 280 bytes de 0x5b067c135640 a 0x5b067c135640
+[2025-03-13 15:58:18] [DEBUG] Reasignados 288 bytes de 0x5b067c135640 a 0x5b067c136910
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c133b80 a 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c133b80 a 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c133b80 a 0x5b067c137530
+[2025-03-13 15:58:18] [DEBUG] Reasignados 296 bytes de 0x5b067c136910 a 0x5b067c136910
+[2025-03-13 15:58:18] [DEBUG] Reasignados 304 bytes de 0x5b067c136910 a 0x5b067c1379c0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c133b80 a 0x5b067c133b80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 312 bytes de 0x5b067c1379c0 a 0x5b067c1379c0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c1385f0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 320 bytes de 0x5b067c1379c0 a 0x5b067c138840
+[2025-03-13 15:58:18] [DEBUG] Reasignados 328 bytes de 0x5b067c138840 a 0x5b067c138840
+[2025-03-13 15:58:18] [DEBUG] Reasignados 336 bytes de 0x5b067c138840 a 0x5b067c139250
+[2025-03-13 15:58:18] [DEBUG] Reasignados 344 bytes de 0x5b067c139250 a 0x5b067c139250
+[2025-03-13 15:58:18] [DEBUG] Reasignados 352 bytes de 0x5b067c139250 a 0x5b067c139c70
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c13ad30
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c13ad30 a 0x5b067c13ad30
+[2025-03-13 15:58:18] [DEBUG] Reasignados 360 bytes de 0x5b067c139c70 a 0x5b067c139c70
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c13c330
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c13c7b0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 368 bytes de 0x5b067c139c70 a 0x5b067c13ca00
+[2025-03-13 15:58:18] [DEBUG] Reasignados 376 bytes de 0x5b067c13ca00 a 0x5b067c13ca00
+[2025-03-13 15:58:18] [DEBUG] Reasignados 384 bytes de 0x5b067c13ca00 a 0x5b067c13d440
+[2025-03-13 15:58:18] [DEBUG] Reasignados 392 bytes de 0x5b067c13d440 a 0x5b067c13d440
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c13e2f0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c13e2f0 a 0x5b067c13e2f0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 400 bytes de 0x5b067c13d440 a 0x5b067c13f490
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c140120
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c1405a0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 408 bytes de 0x5b067c13f490 a 0x5b067c13f490
+[2025-03-13 15:58:18] [DEBUG] Reasignados 416 bytes de 0x5b067c13f490 a 0x5b067c140c50
+[2025-03-13 15:58:18] [DEBUG] Reasignados 424 bytes de 0x5b067c140c50 a 0x5b067c140c50
+[2025-03-13 15:58:18] [DEBUG] Reasignados 432 bytes de 0x5b067c140c50 a 0x5b067c1416c0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c142140
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c142390
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c142a40
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c142390 a 0x5b067c142390
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c143320
+[2025-03-13 15:58:18] [DEBUG] Reasignados 24 bytes de 0x5b067c142390 a 0x5b067c142390
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c143c00
+[2025-03-13 15:58:18] [DEBUG] Reasignados 32 bytes de 0x5b067c142390 a 0x5b067c143e50
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c142390
+[2025-03-13 15:58:18] [DEBUG] Reasignados 40 bytes de 0x5b067c143e50 a 0x5b067c143e50
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c144ba0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 440 bytes de 0x5b067c1416c0 a 0x5b067c1416c0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c1458e0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c145d60
+[2025-03-13 15:58:18] [DEBUG] Reasignados 448 bytes de 0x5b067c1416c0 a 0x5b067c145fb0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 456 bytes de 0x5b067c145fb0 a 0x5b067c145fb0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 464 bytes de 0x5b067c145fb0 a 0x5b067c146a40
+[2025-03-13 15:58:18] [DEBUG] Reasignados 472 bytes de 0x5b067c146a40 a 0x5b067c146a40
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c147b70
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c147dc0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c148240
+[2025-03-13 15:58:18] [DEBUG] Reasignados 16 bytes de 0x5b067c148240 a 0x5b067c148240
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c148f80
+[2025-03-13 15:58:18] [DEBUG] Reasignados 480 bytes de 0x5b067c146a40 a 0x5b067c1491d0
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c149c80
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c14a100
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c14a350
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c14aa00
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c14ae80
+[2025-03-13 15:58:18] [DEBUG] Asignados 8 bytes en 0x5b067c14b0d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 488 bytes de 0x5b067c1491d0 a 0x5b067c1491d0
+[2025-03-13 15:58:18] [DEBUG] Reasignados 496 bytes de 0x5b067c1491d0 a 0x5b067c14b780
+[2025-03-13 15:58:18] [DEBUG] Reasignados 504 bytes de 0x5b067c14b780 a 0x5b067c14b780
+[2025-03-13 15:58:18] [DEBUG] Reasignados 512 bytes de 0x5b067c14b780 a 0x5b067c14c240
+[2025-03-13 15:58:18] [DEBUG] Reasignados 520 bytes de 0x5b067c14c240 a 0x5b067c14c240
+[2025-03-13 15:58:18] [DEBUG] Reasignados 528 bytes de 0x5b067c14c240 a 0x5b067c14cd10
+[2025-03-13 15:58:18] [DEBUG] Reasignados 536 bytes de 0x5b067c14cd10 a 0x5b067c14cd10
+[2025-03-13 15:58:18] [DEBUG] Reasignados 544 bytes de 0x5b067c14cd10 a 0x5b067c14d7f0
+[2025-03-13 15:58:18] [DEBUG] Archivo fuente leído: 6432 bytes
+[2025-03-13 15:58:18] [INFO] Compilando a C: test.c
+[2025-03-13 15:58:18] [INFO] Optimizando AST...
+[2025-03-13 15:58:18] [INFO] Generando código C...
+[2025-03-13 15:58:18] [INFO] Compilando código C a ejecutable...
+[2025-03-13 15:58:18] [INFO] Ejecutando programa compilado...
+[2025-03-13 15:58:18] [INFO] Program executed successfully
+[2025-03-13 15:58:18] [DEBUG] Limpiando AST...
+[2025-03-13 15:58:18] [INFO] Compilación completada exitosamente
+
+========== SESIÓN DE LOG FINALIZADA 2025-03-13 15:58:18 ==========
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-13 16:00:13 ==========
+
+[2025-03-13 16:00:13] [INFO] Iniciando compilación de test.lyn
+[2025-03-13 16:00:13] [INFO] Parseando código fuente...
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eef11c0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eef11c0 a 0x61536eef11c0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eef1640
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eef1640 a 0x61536eef1640
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eef1640 a 0x61536eef1640
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eef3460
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eef3460 a 0x61536eef3460
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eef11c0 a 0x61536eef11c0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eef1660
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eef1660 a 0x61536eef1660
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eef36b0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eef36b0 a 0x61536eef36b0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eef36d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eef36b0 a 0x61536eef36b0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536eef11c0 a 0x61536eef36f0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eef11c0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eef3720
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eef3720 a 0x61536eef3720
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eef3720 a 0x61536eef3720
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eef8ff0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eef8ff0 a 0x61536eef8ff0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eef8ff0 a 0x61536eef8ff0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536eef8ff0 a 0x61536eef96a0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eef8ff0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eef8ff0 a 0x61536eef8ff0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eef8ff0 a 0x61536eef8ff0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536eef3720 a 0x61536eef3720
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eefa850
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eefcfd0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eefd220
+[2025-03-13 16:00:13] [DEBUG] Reasignados 40 bytes de 0x61536eef3720 a 0x61536eef3720
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eefd6a0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eefd6a0 a 0x61536eefd6a0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eefdd50
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eefe1d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eefe1d0 a 0x61536eefe1d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eefe1d0 a 0x61536eefe1d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536eefe1d0 a 0x61536ef002c0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eefdd50 a 0x61536eefdd50
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eefdd50 a 0x61536eefdd50
+[2025-03-13 16:00:13] [DEBUG] Reasignados 48 bytes de 0x61536eef3720 a 0x61536ef00980
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eef11c0 a 0x61536eef11c0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eefe1d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eefe1d0 a 0x61536eefe1d0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef01280
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef01280 a 0x61536ef01280
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536ef01280 a 0x61536ef01280
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef01fc0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef01fc0 a 0x61536ef01fc0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eefe1d0 a 0x61536eefe1d0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef02440
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef028c0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536eefe1d0 a 0x61536ef02b10
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eef11c0 a 0x61536eef11c0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eefe1d0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef031d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef031d0 a 0x61536ef031d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536ef031d0 a 0x61536ef031d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536ef031d0 a 0x61536ef03880
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef031d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef031d0 a 0x61536ef031d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536ef031d0 a 0x61536ef031d0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef04170
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef04170 a 0x61536ef04170
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eefe1d0 a 0x61536eefe1d0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef04a50
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef05bf0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eefe1d0 a 0x61536eefe1d0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef06070
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef06070 a 0x61536ef06070
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef07210
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536eefe1d0 a 0x61536ef07230
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536eef11c0 a 0x61536ef07260
+[2025-03-13 16:00:13] [DEBUG] Reasignados 40 bytes de 0x61536ef07260 a 0x61536ef07260
+[2025-03-13 16:00:13] [DEBUG] Reasignados 48 bytes de 0x61536ef07260 a 0x61536ef07920
+[2025-03-13 16:00:13] [DEBUG] Reasignados 56 bytes de 0x61536ef07920 a 0x61536ef07920
+[2025-03-13 16:00:13] [DEBUG] Reasignados 64 bytes de 0x61536ef07920 a 0x61536ef08220
+[2025-03-13 16:00:13] [DEBUG] Reasignados 72 bytes de 0x61536ef08220 a 0x61536ef08220
+[2025-03-13 16:00:13] [DEBUG] Reasignados 80 bytes de 0x61536ef08220 a 0x61536ef08b30
+[2025-03-13 16:00:13] [DEBUG] Reasignados 88 bytes de 0x61536ef08b30 a 0x61536ef08b30
+[2025-03-13 16:00:13] [DEBUG] Reasignados 96 bytes de 0x61536ef08b30 a 0x61536ef09d10
+[2025-03-13 16:00:13] [DEBUG] Reasignados 104 bytes de 0x61536ef09d10 a 0x61536ef09d10
+[2025-03-13 16:00:13] [DEBUG] Reasignados 112 bytes de 0x61536ef09d10 a 0x61536ef0af00
+[2025-03-13 16:00:13] [DEBUG] Reasignados 120 bytes de 0x61536ef0af00 a 0x61536ef0af00
+[2025-03-13 16:00:13] [DEBUG] Reasignados 128 bytes de 0x61536ef0af00 a 0x61536ef0b840
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eef11c0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eef11c0 a 0x61536eef11c0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eef11c0 a 0x61536eef11c0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 136 bytes de 0x61536ef0b840 a 0x61536ef0b840
+[2025-03-13 16:00:13] [DEBUG] Reasignados 144 bytes de 0x61536ef0b840 a 0x61536ef0c5f0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536eefe1d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536eefe1d0 a 0x61536eefe1d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536eefe1d0 a 0x61536eefe1d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 152 bytes de 0x61536ef0c5f0 a 0x61536ef0c5f0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef0d3b0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef0d3b0 a 0x61536ef0d3b0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 160 bytes de 0x61536ef0c5f0 a 0x61536ef0d830
+[2025-03-13 16:00:13] [DEBUG] Reasignados 168 bytes de 0x61536ef0d830 a 0x61536ef0d830
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef0e1a0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef0e1a0 a 0x61536ef0e1a0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536ef0e1a0 a 0x61536ef0e1a0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536ef0e1a0 a 0x61536ef0e850
+[2025-03-13 16:00:13] [DEBUG] Reasignados 176 bytes de 0x61536ef0d830 a 0x61536ef0e880
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef0e1a0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 184 bytes de 0x61536ef0e880 a 0x61536ef0e880
+[2025-03-13 16:00:13] [DEBUG] Reasignados 192 bytes de 0x61536ef0e880 a 0x61536ef0f430
+[2025-03-13 16:00:13] [DEBUG] Reasignados 200 bytes de 0x61536ef0f430 a 0x61536ef0f430
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef0fdc0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef0fdc0 a 0x61536ef0fdc0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536ef0fdc0 a 0x61536ef0fdc0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536ef0fdc0 a 0x61536ef10470
+[2025-03-13 16:00:13] [DEBUG] Reasignados 208 bytes de 0x61536ef0f430 a 0x61536ef104a0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef0fdc0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 216 bytes de 0x61536ef104a0 a 0x61536ef104a0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 224 bytes de 0x61536ef104a0 a 0x61536ef11070
+[2025-03-13 16:00:13] [DEBUG] Reasignados 232 bytes de 0x61536ef11070 a 0x61536ef11070
+[2025-03-13 16:00:13] [DEBUG] Reasignados 240 bytes de 0x61536ef11070 a 0x61536ef11e80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 248 bytes de 0x61536ef11e80 a 0x61536ef11e80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 256 bytes de 0x61536ef11e80 a 0x61536ef12840
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef12b80 a 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536ef12b80 a 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536ef12b80 a 0x61536ef13230
+[2025-03-13 16:00:13] [DEBUG] Reasignados 40 bytes de 0x61536ef13230 a 0x61536ef13230
+[2025-03-13 16:00:13] [DEBUG] Reasignados 264 bytes de 0x61536ef12840 a 0x61536ef12840
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef12b80 a 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536ef12b80 a 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536ef12b80 a 0x61536ef141b0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 272 bytes de 0x61536ef12840 a 0x61536ef14640
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef12b80 a 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536ef12b80 a 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536ef12b80 a 0x61536ef15020
+[2025-03-13 16:00:13] [DEBUG] Reasignados 280 bytes de 0x61536ef14640 a 0x61536ef14640
+[2025-03-13 16:00:13] [DEBUG] Reasignados 288 bytes de 0x61536ef14640 a 0x61536ef15910
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef12b80 a 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536ef12b80 a 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536ef12b80 a 0x61536ef16530
+[2025-03-13 16:00:13] [DEBUG] Reasignados 296 bytes de 0x61536ef15910 a 0x61536ef15910
+[2025-03-13 16:00:13] [DEBUG] Reasignados 304 bytes de 0x61536ef15910 a 0x61536ef169c0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef12b80 a 0x61536ef12b80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 312 bytes de 0x61536ef169c0 a 0x61536ef169c0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef175f0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 320 bytes de 0x61536ef169c0 a 0x61536ef17840
+[2025-03-13 16:00:13] [DEBUG] Reasignados 328 bytes de 0x61536ef17840 a 0x61536ef17840
+[2025-03-13 16:00:13] [DEBUG] Reasignados 336 bytes de 0x61536ef17840 a 0x61536ef18250
+[2025-03-13 16:00:13] [DEBUG] Reasignados 344 bytes de 0x61536ef18250 a 0x61536ef18250
+[2025-03-13 16:00:13] [DEBUG] Reasignados 352 bytes de 0x61536ef18250 a 0x61536ef18c70
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef19d30
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef19d30 a 0x61536ef19d30
+[2025-03-13 16:00:13] [DEBUG] Reasignados 360 bytes de 0x61536ef18c70 a 0x61536ef18c70
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef1b330
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef1b7b0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 368 bytes de 0x61536ef18c70 a 0x61536ef1ba00
+[2025-03-13 16:00:13] [DEBUG] Reasignados 376 bytes de 0x61536ef1ba00 a 0x61536ef1ba00
+[2025-03-13 16:00:13] [DEBUG] Reasignados 384 bytes de 0x61536ef1ba00 a 0x61536ef1c440
+[2025-03-13 16:00:13] [DEBUG] Reasignados 392 bytes de 0x61536ef1c440 a 0x61536ef1c440
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef1d2f0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef1d2f0 a 0x61536ef1d2f0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 400 bytes de 0x61536ef1c440 a 0x61536ef1e490
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef1f120
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef1f5a0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 408 bytes de 0x61536ef1e490 a 0x61536ef1e490
+[2025-03-13 16:00:13] [DEBUG] Reasignados 416 bytes de 0x61536ef1e490 a 0x61536ef1fc50
+[2025-03-13 16:00:13] [DEBUG] Reasignados 424 bytes de 0x61536ef1fc50 a 0x61536ef1fc50
+[2025-03-13 16:00:13] [DEBUG] Reasignados 432 bytes de 0x61536ef1fc50 a 0x61536ef206c0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef21140
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef21390
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef21a40
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef21390 a 0x61536ef21390
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef22320
+[2025-03-13 16:00:13] [DEBUG] Reasignados 24 bytes de 0x61536ef21390 a 0x61536ef21390
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef22c00
+[2025-03-13 16:00:13] [DEBUG] Reasignados 32 bytes de 0x61536ef21390 a 0x61536ef22e50
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef21390
+[2025-03-13 16:00:13] [DEBUG] Reasignados 40 bytes de 0x61536ef22e50 a 0x61536ef22e50
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef23ba0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 440 bytes de 0x61536ef206c0 a 0x61536ef206c0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef248e0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef24d60
+[2025-03-13 16:00:13] [DEBUG] Reasignados 448 bytes de 0x61536ef206c0 a 0x61536ef24fb0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 456 bytes de 0x61536ef24fb0 a 0x61536ef24fb0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 464 bytes de 0x61536ef24fb0 a 0x61536ef25a40
+[2025-03-13 16:00:13] [DEBUG] Reasignados 472 bytes de 0x61536ef25a40 a 0x61536ef25a40
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef26b70
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef26dc0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef27240
+[2025-03-13 16:00:13] [DEBUG] Reasignados 16 bytes de 0x61536ef27240 a 0x61536ef27240
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef27f80
+[2025-03-13 16:00:13] [DEBUG] Reasignados 480 bytes de 0x61536ef25a40 a 0x61536ef281d0
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef28c80
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef29100
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef29350
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef29a00
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef29e80
+[2025-03-13 16:00:13] [DEBUG] Asignados 8 bytes en 0x61536ef2a0d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 488 bytes de 0x61536ef281d0 a 0x61536ef281d0
+[2025-03-13 16:00:13] [DEBUG] Reasignados 496 bytes de 0x61536ef281d0 a 0x61536ef2a780
+[2025-03-13 16:00:13] [DEBUG] Reasignados 504 bytes de 0x61536ef2a780 a 0x61536ef2a780
+[2025-03-13 16:00:13] [DEBUG] Reasignados 512 bytes de 0x61536ef2a780 a 0x61536ef2b240
+[2025-03-13 16:00:13] [DEBUG] Reasignados 520 bytes de 0x61536ef2b240 a 0x61536ef2b240
+[2025-03-13 16:00:13] [DEBUG] Reasignados 528 bytes de 0x61536ef2b240 a 0x61536ef2bd10
+[2025-03-13 16:00:13] [DEBUG] Reasignados 536 bytes de 0x61536ef2bd10 a 0x61536ef2bd10
+[2025-03-13 16:00:13] [DEBUG] Reasignados 544 bytes de 0x61536ef2bd10 a 0x61536ef2c7f0
+[2025-03-13 16:00:13] [DEBUG] Archivo fuente leído: 6432 bytes
+[2025-03-13 16:00:13] [INFO] Compilando a C: test.c
+[2025-03-13 16:00:13] [INFO] Optimizando AST...
+[2025-03-13 16:00:13] [INFO] Generando código C...
+[2025-03-13 16:00:13] [INFO] Compilando código C a ejecutable...
+[2025-03-13 16:00:13] [INFO] Ejecutando programa compilado...
+[2025-03-13 16:00:13] [INFO] Program executed successfully
+[2025-03-13 16:00:13] [DEBUG] Limpiando AST...
+[2025-03-13 16:00:13] [INFO] Compilación completada exitosamente
+
+========== SESIÓN DE LOG FINALIZADA 2025-03-13 16:00:13 ==========

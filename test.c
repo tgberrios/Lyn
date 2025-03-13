@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <setjmp.h>
 
 // Boolean constants
 const bool TRUE = 1;
@@ -209,16 +210,22 @@ int main() {
     switch (    day    ) {
         case         1        :
             day_name =             "Monday"            ;
+            break;
         case         2        :
             day_name =             "Tuesday"            ;
+            break;
         case         3        :
             day_name =             "Wednesday"            ;
+            break;
         case         4        :
             day_name =             "Thursday"            ;
+            break;
         case         5        :
             day_name =             "Friday"            ;
+            break;
         default:
             day_name =             "Weekend"            ;
+            break;
     }
     if (    strcmp(    day_name    ,     "Wednesday"    ) == 0    ) {
         printf("[PASS] Switch statement selected correct case\n");
@@ -230,12 +237,18 @@ int main() {
     error_caught =     FALSE    ;
     finally_executed =     FALSE    ;
     {
+        jmp_buf _env;
         int _exception = 0;
         char _error_message[256] = "";
-        if (        1         ==         1        ) {
-            _exception = 1; sprintf(_error_message, "%s",             "Test error"            );
-        }
-        if (_exception) {
+        if (setjmp(_env) == 0) {
+            if (            1             ==             1            ) {
+                {
+                    sprintf(_error_message, "%s",                     "Test error"                    );
+                    longjmp(_env, 1);
+                }
+            }
+        } else {
+            _exception = 1;
             const char* err = _error_message;
             error_caught =             TRUE            ;
             {
@@ -247,6 +260,7 @@ int main() {
                 printf("%s\n", _buffer);
             }
         }
+        finally_executed = true;
         finally_executed =         TRUE        ;
     }
     if (    error_caught    ) {
