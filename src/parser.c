@@ -51,6 +51,7 @@ static void parserError(const char *message) {
 static int isLambdaLookahead(void) {
     LexerState saved = lexSaveState();
     Token tok1 = getNextToken(); // Primer token dentro del paréntesis.
+    
     if (tok1.type == TOKEN_RPAREN) {
         Token tok2 = getNextToken();
         if (tok2.type != TOKEN_ARROW) { lexRestoreState(saved); return 0; }
@@ -60,7 +61,11 @@ static int isLambdaLookahead(void) {
             return 0;
         }
         Token tok4 = getNextToken();
-        if (tok4.type != TOKEN_FAT_ARROW) { lexRestoreState(saved); return 0; }
+        // Allow either fat arrow (=>) or opening brace ({) for block lambda
+        if (tok4.type != TOKEN_FAT_ARROW && tok4.type != TOKEN_LBRACE) {
+            lexRestoreState(saved);
+            return 0;
+        }
         lexRestoreState(saved);
         return 1;
     } else {
@@ -94,7 +99,11 @@ static int isLambdaLookahead(void) {
             return 0;
         }
         Token tokFatArrow = getNextToken();
-        if (tokFatArrow.type != TOKEN_FAT_ARROW) { lexRestoreState(saved); return 0; }
+        // Allow either fat arrow (=>) or opening brace ({) for block lambda
+        if (tokFatArrow.type != TOKEN_FAT_ARROW && tokFatArrow.type != TOKEN_LBRACE) {
+            lexRestoreState(saved);
+            return 0;
+        }
         lexRestoreState(saved);
         return 1;
     }
@@ -169,7 +178,7 @@ static AstNode *parsePostfix(AstNode *node) {
             if (currentToken.type == TOKEN_COMMA)
                 advanceToken();
             else if (currentToken.type != TOKEN_RPAREN)
-                parserError("Expected ',' or ')' in argument list");
+                parserError("Expected ',' or ')' in function call argument list");
         }
         advanceToken(); // consume ')'
         printf("parsePostfix: consumed ')', current type=%d, lexeme='%s'\n",
@@ -775,6 +784,7 @@ static void skipStatementSeparators(void) {
         advanceToken();
 }
 
+/* parseModuleDecl: Procesa declaraciones de módulos */
 static AstNode* parseModuleDecl(void) {
     advanceToken(); // consume 'module'
     
@@ -806,6 +816,7 @@ static AstNode* parseModuleDecl(void) {
     return moduleNode;
 }
 
+/* parseImport: Procesa sentencias import */
 static AstNode* parseImport(void) {
     advanceToken(); // consume 'import'
     
@@ -813,8 +824,7 @@ static AstNode* parseImport(void) {
         parserError("Expected module name");
     }
     
-    AstNode* importNode = createAstNode(AST_IMPORT); // Cambiado de AST_MODULE_IMPORT a AST_IMPORT
-    // Asigna el nombre del módulo al campo importStmt.moduleName
+    AstNode* importNode = createAstNode(AST_IMPORT);
     strncpy(importNode->importStmt.moduleName, currentToken.lexeme, sizeof(importNode->importStmt.moduleName));
     
     advanceToken(); // consume module name

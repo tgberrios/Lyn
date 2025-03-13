@@ -1,6 +1,11 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <stdbool.h>  // Added for bool type
+
+// Forward declaration
+struct AstNode;
+
 // Enumerador para los tipos básicos y compuestos
 typedef enum {
     TYPE_INT,
@@ -47,9 +52,25 @@ const char* typeToString(Type* type);
 void typeToC(Type* type, char* buffer, int bufferSize);
 void freeType(Type* type);
 
-// Funciones “wrapper” para tipos primitivos y compuestos
+// Funciones "wrapper" para tipos primitivos y compuestos
 Type* create_primitive_type(TypeKind kind);
 Type* create_function_type(Type* returnType, Type** paramTypes, int paramCount);
 Type* create_class_type(const char* name, Type* baseClass);
+
+// Type checking and comparison functions
+bool are_types_compatible(Type* type1, Type* type2);
+bool is_subtype_of(Type* type, Type* supertype);
+bool are_types_equal(Type* type1, Type* type2);
+
+// Type inference and checking
+// These functions will be defined in types.c, not in the header
+// to avoid circular dependencies
+Type* infer_type(struct AstNode* node);
+bool check_ast_types(struct AstNode* node);
+void check_types(struct AstNode* node, Type* expected);
+
+// Type system utilities
+const char* type_kind_to_string(TypeKind kind);
+Type* get_member_type(Type* classType, const char* memberName);
 
 #endif

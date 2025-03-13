@@ -51,7 +51,10 @@ typedef enum {
     TOKEN_RBRACKET,        // 40: ]
     TOKEN_COLON,           // 41: :
     TOKEN_MODULE,          // 42: module
-    TOKEN_EXPORT           // 43: export
+    TOKEN_EXPORT,          // 43: export
+    TOKEN_LBRACE,          // 44: {
+    TOKEN_RBRACE,          // 45: }
+    TOKEN_INVALID = -1     // Add this line
 } TokenType;
 
 /**

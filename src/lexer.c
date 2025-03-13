@@ -12,6 +12,8 @@
     #define DBG_PRINT(...) /* No hace nada */
 #endif
 
+#define TOKEN_INVALID -1  // Add this at the top of the file with the other token definitions
+
 static const char *source;
 static int position;
 static int line = 1;
@@ -319,10 +321,42 @@ Token getNextToken(void) {
             token.type = TOKEN_RBRACKET;
             strcpy(token.lexeme, "]");
             break;
+        case '{':   // Add this case
+            token.type = TOKEN_LBRACE;
+            strcpy(token.lexeme, "{");
+            break;
+        case '}':   // Add this case
+            token.type = TOKEN_RBRACE;
+            strcpy(token.lexeme, "}");
+            break;
         default:
             token.type = TOKEN_UNKNOWN;
             snprintf(token.lexeme, sizeof(token.lexeme), "Unknown character");
             break;
     }
     return token;
+}
+
+// Add TOKEN_LBRACE and TOKEN_RBRACE if they don't exist
+static TokenType charToToken(char c) {
+    switch (c) {
+        case '(': return TOKEN_LPAREN;
+        case ')': return TOKEN_RPAREN;
+        case '[': return TOKEN_LBRACKET;
+        case ']': return TOKEN_RBRACKET;
+        case '{': return TOKEN_LBRACE;   // Add this if missing
+        case '}': return TOKEN_RBRACE;   // Add this if missing
+        case '.': return TOKEN_DOT;
+        case ',': return TOKEN_COMMA;
+        case ';': return TOKEN_SEMICOLON;
+        case ':': return TOKEN_COLON;
+        case '+': return TOKEN_PLUS;
+        case '-': return TOKEN_MINUS;
+        case '*': return TOKEN_ASTERISK;
+        case '/': return TOKEN_SLASH;
+        case '=': return TOKEN_ASSIGN;
+        case '<': return TOKEN_LT;
+        case '>': return TOKEN_GT;
+        default: return TOKEN_INVALID;  // Then fix the charToToken function to use TOKEN_INVALID
+    }
 }

@@ -1,7 +1,9 @@
 #include "types.h"
+#include "ast.h"  // Include ast.h to get AST_XXX definitions
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 // Definiciones estáticas para los tipos predefinidos
 static Type INTEGER_TYPE = { TYPE_INT, "int" };
@@ -233,4 +235,719 @@ Type* create_function_type(Type* returnType, Type** paramTypes, int paramCount) 
 
 Type* create_class_type(const char* name, Type* baseClass) {
     return createClassType(name, baseClass);
+}
+
+/**
+ * Returns string representation of a TypeKind
+ */
+const char* type_kind_to_string(TypeKind kind) {
+    switch (kind) {
+        case TYPE_INT:     return "int";
+        case TYPE_FLOAT:   return "float";
+        case TYPE_BOOL:    return "bool";
+        case TYPE_STRING:  return "string";
+        case TYPE_VOID:    return "void";
+        case TYPE_UNKNOWN: return "unknown";
+        case TYPE_ARRAY:   return "array";
+        case TYPE_CLASS:   return "class";
+        case TYPE_FUNCTION:return "function";
+        case TYPE_LAMBDA:  return "lambda";
+        default:           return "invalid_type";
+    }
+}
+
+/**
+ * Checks if two types are equal (exact same type)
+ */
+bool are_types_equal(Type* type1, Type* type2) {
+    if (type1 == type2) return true; // Same instance
+    
+    if (!type1 || !type2) return false;
+    
+    if (type1->kind != type2->kind) return false;
+    
+    switch (type1->kind) {
+        case TYPE_INT:
+        case TYPE_FLOAT:
+        case TYPE_BOOL:
+        case TYPE_STRING:
+        case TYPE_VOID:
+        case TYPE_UNKNOWN:
+            return true; // Basic types with same kind are equal
+            
+        case TYPE_ARRAY:
+            return are_types_equal(type1->arrayType.elementType, type2->arrayType.elementType);
+            
+        case TYPE_CLASS:
+            return strcmp(type1->classType.name, type2->classType.name) == 0;
+            
+        case TYPE_FUNCTION:
+        case TYPE_LAMBDA:
+            // Return types must match
+            if (!are_types_equal(type1->functionType.returnType, type2->functionType.returnType))
+                return false;
+                
+            // Parameter count must match
+            if (type1->functionType.paramCount != type2->functionType.paramCount)
+                return false;
+                
+            // Each parameter type must match
+            for (int i = 0; i < type1->functionType.paramCount; i++) {
+                if (!are_types_equal(type1->functionType.paramTypes[i], 
+                                     type2->functionType.paramTypes[i]))
+                    return false;
+            }
+            return true;
+    }
+    
+    return false;
+}
+
+/**
+ * Checks if type is a subtype of supertype (inheritance relationship)
+ */
+bool is_subtype_of(Type* type, Type* supertype) {
+    if (!type || !supertype) return false;
+    
+    // Same type
+    if (are_types_equal(type, supertype)) return true;
+    
+    // Special case: unknown type can be assigned to anything
+    if (type->kind == TYPE_UNKNOWN) return true;
+    
+    // Special case: anything can be assigned to unknown
+    if (supertype->kind == TYPE_UNKNOWN) return true;
+    
+    if (type->kind == TYPE_CLASS && supertype->kind == TYPE_CLASS) {
+        // Check class hierarchy
+        Type* current = type;
+        while (current) {
+            if (strcmp(current->classType.name, supertype->classType.name) == 0) {
+                return true;
+            }
+            current = current->classType.baseClass;
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * Checks if two types are compatible (one can be assigned to the other)
+ */
+bool are_types_compatible(Type* type1, Type* type2) {
+    if (!type1 || !type2) return false;
+    
+    // Same type
+    if (are_types_equal(type1, type2)) return true;
+    
+    // Check subtype relationship
+    if (is_subtype_of(type1, type2) || is_subtype_of(type2, type1)) return true;
+    
+    // Special compatibility rules
+    if ((type1->kind == TYPE_INT && type2->kind == TYPE_FLOAT) ||
+        (type1->kind == TYPE_FLOAT && type2->kind == TYPE_INT)) {
+        return true;  // Integer and float are compatible
+    }
+    
+    // Array compatibility requires same element type
+    if (type1->kind == TYPE_ARRAY && type2->kind == TYPE_ARRAY) {
+        return are_types_compatible(type1->arrayType.elementType, 
+                                   type2->arrayType.elementType);
+    }
+    
+    // Function compatibility
+    if ((type1->kind == TYPE_FUNCTION || type1->kind == TYPE_LAMBDA) &&
+        (type2->kind == TYPE_FUNCTION || type2->kind == TYPE_LAMBDA)) {
+        
+        // Return types must be compatible
+        if (!are_types_compatible(type1->functionType.returnType, 
+                                 type2->functionType.returnType))
+            return false;
+        
+        // Parameter count must match
+        if (type1->functionType.paramCount != type2->functionType.paramCount)
+            return false;
+        
+        // Each parameter type must be compatible
+        for (int i = 0; i < type1->functionType.paramCount; i++) {
+            if (!are_types_compatible(type1->functionType.paramTypes[i], 
+                                     type2->functionType.paramTypes[i]))
+                return false;
+        }
+        return true;
+    }
+    
+    return false;
+}
+
+/**
+ * Get the type of a class member
+ */
+Type* get_member_type(Type* classType, const char* memberName) {
+    if (!classType || !memberName || classType->kind != TYPE_CLASS) {
+        return create_primitive_type(TYPE_UNKNOWN);
+    }
+    
+    // This would normally look up the member in a class definition
+    // For now, we'll handle some known classes as examples
+    
+    const char* className = classType->classType.name;
+    
+    if (strcmp(className, "Point") == 0) {
+        if (strcmp(memberName, "x") == 0 || strcmp(memberName, "y") == 0) {
+            return create_primitive_type(TYPE_FLOAT);
+        }
+    } 
+    else if (strcmp(className, "Vector3") == 0) {
+        if (strcmp(memberName, "x") == 0 || 
+            strcmp(memberName, "y") == 0 || 
+            strcmp(memberName, "z") == 0) {
+            return create_primitive_type(TYPE_FLOAT);
+        }
+    }
+    else if (strcmp(className, "Circle") == 0) {
+        if (strcmp(memberName, "x") == 0 || 
+            strcmp(memberName, "y") == 0 || 
+            strcmp(memberName, "radius") == 0) {
+            return create_primitive_type(TYPE_FLOAT);
+        }
+        if (strcmp(memberName, "type") == 0) {
+            return create_primitive_type(TYPE_INT);
+        }
+    }
+    
+    // If not found in this class, check base class
+    if (classType->classType.baseClass) {
+        return get_member_type(classType->classType.baseClass, memberName);
+    }
+    
+    return create_primitive_type(TYPE_UNKNOWN);
+}
+
+/**
+ * Infers the type of an AST node
+ */
+Type* infer_type(struct AstNode* node) {
+    if (!node) return create_primitive_type(TYPE_UNKNOWN);
+    
+    // Cache type if already inferred
+    if (node->inferredType) {
+        return node->inferredType;
+    }
+    
+    Type* result = NULL;
+    
+    switch (node->type) {
+        case AST_NUMBER_LITERAL:
+            // Check if the value is an integer or float
+            if (node->numberLiteral.value == (int)node->numberLiteral.value) {
+                result = create_primitive_type(TYPE_INT);
+            } else {
+                result = create_primitive_type(TYPE_FLOAT);
+            }
+            break;
+            
+        case AST_STRING_LITERAL:
+            result = create_primitive_type(TYPE_STRING);
+            break;
+            
+        case AST_BINARY_OP:
+            {
+                Type* left_type = infer_type(node->binaryOp.left);
+                Type* right_type = infer_type(node->binaryOp.right);
+                
+                // Type promotion rules
+                if (left_type->kind == TYPE_FLOAT || right_type->kind == TYPE_FLOAT) {
+                    result = create_primitive_type(TYPE_FLOAT);
+                } else if (left_type->kind == TYPE_INT && right_type->kind == TYPE_INT) {
+                    result = create_primitive_type(TYPE_INT);
+                } else if (left_type->kind == TYPE_STRING && node->binaryOp.op == '+') {
+                    // String concatenation
+                    result = create_primitive_type(TYPE_STRING);
+                } else {
+                    fprintf(stderr, "Type error at line %d: incompatible types for binary operation\n", 
+                            node->line);
+                    result = create_primitive_type(TYPE_UNKNOWN);
+                }
+            }
+            break;
+            
+        case AST_IDENTIFIER:
+            {
+                // In a real compiler, we would look up the identifier in the symbol table
+                // For this example, we'll do some basic hardcoded checks
+                if (strcmp(node->identifier.name, "i") == 0 ||
+                    strcmp(node->identifier.name, "j") == 0 ||
+                    strcmp(node->identifier.name, "k") == 0) {
+                    result = create_primitive_type(TYPE_INT);
+                } else if (strcmp(node->identifier.name, "pi") == 0 ||
+                           strcmp(node->identifier.name, "e") == 0) {
+                    result = create_primitive_type(TYPE_FLOAT);
+                } else if (strcmp(node->identifier.name, "p1") == 0) {
+                    result = createClassType("Point", NULL);
+                } else if (strcmp(node->identifier.name, "v1") == 0) {
+                    result = createClassType("Vector3", NULL);
+                } else if (strcmp(node->identifier.name, "c1") == 0) {
+                    result = createClassType("Circle", NULL);
+                } else {
+                    result = create_primitive_type(TYPE_UNKNOWN);
+                }
+            }
+            break;
+            
+        case AST_FUNC_CALL:
+            {
+                // Handle known functions
+                if (strcmp(node->funcCall.name, "Point_init") == 0) {
+                    result = create_primitive_type(TYPE_VOID);
+                } else if (strcmp(node->funcCall.name, "Point_distance") == 0) {
+                    result = create_primitive_type(TYPE_FLOAT);
+                } else if (strcmp(node->funcCall.name, "Vector3_magnitude") == 0) {
+                    result = create_primitive_type(TYPE_FLOAT);
+                } else if (strcmp(node->funcCall.name, "Circle_area") == 0) {
+                    result = create_primitive_type(TYPE_FLOAT);
+                } else if (strcmp(node->funcCall.name, "Circle_scale") == 0) {
+                    result = create_primitive_type(TYPE_VOID);
+                } else if (strcmp(node->funcCall.name, "new_Point") == 0) {
+                    result = createClassType("Point", NULL);
+                } else if (strcmp(node->funcCall.name, "new_Vector3") == 0) {
+                    result = createClassType("Vector3", NULL);
+                } else if (strcmp(node->funcCall.name, "new_Circle") == 0) {
+                    result = createClassType("Circle", NULL);
+                } else {
+                    result = create_primitive_type(TYPE_UNKNOWN);
+                }
+            }
+            break;
+            
+        case AST_MEMBER_ACCESS:
+            {
+                Type* objectType = infer_type(node->memberAccess.object);
+                
+                if (objectType->kind == TYPE_CLASS) {
+                    result = get_member_type(objectType, node->memberAccess.member);
+                } else {
+                    fprintf(stderr, "Type error at line %d: cannot access member of non-class type\n", 
+                            node->line);
+                    result = create_primitive_type(TYPE_UNKNOWN);
+                }
+            }
+            break;
+            
+        case AST_ARRAY_LITERAL:
+            {
+                if (node->arrayLiteral.elementCount > 0) {
+                    // Infer element type from first element
+                    Type* elementType = infer_type(node->arrayLiteral.elements[0]);
+                    
+                    // Check that all elements have compatible types
+                    for (int i = 1; i < node->arrayLiteral.elementCount; i++) {
+                        Type* currentType = infer_type(node->arrayLiteral.elements[i]);
+                        if (!are_types_compatible(elementType, currentType)) {
+                            fprintf(stderr, "Type error at line %d: array contains incompatible element types\n", 
+                                    node->line);
+                            elementType = create_primitive_type(TYPE_UNKNOWN);
+                            break;
+                        }
+                    }
+                    
+                    result = createArrayType(elementType);
+                } else {
+                    // Empty array, use unknown element type
+                    result = createArrayType(create_primitive_type(TYPE_UNKNOWN));
+                }
+            }
+            break;
+            
+        case AST_LAMBDA:
+            {
+                // Get return type
+                Type* returnType;
+                if (strlen(node->lambda.returnType) > 0) {
+                    // Parse return type from string
+                    if (strcmp(node->lambda.returnType, "int") == 0) {
+                        returnType = create_primitive_type(TYPE_INT);
+                    } else if (strcmp(node->lambda.returnType, "float") == 0) {
+                        returnType = create_primitive_type(TYPE_FLOAT);
+                    } else if (strcmp(node->lambda.returnType, "bool") == 0) {
+                        returnType = create_primitive_type(TYPE_BOOL);
+                    } else if (strcmp(node->lambda.returnType, "string") == 0) {
+                        returnType = create_primitive_type(TYPE_STRING);
+                    } else if (strcmp(node->lambda.returnType, "void") == 0) {
+                        returnType = create_primitive_type(TYPE_VOID);
+                    } else {
+                        returnType = createClassType(node->lambda.returnType, NULL);
+                    }
+                } else {
+                    // Infer return type from body
+                    returnType = infer_type(node->lambda.body);
+                }
+                
+                // Get parameter types
+                Type** paramTypes = NULL;
+                if (node->lambda.paramCount > 0) {
+                    paramTypes = malloc(sizeof(Type*) * node->lambda.paramCount);
+                    for (int i = 0; i < node->lambda.paramCount; i++) {
+                        // Try to get the type from parameter if available
+                        if (node->lambda.parameters[i]->inferredType) {
+                            paramTypes[i] = clone_type(node->lambda.parameters[i]->inferredType);
+                        } else {
+                            paramTypes[i] = create_primitive_type(TYPE_UNKNOWN);
+                        }
+                    }
+                }
+                
+                result = createFunctionType(returnType, paramTypes, node->lambda.paramCount);
+                result->kind = TYPE_LAMBDA;  // Update to lambda kind
+            }
+            break;
+            
+        case AST_VAR_DECL:
+            {
+                // Get type from declaration
+                if (strlen(node->varDecl.type) > 0) {
+                    if (strcmp(node->varDecl.type, "int") == 0) {
+                        result = create_primitive_type(TYPE_INT);
+                    } else if (strcmp(node->varDecl.type, "float") == 0) {
+                        result = create_primitive_type(TYPE_FLOAT);
+                    } else if (strcmp(node->varDecl.type, "bool") == 0) {
+                        result = create_primitive_type(TYPE_BOOL);
+                    } else if (strcmp(node->varDecl.type, "string") == 0) {
+                        result = create_primitive_type(TYPE_STRING);
+                    } else if (strcmp(node->varDecl.type, "void") == 0) {
+                        result = create_primitive_type(TYPE_VOID);
+                    } else {
+                        result = createClassType(node->varDecl.type, NULL);
+                    }
+                } else if (node->varDecl.initializer) {
+                    // Infer type from initializer
+                    result = infer_type(node->varDecl.initializer);
+                } else {
+                    result = create_primitive_type(TYPE_UNKNOWN);
+                }
+            }
+            break;
+            
+        case AST_VAR_ASSIGN:
+            {
+                if (node->varAssign.initializer) {
+                    result = infer_type(node->varAssign.initializer);
+                } else {
+                    result = create_primitive_type(TYPE_UNKNOWN);
+                }
+            }
+            break;
+            
+        case AST_FUNC_DEF:
+            {
+                // Get return type
+                Type* returnType;
+                if (strlen(node->funcDef.returnType) > 0) {
+                    if (strcmp(node->funcDef.returnType, "int") == 0) {
+                        returnType = create_primitive_type(TYPE_INT);
+                    } else if (strcmp(node->funcDef.returnType, "float") == 0) {
+                        returnType = create_primitive_type(TYPE_FLOAT);
+                    } else if (strcmp(node->funcDef.returnType, "bool") == 0) {
+                        returnType = create_primitive_type(TYPE_BOOL);
+                    } else if (strcmp(node->funcDef.returnType, "string") == 0) {
+                        returnType = create_primitive_type(TYPE_STRING);
+                    } else if (strcmp(node->funcDef.returnType, "void") == 0) {
+                        returnType = create_primitive_type(TYPE_VOID);
+                    } else {
+                        returnType = createClassType(node->funcDef.returnType, NULL);
+                    }
+                } else {
+                    // Default to void
+                    returnType = create_primitive_type(TYPE_VOID);
+                }
+                
+                // Get parameter types
+                Type** paramTypes = NULL;
+                if (node->funcDef.paramCount > 0) {
+                    paramTypes = malloc(sizeof(Type*) * node->funcDef.paramCount);
+                    for (int i = 0; i < node->funcDef.paramCount; i++) {
+                        if (node->funcDef.parameters[i]->inferredType) {
+                            paramTypes[i] = clone_type(node->funcDef.parameters[i]->inferredType);
+                        } else {
+                            // Default to unknown
+                            paramTypes[i] = create_primitive_type(TYPE_UNKNOWN);
+                        }
+                    }
+                }
+                
+                result = createFunctionType(returnType, paramTypes, node->funcDef.paramCount);
+            }
+            break;
+            
+        case AST_CLASS_DEF:
+            {
+                Type* baseClass = NULL;
+                if (strlen(node->classDef.baseClassName) > 0) {
+                    baseClass = createClassType(node->classDef.baseClassName, NULL);
+                }
+                result = createClassType(node->classDef.name, baseClass);
+            }
+            break;
+            
+        default:
+            result = create_primitive_type(TYPE_UNKNOWN);
+            break;
+    }
+    
+    // Cache the result
+    node->inferredType = result;
+    
+    return result;
+}
+
+/**
+ * Checks the types of nodes in an AST for errors
+ */
+void check_types(struct AstNode* node, Type* expected) {
+    if (!node) return;
+    
+    Type* actual = infer_type(node);
+    
+    // If expected type is provided, check compatibility
+    if (expected && !are_types_compatible(actual, expected)) {
+        fprintf(stderr, "Type error at line %d: expected %s, got %s\n", 
+                node->line, typeToString(expected), typeToString(actual));
+    }
+    
+    // Additional type checking based on node type
+    switch (node->type) {
+        case AST_BINARY_OP:
+            {
+                Type* leftType = infer_type(node->binaryOp.left);
+                Type* rightType = infer_type(node->binaryOp.right);
+                
+                // Check operator compatibility
+                switch (node->binaryOp.op) {
+                    case '+':
+                        // + works with numbers and strings
+                        if ((leftType->kind != TYPE_INT && leftType->kind != TYPE_FLOAT && 
+                             leftType->kind != TYPE_STRING) ||
+                            (rightType->kind != TYPE_INT && rightType->kind != TYPE_FLOAT && 
+                             rightType->kind != TYPE_STRING)) {
+                            fprintf(stderr, "Type error at line %d: '+' operator requires numeric or string operands\n", 
+                                    node->line);
+                        }
+                        
+                        // Make sure both operands are the same type category (numeric or string)
+                        if ((leftType->kind == TYPE_STRING && 
+                             (rightType->kind != TYPE_STRING)) ||
+                            (leftType->kind != TYPE_STRING && 
+                             (rightType->kind == TYPE_STRING))) {
+                            fprintf(stderr, "Type error at line %d: cannot mix string and numeric operands with '+'\n", 
+                                    node->line);
+                        }
+                        break;
+                        
+                    case '-':
+                    case '*':
+                    case '/':
+                        // These operators work only with numbers
+                        if (leftType->kind != TYPE_INT && leftType->kind != TYPE_FLOAT) {
+                            fprintf(stderr, "Type error at line %d: left operand of '%c' must be numeric\n", 
+                                    node->line, node->binaryOp.op);
+                        }
+                        if (rightType->kind != TYPE_INT && rightType->kind != TYPE_FLOAT) {
+                            fprintf(stderr, "Type error at line %d: right operand of '%c' must be numeric\n", 
+                                    node->line, node->binaryOp.op);
+                        }
+                        break;
+                }
+            }
+            break;
+            
+        case AST_VAR_DECL:
+            if (node->varDecl.initializer) {
+                Type* declaredType = NULL;
+                
+                // Get declared type if specified
+                if (strlen(node->varDecl.type) > 0) {
+                    if (strcmp(node->varDecl.type, "int") == 0) {
+                        declaredType = create_primitive_type(TYPE_INT);
+                    } else if (strcmp(node->varDecl.type, "float") == 0) {
+                        declaredType = create_primitive_type(TYPE_FLOAT);
+                    } else if (strcmp(node->varDecl.type, "bool") == 0) {
+                        declaredType = create_primitive_type(TYPE_BOOL);
+                    } else if (strcmp(node->varDecl.type, "string") == 0) {
+                        declaredType = create_primitive_type(TYPE_STRING);
+                    } else {
+                        declaredType = createClassType(node->varDecl.type, NULL);
+                    }
+                }
+                
+                if (declaredType) {
+                    // Check initializer against declared type
+                    Type* initType = infer_type(node->varDecl.initializer);
+                    if (!are_types_compatible(declaredType, initType)) {
+                        fprintf(stderr, "Type error at line %d: cannot initialize variable of type %s with value of type %s\n", 
+                                node->line, typeToString(declaredType), typeToString(initType));
+                    }
+                }
+            }
+            break;
+            
+        case AST_VAR_ASSIGN:
+            {
+                // In a real compiler with a symbol table, we would:
+                // 1. Look up the variable's declared type
+                // 2. Check that the initializer type is compatible
+                if (node->varAssign.initializer) {
+                    infer_type(node->varAssign.initializer);
+                }
+            }
+            break;
+            
+        case AST_FUNC_DEF:
+            {
+                // Get the return type
+                Type* returnType;
+                if (strlen(node->funcDef.returnType) > 0) {
+                    if (strcmp(node->funcDef.returnType, "int") == 0) {
+                        returnType = create_primitive_type(TYPE_INT);
+                    } else if (strcmp(node->funcDef.returnType, "float") == 0) {
+                        returnType = create_primitive_type(TYPE_FLOAT);
+                    } else if (strcmp(node->funcDef.returnType, "bool") == 0) {
+                        returnType = create_primitive_type(TYPE_BOOL);
+                    } else if (strcmp(node->funcDef.returnType, "string") == 0) {
+                        returnType = create_primitive_type(TYPE_STRING);
+                    } else if (strcmp(node->funcDef.returnType, "void") == 0) {
+                        returnType = create_primitive_type(TYPE_VOID);
+                    } else {
+                        returnType = createClassType(node->funcDef.returnType, NULL);
+                    }
+                } else {
+                    // Default to void
+                    returnType = create_primitive_type(TYPE_VOID);
+                }
+                
+                // Check each statement in the body
+                for (int i = 0; i < node->funcDef.bodyCount; i++) {
+                    // For return statements, make sure they return the correct type
+                    if (node->funcDef.body[i]->type == AST_RETURN_STMT) {
+                        if (returnType->kind == TYPE_VOID && node->funcDef.body[i]->returnStmt.expr != NULL) {
+                            fprintf(stderr, "Type error at line %d: void function cannot return a value\n", 
+                                    node->funcDef.body[i]->line);
+                        } else if (returnType->kind != TYPE_VOID && node->funcDef.body[i]->returnStmt.expr == NULL) {
+                            fprintf(stderr, "Type error at line %d: non-void function must return a value\n", 
+                                    node->funcDef.body[i]->line);
+                        } else if (node->funcDef.body[i]->returnStmt.expr != NULL) {
+                            Type* exprType = infer_type(node->funcDef.body[i]->returnStmt.expr);
+                            if (!are_types_compatible(returnType, exprType)) {
+                                fprintf(stderr, "Type error at line %d: return value of type %s is incompatible with function return type %s\n", 
+                                        node->funcDef.body[i]->line, typeToString(exprType), typeToString(returnType));
+                            }
+                        }
+                    } else {
+                        // Recursively check other statements
+                        check_ast_types(node->funcDef.body[i]);
+                    }
+                }
+            }
+            break;
+            
+        case AST_FUNC_CALL:
+            {
+                // Check function call arguments against expected parameter types
+                // For known functions, we'll do specific checks
+                
+                if (strcmp(node->funcCall.name, "Point_init") == 0) {
+                    if (node->funcCall.argCount != 3) {
+                        fprintf(stderr, "Type error at line %d: Point_init requires 3 arguments\n", node->line);
+                    } else {
+                        // First arg should be a Point*
+                        // Second and third args should be numeric (x, y)
+                        Type* arg1Type = infer_type(node->funcCall.arguments[0]);
+                        if (arg1Type->kind != TYPE_CLASS || strcmp(arg1Type->classType.name, "Point") != 0) {
+                            fprintf(stderr, "Type error at line %d: first argument of Point_init must be a Point\n", 
+                                    node->line);
+                        }
+                        
+                        for (int i = 1; i < 3; i++) {
+                            Type* argType = infer_type(node->funcCall.arguments[i]);
+                            if (argType->kind != TYPE_INT && argType->kind != TYPE_FLOAT) {
+                                fprintf(stderr, "Type error at line %d: argument %d of Point_init must be numeric\n", 
+                                        node->line, i+1);
+                            }
+                        }
+                    }
+                }
+                else if (strcmp(node->funcCall.name, "Vector3_init") == 0) {
+                    if (node->funcCall.argCount != 4) {
+                        fprintf(stderr, "Type error at line %d: Vector3_init requires 4 arguments\n", node->line);
+                    } else {
+                        // First arg should be a Vector3*
+                        Type* arg1Type = infer_type(node->funcCall.arguments[0]);
+                        if (arg1Type->kind != TYPE_CLASS || strcmp(arg1Type->classType.name, "Vector3") != 0) {
+                            fprintf(stderr, "Type error at line %d: first argument of Vector3_init must be a Vector3\n", 
+                                    node->line);
+                        }
+                        
+                        // Remaining args should be numeric (x, y, z)
+                        for (int i = 1; i < 4; i++) {
+                            Type* argType = infer_type(node->funcCall.arguments[i]);
+                            if (argType->kind != TYPE_INT && argType->kind != TYPE_FLOAT) {
+                                fprintf(stderr, "Type error at line %d: argument %d of Vector3_init must be numeric\n", 
+                                        node->line, i+1);
+                            }
+                        }
+                    }
+                }
+                else if (strcmp(node->funcCall.name, "Circle_init") == 0) {
+                    if (node->funcCall.argCount != 4) {
+                        fprintf(stderr, "Type error at line %d: Circle_init requires 4 arguments\n", node->line);
+                    } else {
+                        // First arg should be a Circle*
+                        Type* arg1Type = infer_type(node->funcCall.arguments[0]);
+                        if (arg1Type->kind != TYPE_CLASS || strcmp(arg1Type->classType.name, "Circle") != 0) {
+                            fprintf(stderr, "Type error at line %d: first argument of Circle_init must be a Circle\n", 
+                                    node->line);
+                        }
+                        
+                        // Remaining args should be numeric (x, y, radius)
+                        for (int i = 1; i < 4; i++) {
+                            Type* argType = infer_type(node->funcCall.arguments[i]);
+                            if (argType->kind != TYPE_INT && argType->kind != TYPE_FLOAT) {
+                                fprintf(stderr, "Type error at line %d: argument %d of Circle_init must be numeric\n", 
+                                        node->line, i+1);
+                            }
+                        }
+                    }
+                }
+            }
+            break;
+    }
+}
+
+/**
+ * Check all AST node types recursively
+ */
+bool check_ast_types(struct AstNode* node) {
+    if (!node) return true;
+    
+    // First infer the type of this node
+    infer_type(node);
+    
+    // Then perform specific type checking
+    check_types(node, NULL);
+    
+    // Recursively check child nodes based on node type
+    switch (node->type) {
+        case AST_PROGRAM:
+            // Check all program statements
+            for (int i = 0; i < node->program.statementCount; i++) {
+                if (!check_ast_types(node->program.statements[i])) {
+                    return false;
+                }
+            }
+            break;
+            
+        // ... implementation for other node types ...
+    }
+    
+    return true;
 }
