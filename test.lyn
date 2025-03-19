@@ -1,24 +1,10 @@
 main
-    // Forzamos un error sintáctico intencional
-    error_trigger = ;
+    // Solo variables simples y operaciones básicas
+    a = 5
+    b = 3
+    c = a + b
     
-    // Resto del código...
-    // Primera clase: Point
-    class Point
-        x: float;
-        y: float;
-        
-        func init(self: Point, x: float, y: float) -> void
-            self.x = x;
-            self.y = y;
-        end
-        
-        func distance(self: Point, other: Point) -> float
-            dx = self.x - other.x;
-            dy = self.y - other.y;
-            return sqrt(dx * dx + dy * dy);
-        end
-    end
-    
-    // ... (resto del código de test.lyn)
+    // Print simple
+    print("Resultado:")
+    print(c)
 end
