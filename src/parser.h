@@ -41,4 +41,9 @@ void parser_get_stats(int* nodes_created, int* errors_found);
  */
 void freeAst(AstNode *root);
 
+// Agregar prototipos de las funciones internas que faltan
+void nextToken(void);
+void expectToken(int tokenType);
+AstNode** parseBlock(int* count);
+
 #endif /* PARSER_H */

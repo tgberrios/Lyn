@@ -174,6 +174,45 @@ Type* createFunctionType(Type* returnType, Type** paramTypes, int paramCount) {
     return type;
 }
 
+// Create a curried function type
+Type* create_curried_type(Type* baseType, int appliedArgCount) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)create_curried_type);
+    
+    if (!baseType || baseType->kind != TYPE_FUNCTION) {
+        logger_log(LOG_ERROR, "Cannot curry non-function type");
+        return create_primitive_type(TYPE_UNKNOWN);
+    }
+    
+    if (appliedArgCount >= baseType->functionType.paramCount) {
+        // If all arguments are applied, this would be the return type
+        return clone_type(baseType->functionType.returnType);
+    }
+    
+    Type* type = malloc(sizeof(Type));
+    if (!type) {
+        error_report("TypeSystem", __LINE__, 0, "Failed to allocate memory for curried type", ERROR_MEMORY);
+        logger_log(LOG_ERROR, "Memory allocation failed for curried type");
+        return NULL;
+    }
+    
+    type->kind = TYPE_CURRIED;
+    type->curriedType.baseType = clone_type(baseType);
+    type->curriedType.appliedArgCount = appliedArgCount;
+    
+    // Generate the type name
+    snprintf(type->typeName, sizeof(type->typeName), "curried(%s, %d)", 
+             typeToString(baseType), appliedArgCount);
+    
+    stats.types_created++;
+    
+    if (debug_level >= 2) {
+        logger_log(LOG_DEBUG, "Created curried type for %s with %d arguments applied", 
+                  typeToString(baseType), appliedArgCount);
+    }
+    
+    return type;
+}
+
 const char* typeToString(Type* type) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)typeToString);
     
@@ -215,6 +254,16 @@ const char* typeToString(Type* type) {
                 strcat(temp, "unknown");
             }
             strncpy(buffer, temp, sizeof(buffer));
+            return buffer;
+        }
+        case TYPE_CURRIED: {
+            if (type->curriedType.baseType) {
+                snprintf(buffer, sizeof(buffer), "curried(%s, applied=%d)", 
+                        typeToString(type->curriedType.baseType),
+                        type->curriedType.appliedArgCount);
+            } else {
+                snprintf(buffer, sizeof(buffer), "curried(unknown)");
+            }
             return buffer;
         }
     }
@@ -320,6 +369,11 @@ void freeType(Type* type) {
                 free(type->functionType.paramTypes);
             }
             break;
+        case TYPE_CURRIED:
+            if (type->curriedType.baseType) {
+                freeType(type->curriedType.baseType);
+            }
+            break;
         default:
             break;
     }
@@ -375,6 +429,8 @@ Type* clone_type(Type* type) {
             return createFunctionType(clone_type(type->functionType.returnType),
                                       paramTypes, type->functionType.paramCount);
         }
+        case TYPE_CURRIED:
+            return create_curried_type(clone_type(type->curriedType.baseType), type->curriedType.appliedArgCount);
     }
     return NULL;
 }
@@ -483,6 +539,9 @@ bool are_types_equal(Type* type1, Type* type2) {
                     return false;
             }
             return true;
+        case TYPE_CURRIED:
+            return type1->curriedType.appliedArgCount == type2->curriedType.appliedArgCount &&
+                   are_types_equal(type1->curriedType.baseType, type2->curriedType.baseType);
     }
     
     return false;
@@ -529,6 +588,53 @@ bool is_subtype_of(Type* type, Type* supertype) {
     }
     
     return false;
+}
+
+/**
+ * Get the type of a member of a class
+ */
+Type* get_member_type(Type* classType, const char* memberName) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)get_member_type);
+    
+    if (!classType || !memberName) {
+        logger_log(LOG_WARNING, "Null parameter passed to get_member_type");
+        return create_primitive_type(TYPE_UNKNOWN);
+    }
+    
+    if (classType->kind != TYPE_CLASS) {
+        logger_log(LOG_WARNING, "Cannot get member from non-class type: %s", typeToString(classType));
+        return create_primitive_type(TYPE_UNKNOWN);
+    }
+    
+    // In a real compiler, we would lookup the member in the class symbol table
+    // For this example, we'll implement some hardcoded cases
+    if (strcmp(classType->classType.name, "Point") == 0) {
+        if (strcmp(memberName, "x") == 0 || strcmp(memberName, "y") == 0) {
+            return create_primitive_type(TYPE_FLOAT);
+        }
+    } 
+    else if (strcmp(classType->classType.name, "Vector3") == 0) {
+        if (strcmp(memberName, "x") == 0 || 
+            strcmp(memberName, "y") == 0 || 
+            strcmp(memberName, "z") == 0) {
+            return create_primitive_type(TYPE_FLOAT);
+        }
+    }
+    else if (strcmp(classType->classType.name, "Circle") == 0) {
+        if (strcmp(memberName, "radius") == 0) {
+            return create_primitive_type(TYPE_FLOAT);
+        }
+        if (strcmp(memberName, "type") == 0) {
+            return create_primitive_type(TYPE_INT);
+        }
+    }
+    
+    // If not found in this class, check base class
+    if (classType->classType.baseClass) {
+        return get_member_type(classType->classType.baseClass, memberName);
+    }
+    
+    return create_primitive_type(TYPE_UNKNOWN);
 }
 
 /**
@@ -586,13 +692,8 @@ bool are_types_compatible(Type* type1, Type* type2) {
         
         // Each parameter type must be compatible
         for (int i = 0; i < type1->functionType.paramCount; i++) {
-            if (!are_types_compatible(type1->functionType.paramTypes[i], 
+            if (!are_types_compatible(type1->functionType.paramTypes[i],
                                      type2->functionType.paramTypes[i])) {
-                if (debug_level >= 3) {
-                    logger_log(LOG_DEBUG, "Function parameter %d types incompatible: %s vs %s", 
-                              i, typeToString(type1->functionType.paramTypes[i]),
-                              typeToString(type2->functionType.paramTypes[i]));
-                }
                 return false;
             }
         }
@@ -600,63 +701,6 @@ bool are_types_compatible(Type* type1, Type* type2) {
     }
     
     return false;
-}
-
-/**
- * Get the type of a class member
- */
-Type* get_member_type(Type* classType, const char* memberName) {
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)get_member_type);
-    
-    if (!classType) {
-        logger_log(LOG_WARNING, "Attempt to get member type from NULL class type");
-        return create_primitive_type(TYPE_UNKNOWN);
-    }
-    
-    if (!memberName) {
-        logger_log(LOG_WARNING, "Attempt to get member type with NULL member name");
-        return create_primitive_type(TYPE_UNKNOWN);
-    }
-    
-    if (classType->kind != TYPE_CLASS) {
-        logger_log(LOG_WARNING, "Attempt to get member from non-class type: %s", typeToString(classType));
-        return create_primitive_type(TYPE_UNKNOWN);
-    }
-    
-    // This would normally look up the member in a class definition
-    // For now, we'll handle some known classes as examples
-    
-    const char* className = classType->classType.name;
-    
-    if (strcmp(className, "Point") == 0) {
-        if (strcmp(memberName, "x") == 0 || strcmp(memberName, "y") == 0) {
-            return create_primitive_type(TYPE_FLOAT);
-        }
-    } 
-    else if (strcmp(className, "Vector3") == 0) {
-        if (strcmp(memberName, "x") == 0 || 
-            strcmp(memberName, "y") == 0 || 
-            strcmp(memberName, "z") == 0) {
-            return create_primitive_type(TYPE_FLOAT);
-        }
-    }
-    else if (strcmp(className, "Circle") == 0) {
-        if (strcmp(memberName, "x") == 0 || 
-            strcmp(memberName, "y") == 0 || 
-            strcmp(memberName, "radius") == 0) {
-            return create_primitive_type(TYPE_FLOAT);
-        }
-        if (strcmp(memberName, "type") == 0) {
-            return create_primitive_type(TYPE_INT);
-        }
-    }
-    
-    // If not found in this class, check base class
-    if (classType->classType.baseClass) {
-        return get_member_type(classType->classType.baseClass, memberName);
-    }
-    
-    return create_primitive_type(TYPE_UNKNOWN);
 }
 
 /**
@@ -924,6 +968,64 @@ Type* infer_type(struct AstNode* node) {
             }
             break;
             
+        case AST_FUNC_COMPOSE: {
+            // For function composition (f >> g), we need:
+            // 1. f's return type to match g's first parameter type
+            // 2. The composed function type to have parameters of f and return type of g
+            Type* leftType = infer_type(node->funcCompose.left);
+            Type* rightType = infer_type(node->funcCompose.right);
+            
+            if (leftType->kind != TYPE_FUNCTION && leftType->kind != TYPE_LAMBDA) {
+                fprintf(stderr, "Type error at line %d: Left side of >> must be a function\n", 
+                        node->line);
+                result = create_primitive_type(TYPE_UNKNOWN);
+                break;
+            }
+            
+            if (rightType->kind != TYPE_FUNCTION && rightType->kind != TYPE_LAMBDA) {
+                fprintf(stderr, "Type error at line %d: Right side of >> must be a function\n", 
+                        node->line);
+                result = create_primitive_type(TYPE_UNKNOWN);
+                break;
+            }
+            
+            // Check that f's return type is compatible with g's first parameter
+            Type* leftReturnType = leftType->functionType.returnType;
+            
+            if (rightType->functionType.paramCount == 0) {
+                fprintf(stderr, "Type error at line %d: Right function must take at least one parameter\n", 
+                        node->line);
+                result = create_primitive_type(TYPE_UNKNOWN);
+                break;
+            }
+            
+            Type* rightFirstParamType = rightType->functionType.paramTypes[0];
+            
+            if (!are_types_compatible(leftReturnType, rightFirstParamType)) {
+                fprintf(stderr, "Type error at line %d: Left function return type %s is incompatible with right function first parameter type %s\n",
+                        node->line, typeToString(leftReturnType), typeToString(rightFirstParamType));
+                result = create_primitive_type(TYPE_UNKNOWN);
+                break;
+            }
+            
+            // Create the composed function type
+            // Parameters are from left function, return type is from right function
+            Type** paramTypes = NULL;
+            int paramCount = leftType->functionType.paramCount;
+            
+            if (paramCount > 0) {
+                paramTypes = malloc(paramCount * sizeof(Type*));
+                for (int i = 0; i < paramCount; i++) {
+                    paramTypes[i] = clone_type(leftType->functionType.paramTypes[i]);
+                }
+            }
+            
+            Type* returnType = clone_type(rightType->functionType.returnType);
+            
+            result = createFunctionType(returnType, paramTypes, paramCount);
+        }
+        break;
+            
         default:
             result = create_primitive_type(TYPE_UNKNOWN);
             break;
@@ -1184,4 +1286,32 @@ bool check_ast_types(struct AstNode* node) {
     }
     
     return true;
+}
+
+const char* typeof_value(AstNode* expr) {
+    if (!expr) return "unknown";
+    
+    // First try to use inferred type
+    if (expr->inferredType) {
+        return typeToString(expr->inferredType);
+    }
+    
+    // If no inferred type, try to determine from node type
+    switch (expr->type) {
+        case AST_NUMBER_LITERAL:
+            // Check if integer or float
+            return (expr->numberLiteral.value == (int)expr->numberLiteral.value) 
+                   ? "int" : "float";
+            
+        case AST_STRING_LITERAL:
+            return "string";
+            
+        case AST_IDENTIFIER:
+            // Try to lookup identifier type
+            // For now, return unknown
+            return "unknown";
+            
+        default:
+            return "unknown";
+    }
 }

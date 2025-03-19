@@ -63,6 +63,14 @@ static AstNode *parseSwitchStmt(void);
 static AstNode *parseBreakStmt(void);
 static AstNode *parseTryCatchStmt(void);
 static AstNode *parseThrowStmt(void);
+static AstNode* parseCurryExpression(AstNode* baseFunc);
+static AstNode* parsePatternMatch(void);
+static AstNode* parseFunctionComposition(void);
+
+// Añadir nuevos prototipos
+static AstNode* parseAspect(void);
+static AstNode* parsePointcut(void);
+static AstNode* parseAdvice(void);
 
 /* Avanza al siguiente token */
 static void advanceToken(void) {
@@ -412,6 +420,10 @@ static AstNode *parseStatement(void) {
         result = regCall;
     } else if (currentToken.type == TOKEN_MODULE) {
         result = parseModuleDecl();
+    } else if (currentToken.type == TOKEN_MATCH) {
+        result = parsePatternMatch();
+    } else if (currentToken.type == TOKEN_ASPECT) {
+        result = parseAspect();
     } else if (currentToken.type == TOKEN_IDENTIFIER) {
         Token temp = currentToken;
         LexerState saved = lexSaveState();
@@ -549,7 +561,7 @@ static AstNode *parseStatement(void) {
     return result;
 }
 
-/* parseExpression: Maneja operadores '+', '-', comparaciones */
+/* parseExpression: Maneja operadores '+', '-', comparaciones y composición de funciones */
 static AstNode *parseExpression(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)parseExpression);
     
@@ -557,6 +569,40 @@ static AstNode *parseExpression(void) {
     
     if (debug_level >= 3) {
         logger_log(LOG_DEBUG, "Parsed initial term for expression");
+    }
+    
+    // Check for function composition operator
+    if (currentToken.type == TOKEN_COMPOSE) {
+        advanceToken(); // consume '>>'
+        AstNode* rightFunc = parseTerm();
+        
+        AstNode* composeNode = createAstNode(AST_FUNC_COMPOSE);
+        parser_stats.nodes_created++;
+        
+        composeNode->funcCompose.left = node;
+        composeNode->funcCompose.right = rightFunc;
+        
+        if (debug_level >= 2) {
+            logger_log(LOG_DEBUG, "Created function composition node");
+        }
+        
+        node = composeNode;
+        
+        // Support chaining multiple compositions: f >> g >> h
+        while (currentToken.type == TOKEN_COMPOSE) {
+            advanceToken(); // consume '>>'
+            rightFunc = parseTerm();
+            
+            composeNode = createAstNode(AST_FUNC_COMPOSE);
+            parser_stats.nodes_created++;
+            
+            composeNode->funcCompose.left = node;
+            composeNode->funcCompose.right = rightFunc;
+            
+            node = composeNode;
+        }
+        
+        return node;
     }
     
     while (currentToken.type == TOKEN_PLUS || currentToken.type == TOKEN_MINUS ||
@@ -663,7 +709,46 @@ static AstNode *parseFactor(void) {
         }
         
         advanceToken();
-        node = parsePostfix(node);
+        
+        // Look ahead for currying pattern: function(arg1)(arg2)...
+        if (currentToken.type == TOKEN_LPAREN) {
+            // This could be a regular function call or the start of a curry
+            LexerState saved = lexSaveState();
+            advanceToken(); // consume '('
+            
+            AstNode *funcCall = createAstNode(AST_FUNC_CALL);
+            parser_stats.nodes_created++;
+            strncpy(funcCall->funcCall.name, node->identifier.name, sizeof(funcCall->funcCall.name));
+            funcCall->funcCall.arguments = NULL;
+            funcCall->funcCall.argCount = 0;
+            
+            while (currentToken.type != TOKEN_RPAREN && currentToken.type != TOKEN_EOF) {
+                AstNode *arg = parseExpression();
+                funcCall->funcCall.argCount++;
+                funcCall->funcCall.arguments = memory_realloc(funcCall->funcCall.arguments,
+                                                            funcCall->funcCall.argCount * sizeof(AstNode *));
+                funcCall->funcCall.arguments[funcCall->funcCall.argCount - 1] = arg;
+                
+                if (currentToken.type == TOKEN_COMMA)
+                    advanceToken();
+                else if (currentToken.type != TOKEN_RPAREN)
+                    parserError("Expected ',' or ')' in function call argument list", currentToken);
+            }
+            
+            advanceToken(); // consume ')'
+            
+            // Check if this is a curry sequence by looking for another '('
+            if (currentToken.type == TOKEN_LPAREN) {
+                // Yes, this is a curry pattern
+                return parseCurryExpression(funcCall);
+            } else {
+                // Nope, just a regular function call
+                freeAstNode(node); // Free the identifier node
+                return funcCall;
+            }
+        } else {
+            node = parsePostfix(node);
+        }
     } else if (currentToken.type == TOKEN_LPAREN) {
         advanceToken();
         node = parseExpression();
@@ -679,126 +764,86 @@ static AstNode *parseFactor(void) {
     return node;
 }
 
+/**
+ * Parse a curry expression: func(arg1)(arg2)...
+ */
+static AstNode* parseCurryExpression(AstNode* baseFunc) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parseCurryExpression);
+    
+    if (debug_level >= 2) {
+        logger_log(LOG_DEBUG, "Parsing curried function call");
+    }
+    
+    // Create curry node with the base function
+    AstNode* curryNode = createAstNode(AST_CURRY_EXPR);
+    parser_stats.nodes_created++;
+    
+    curryNode->curryExpr.baseFunc = baseFunc;
+    
+    // Function to determine total argument count expected by base function
+    int expectedArgCount = 0;
+    if (baseFunc->type == AST_FUNC_CALL) {
+        // For now we'll use a placeholder value - in a real implementation
+        // we'd look up the function's signature in the symbol table
+        expectedArgCount = 2; // Just an example
+    }
+    
+    curryNode->curryExpr.totalArgCount = expectedArgCount;
+    
+    // Parse the applied argument lists for currying
+    curryNode->curryExpr.appliedArgs = NULL;
+    curryNode->curryExpr.appliedCount = 0;
+    
+    // We start by considering the arguments already applied in the base function
+    if (baseFunc->type == AST_FUNC_CALL) {
+        curryNode->curryExpr.appliedCount = baseFunc->funcCall.argCount;
+    }
+    
+    // Parse additional argument applications (the curry part)
+    while (currentToken.type == TOKEN_LPAREN) {
+        advanceToken(); // consume '('
+        
+        // Parse arguments in this parenthesis group
+        AstNode** newArgs = NULL;
+        int newArgCount = 0;
+        
+        while (currentToken.type != TOKEN_RPAREN && currentToken.type != TOKEN_EOF) {
+            AstNode *arg = parseExpression();
+            newArgCount++;
+            newArgs = memory_realloc(newArgs, newArgCount * sizeof(AstNode *));
+            newArgs[newArgCount - 1] = arg;
+            
+            if (currentToken.type == TOKEN_COMMA)
+                advanceToken();
+            else if (currentToken.type != TOKEN_RPAREN)
+                parserError("Expected ',' or ')' in curried function argument list", currentToken);
+        }
+        
+        advanceToken(); // consume ')'
+        
+        // Add these arguments to the curry node's applied arguments
+        int oldCount = curryNode->curryExpr.appliedCount;
+        curryNode->curryExpr.appliedCount += newArgCount;
+        curryNode->curryExpr.appliedArgs = memory_realloc(curryNode->curryExpr.appliedArgs,
+                                                      curryNode->curryExpr.appliedCount * sizeof(AstNode *));
+        
+        for (int i = 0; i < newArgCount; i++) {
+            curryNode->curryExpr.appliedArgs[oldCount + i] = newArgs[i];
+        }
+        
+        free(newArgs); // Free the temporary array
+    }
+    
+    if (debug_level >= 2) {
+        logger_log(LOG_DEBUG, "Created curry expression with %d/%d arguments applied",
+                  curryNode->curryExpr.appliedCount, curryNode->curryExpr.totalArgCount);
+    }
+    
+    return curryNode;
+}
+
 /* parseFuncDef: Parsea una definición de función */
 static AstNode *parseFuncDef(void) {
-    advanceToken(); // consume 'func'
-    if (currentToken.type != TOKEN_IDENTIFIER)
-        parserError("Expected function name after 'func'", currentToken);
-    char funcName[256];
-    strncpy(funcName, currentToken.lexeme, sizeof(funcName));
-    advanceToken();
-    if (currentToken.type != TOKEN_LPAREN)
-        parserError("Expected '(' after function name", currentToken);
-    advanceToken();
-    AstNode **parameters = NULL;
-    int paramCount = 0;
-    while (currentToken.type != TOKEN_RPAREN) {
-        if (currentToken.type != TOKEN_IDENTIFIER)
-            parserError("Expected parameter name in function definition", currentToken);
-        char paramName[256];
-        strncpy(paramName, currentToken.lexeme, sizeof(paramName));
-        AstNode *param = createAstNode(AST_IDENTIFIER);
-        strncpy(param->identifier.name, currentToken.lexeme, sizeof(param->identifier.name));
-        parameters = memory_realloc(parameters, (paramCount + 1) * sizeof(AstNode *));
-        parameters[paramCount++] = param;
-        advanceToken();
-        if (currentToken.type != TOKEN_COLON)
-            parserError("Expected ':' after parameter name in function definition", currentToken);
-        advanceToken();
-        if (currentToken.type != TOKEN_IDENTIFIER && currentToken.type != TOKEN_INT && currentToken.type != TOKEN_FLOAT)
-            parserError("Expected parameter type in function definition", currentToken);
-        advanceToken();
-        if (currentToken.type == TOKEN_COMMA)
-            advanceToken();
-        else if (currentToken.type != TOKEN_RPAREN)
-            parserError("Expected ',' or ')' in parameter list", currentToken);
-    }
-    advanceToken();
-    char retType[64] = "";
-    if (currentToken.type == TOKEN_ARROW) {
-        advanceToken();
-        if (currentToken.type != TOKEN_IDENTIFIER && currentToken.type != TOKEN_INT && currentToken.type != TOKEN_FLOAT)
-            parserError("Expected return type after '->'", currentToken);
-        strncpy(retType, currentToken.lexeme, sizeof(retType));
-        advanceToken();
-    }
-    printf("parseFuncDef: Token after header: type=%d, lexeme='%s'\n", currentToken.type, currentToken.lexeme);
-    if (currentToken.type == TOKEN_SEMICOLON) {
-        advanceToken();
-        printf("parseFuncDef: Separador ';' consumed\n");
-    }
-    AstNode **body = NULL;
-    int bodyCount = 0;
-    while (currentToken.type == TOKEN_SEMICOLON)
-        advanceToken();
-    while (currentToken.type != TOKEN_END) {
-        AstNode *stmt = parseStatement();
-        while (currentToken.type == TOKEN_SEMICOLON)
-            advanceToken();
-        body = memory_realloc(body, (bodyCount + 1) * sizeof(AstNode *));
-        body[bodyCount++] = stmt;
-    }
-    advanceToken();
-    AstNode *funcNode = createAstNode(AST_FUNC_DEF);
-    strncpy(funcNode->funcDef.name, funcName, sizeof(funcNode->funcDef.name));
-    funcNode->funcDef.parameters = parameters;
-    funcNode->funcDef.paramCount = paramCount;
-    strncpy(funcNode->funcDef.returnType, retType, sizeof(funcNode->funcDef.returnType));
-    funcNode->funcDef.body = body;
-    funcNode->funcDef.bodyCount = bodyCount;
-    return funcNode;
-}
-
-/* parseReturn: Parsea una sentencia return */
-static AstNode *parseReturn(void) {
-    advanceToken();
-    AstNode *expr = parseExpression();
-    AstNode *retNode = createAstNode(AST_RETURN_STMT);
-    retNode->returnStmt.expr = expr;
-    return retNode;
-}
-
-/* parseIfStmt: Parsea una estructura if-else */
-static AstNode *parseIfStmt(void) {
-    advanceToken();
-    AstNode *condition = parseExpression();
-    skipStatementSeparators();
-    AstNode **thenBranch = NULL;
-    int thenCount = 0;
-    while (currentToken.type != TOKEN_ELSE && currentToken.type != TOKEN_END) {
-        AstNode *stmt = parseStatement();
-        thenBranch = memory_realloc(thenBranch, (thenCount + 1) * sizeof(AstNode *));
-        thenBranch[thenCount++] = stmt;
-        skipStatementSeparators();
-    }
-    AstNode **elseBranch = NULL;
-    int elseCount = 0;
-    if (currentToken.type == TOKEN_ELSE) {
-        advanceToken();
-        skipStatementSeparators();
-        while (currentToken.type != TOKEN_END) {
-            AstNode *stmt = parseStatement();
-            elseBranch = memory_realloc(elseBranch, (elseCount + 1) * sizeof(AstNode *));
-            elseBranch[elseCount++] = stmt;
-            skipStatementSeparators();
-        }
-    }
-    if (currentToken.type != TOKEN_END)
-        parserError("Expected 'end' after if statement", currentToken);
-    advanceToken();
-    AstNode *ifNode = createAstNode(AST_IF_STMT);
-    ifNode->ifStmt.condition = condition;
-    ifNode->ifStmt.thenBranch = thenBranch;
-    ifNode->ifStmt.thenCount = thenCount;
-    ifNode->ifStmt.elseBranch = elseBranch;
-    ifNode->ifStmt.elseCount = elseCount;
-    return ifNode;
-}
-
-/* parseForStmt: for i in range(...) ... end */
-static AstNode *parseForStmt(void) {
-    advanceToken();
-    if (currentToken.type != TOKEN_IDENTIFIER)
         parserError("Expected iterator identifier in for loop", currentToken);
     char iterator[256];
     strncpy(iterator, currentToken.lexeme, sizeof(iterator));
@@ -1230,4 +1275,344 @@ static AstNode *parseThrowStmt(void) {
     throwNode->throwStmt.expr = expr;
     
     return throwNode;
+}
+
+/* parsePatternMatch: match expr when pattern => body [when pattern => body]* [otherwise => body] end */
+static AstNode* parsePatternMatch(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parsePatternMatch);
+    
+    advanceToken(); // consume 'match'
+    
+    if (debug_level >= 2) {
+        logger_log(LOG_DEBUG, "Parsing pattern match expression");
+    }
+    
+    AstNode* matchNode = createAstNode(AST_PATTERN_MATCH);
+    parser_stats.nodes_created++;
+    
+    // Parse the expression to match against
+    matchNode->patternMatch.expr = parseExpression();
+    skipStatementSeparators();
+    
+    // Initialize case array
+    matchNode->patternMatch.cases = NULL;
+    matchNode->patternMatch.caseCount = 0;
+    matchNode->patternMatch.otherwise = NULL;
+    
+    // Parse when patterns
+    while (currentToken.type == TOKEN_WHEN) {
+        advanceToken(); // consume 'when'
+        
+        // Parse pattern
+        AstNode* pattern = parseExpression();
+        
+        if (currentToken.type != TOKEN_FAT_ARROW) {
+            parserError("Expected '=>' after pattern", currentToken);
+        }
+        advanceToken(); // consume '=>'
+        
+        // Parse body statements until next 'when', 'otherwise', or 'end'
+        AstNode** body = NULL;
+        int bodyCount = 0;
+        
+        while (currentToken.type != TOKEN_WHEN && 
+               currentToken.type != TOKEN_OTHERWISE && 
+               currentToken.type != TOKEN_END && 
+               currentToken.type != TOKEN_EOF) {
+            AstNode* stmt = parseStatement();
+            body = memory_realloc(body, (bodyCount + 1) * sizeof(AstNode*));
+            body[bodyCount++] = stmt;
+            skipStatementSeparators();
+        }
+        
+        // Create pattern case node
+        AstNode* caseNode = createAstNode(AST_PATTERN_CASE);
+        parser_stats.nodes_created++;
+        
+        caseNode->patternCase.pattern = pattern;
+        caseNode->patternCase.body = body;
+        caseNode->patternCase.bodyCount = bodyCount;
+        
+        // Add to cases array
+        matchNode->patternMatch.caseCount++;
+        matchNode->patternMatch.cases = memory_realloc(matchNode->patternMatch.cases, 
+                                                     matchNode->patternMatch.caseCount * sizeof(AstNode*));
+        matchNode->patternMatch.cases[matchNode->patternMatch.caseCount - 1] = caseNode;
+        
+        if (debug_level >= 3) {
+            logger_log(LOG_DEBUG, "Added pattern case with %d body statements", bodyCount);
+        }
+    }
+    
+    // Parse otherwise case if present
+    if (currentToken.type == TOKEN_OTHERWISE) {
+        advanceToken(); // consume 'otherwise'
+        
+        if (currentToken.type != TOKEN_FAT_ARROW) {
+            parserError("Expected '=>' after 'otherwise'", currentToken);
+        }
+        advanceToken(); // consume '=>'
+        
+        // Parse body statements until 'end'
+        AstNode** body = NULL;
+        int bodyCount = 0;
+        
+        while (currentToken.type != TOKEN_END && currentToken.type != TOKEN_EOF) {
+            AstNode* stmt = parseStatement();
+            body = memory_realloc(body, (bodyCount + 1) * sizeof(AstNode*));
+            body[bodyCount++] = stmt;
+            skipStatementSeparators();
+        }
+        
+        // Create otherwise case node
+        AstNode* otherwiseNode = createAstNode(AST_PATTERN_CASE);
+        parser_stats.nodes_created++;
+        
+        // Create a wildcard pattern (represented as NULL for now)
+        otherwiseNode->patternCase.pattern = NULL;
+        otherwiseNode->patternCase.body = body;
+        otherwiseNode->patternCase.bodyCount = bodyCount;
+        
+        matchNode->patternMatch.otherwise = otherwiseNode;
+        
+        if (debug_level >= 3) {
+            logger_log(LOG_DEBUG, "Added otherwise case with %d body statements", bodyCount);
+        }
+    }
+    
+    if (currentToken.type != TOKEN_END) {
+        parserError("Expected 'end' to close pattern match expression", currentToken);
+    }
+    advanceToken(); // consume 'end'
+    
+    if (debug_level >= 2) {
+        logger_log(LOG_DEBUG, "Completed parsing pattern match with %d cases", 
+                 matchNode->patternMatch.caseCount);
+    }
+    
+    return matchNode;
+}
+
+/* parseAspect: Parsea una definición de aspecto */
+static AstNode* parseAspect(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parseAspect);
+    
+    advanceToken(); // consume 'aspect'
+    
+    if (currentToken.type != TOKEN_IDENTIFIER)
+        parserError("Expected aspect name", currentToken);
+    
+    AstNode* aspectNode = createAstNode(AST_ASPECT_DEF);
+    strncpy(aspectNode->aspectDef.name, currentToken.lexeme, sizeof(aspectNode->aspectDef.name));
+    advanceToken();
+    
+    skipStatementSeparators();
+    
+    aspectNode->aspectDef.pointcuts = NULL;
+    aspectNode->aspectDef.pointcutCount = 0;
+    aspectNode->aspectDef.advice = NULL;
+    aspectNode->aspectDef.adviceCount = 0;
+    
+    while (currentToken.type != TOKEN_END) {
+        if (currentToken.type == TOKEN_POINTCUT) {
+            AstNode* pointcut = parsePointcut();
+            aspectNode->aspectDef.pointcutCount++;
+            aspectNode->aspectDef.pointcuts = memory_realloc(aspectNode->aspectDef.pointcuts,
+                                                          aspectNode->aspectDef.pointcutCount * sizeof(AstNode*));
+            aspectNode->aspectDef.pointcuts[aspectNode->aspectDef.pointcutCount - 1] = pointcut;
+        }
+        else if (currentToken.type == TOKEN_ADVICE) {
+            AstNode* advice = parseAdvice();
+            aspectNode->aspectDef.adviceCount++;
+            aspectNode->aspectDef.advice = memory_realloc(aspectNode->aspectDef.advice,
+                                                       aspectNode->aspectDef.adviceCount * sizeof(AstNode*));
+            aspectNode->aspectDef.advice[aspectNode->aspectDef.adviceCount - 1] = advice;
+        }
+        else {
+            parserError("Expected 'pointcut' or 'advice' in aspect definition", currentToken);
+        }
+        skipStatementSeparators();
+    }
+    
+    if (currentToken.type != TOKEN_END)
+        parserError("Expected 'end' to close aspect definition", currentToken);
+    advanceToken(); // consume 'end'
+    
+    return aspectNode;
+}
+
+/* parsePointcut: Parsea una declaración de pointcut */
+static AstNode* parsePointcut(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parsePointcut);
+    
+    advanceToken(); // consume 'pointcut'
+    
+    if (currentToken.type != TOKEN_IDENTIFIER)
+        parserError("Expected pointcut name", currentToken);
+    
+    AstNode* pointcutNode = createAstNode(AST_POINTCUT);
+    strncpy(pointcutNode->pointcut.name, currentToken.lexeme, sizeof(pointcutNode->pointcut.name));
+    advanceToken();
+    
+    if (currentToken.type != TOKEN_STRING)
+        parserError("Expected pattern string in pointcut definition", currentToken);
+    
+    strncpy(pointcutNode->pointcut.pattern, currentToken.lexeme, sizeof(pointcutNode->pointcut.pattern));
+    advanceToken();
+    
+    skipStatementSeparators();
+    return pointcutNode;
+}
+
+/* parseAdvice: Parsea una declaración de advice */
+static AstNode* parseAdvice(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parseAdvice);
+    
+    advanceToken(); // consume 'advice'
+    
+    AstNode* adviceNode = createAstNode(AST_ADVICE);
+    
+    if (currentToken.type == TOKEN_BEFORE)
+        adviceNode->advice.type = TOKEN_BEFORE;
+    else if (currentToken.type == TOKEN_AFTER)
+        adviceNode->advice.type = TOKEN_AFTER;
+    else if (currentToken.type == TOKEN_AROUND)
+        adviceNode->advice.type = TOKEN_AROUND;
+    else
+        parserError("Expected advice type (before, after, or around)", currentToken);
+    
+    advanceToken();
+    
+    if (currentToken.type != TOKEN_IDENTIFIER)
+        parserError("Expected pointcut name in advice declaration", currentToken);
+    
+    strncpy(adviceNode->advice.pointcutName, currentToken.lexeme, sizeof(adviceNode->advice.pointcutName));
+    advanceToken();
+    
+    skipStatementSeparators();
+    
+    adviceNode->advice.body = NULL;
+    adviceNode->advice.bodyCount = 0;
+    
+    while (currentToken.type != TOKEN_END) {
+        AstNode* stmt = parseStatement();
+        adviceNode->advice.bodyCount++;
+        adviceNode->advice.body = memory_realloc(adviceNode->advice.body,
+                                              adviceNode->advice.bodyCount * sizeof(AstNode*));
+        adviceNode->advice.body[adviceNode->advice.bodyCount - 1] = stmt;
+        skipStatementSeparators();
+    }
+    
+    if (currentToken.type != TOKEN_END)
+        parserError("Expected 'end' to close advice definition", currentToken);
+    advanceToken();
+    
+    return adviceNode;
+}
+
+static AstNode *parseReturn(void) {
+    AstNode *node = createAstNode(AST_RETURN_STMT);
+    if (!node) return NULL;
+
+    // Skip 'return' keyword
+    nextToken();
+    
+    // Parse return expression if exists
+    if (currentToken.type != TOKEN_SEMICOLON) {
+        node->returnStmt.expr = parseExpression();
+    } else {
+        node->returnStmt.expr = NULL;
+    }
+
+    expectToken(TOKEN_SEMICOLON);
+    return node;
+}
+
+static AstNode *parseIfStmt(void) {
+    AstNode *node = createAstNode(AST_IF_STMT);
+    if (!node) return NULL;
+
+    // Skip 'if' keyword
+    nextToken();
+    
+    expectToken(TOKEN_LPAREN);
+    node->ifStmt.condition = parseExpression();
+    expectToken(TOKEN_RPAREN);
+    
+    // Parse then branch
+    node->ifStmt.thenBranch = parseBlock(&node->ifStmt.thenCount);
+    
+    // Parse optional else branch
+    if (currentToken.type == TOKEN_ELSE) {
+        nextToken();
+        node->ifStmt.elseBranch = parseBlock(&node->ifStmt.elseCount);
+    } else {
+        node->ifStmt.elseBranch = NULL;
+        node->ifStmt.elseCount = 0;
+    }
+
+    return node;
+}
+
+static AstNode *parseForStmt(void) {
+    AstNode *node = createAstNode(AST_FOR_STMT);
+    if (!node) return NULL;
+
+    // Skip 'for' keyword
+    nextToken();
+    
+    expectToken(TOKEN_LPAREN);
+    
+    // Parse iterator name
+    if (currentToken.type != TOKEN_IDENTIFIER) {
+        error_report("Parser", currentToken.line, currentToken.col, 
+                    "Expected iterator name", ERROR_SYNTAX);
+        return NULL;
+    }
+    strncpy(node->forStmt.iterator, currentToken.value.string, 255);
+    nextToken();
+
+    expectToken(TOKEN_IN);
+    
+    // Parse range
+    node->forStmt.rangeStart = parseExpression();
+    expectToken(TOKEN_DOTS);
+    node->forStmt.rangeEnd = parseExpression();
+    
+    expectToken(TOKEN_RPAREN);
+    
+    // Parse body
+    node->forStmt.body = parseBlock(&node->forStmt.bodyCount);
+
+    return node;
+}
+
+// Implementar las funciones auxiliares que faltan
+void nextToken(void) {
+    currentToken = getNextToken();
+}
+
+void expectToken(int tokenType) {
+    if (currentToken.type != tokenType) {
+        char message[256];
+        snprintf(message, sizeof(message), "Expected token type %d, got %d", 
+                tokenType, currentToken.type);
+        parserError(message, currentToken);
+    }
+    nextToken();
+}
+
+AstNode** parseBlock(int* count) {
+    AstNode** statements = NULL;
+    *count = 0;
+    
+    while (currentToken.type != TOKEN_END && 
+           currentToken.type != TOKEN_EOF) {
+        AstNode* stmt = parseStatement();
+        statements = memory_realloc(statements, (*count + 1) * sizeof(AstNode*));
+        statements[(*count)++] = stmt;
+        skipStatementSeparators();
+    }
+    
+    return statements;
 }

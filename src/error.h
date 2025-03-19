@@ -5,14 +5,17 @@
 
 // Enumeración de tipos de error
 typedef enum {
-    ERROR_NONE,
+    ERROR_NONE = 0,
     ERROR_SYNTAX,
     ERROR_SEMANTIC,
     ERROR_TYPE,
+    ERROR_NAME,     // Add missing error constant
     ERROR_MEMORY,
     ERROR_IO,
+    ERROR_LIMIT,    // Add missing error constant
     ERROR_UNDEFINED,
-    ERROR_RUNTIME
+    ERROR_RUNTIME,
+    ERROR_MAX
 } ErrorType;
 
 typedef struct {

@@ -40,33 +40,48 @@ typedef enum {
     TOKEN_INT,             // 28: int
     TOKEN_FLOAT,           // 29: float
     TOKEN_DOT,             // 30: .
-    TOKEN_SEMICOLON,       // 31: ;
-    TOKEN_GT,              // 32: >
-    TOKEN_LT,              // 33: <
-    TOKEN_GTE,             // 34: >=
-    TOKEN_LTE,             // 35: <=
-    TOKEN_EQ,              // 36: ==
-    TOKEN_NEQ,             // 37: !=
-    TOKEN_UNKNOWN,         // 38: Caracteres no reconocidos
-    TOKEN_LBRACKET,        // 39: [
-    TOKEN_RBRACKET,        // 40: ]
-    TOKEN_COLON,           // 41: :
-    TOKEN_MODULE,          // 42: module
-    TOKEN_EXPORT,          // 43: export
-    TOKEN_LBRACE,          // 44: {
-    TOKEN_RBRACE,          // 45: }
-    TOKEN_INVALID,         // 46: Invalid token
+    TOKEN_DOTS,            // 31: .. (rango)
+    TOKEN_SEMICOLON,       // 32: ;
+    TOKEN_GT,              // 33: >
+    TOKEN_LT,              // 34: <
+    TOKEN_GTE,             // 35: >=
+    TOKEN_LTE,             // 36: <=
+    TOKEN_EQ,              // 37: ==
+    TOKEN_NEQ,             // 38: !=
+    TOKEN_UNKNOWN,         // 39: Caracteres no reconocidos
+    TOKEN_LBRACKET,        // 40: [
+    TOKEN_RBRACKET,        // 41: ]
+    TOKEN_COLON,           // 42: :
+    TOKEN_MODULE,          // 43: module
+    TOKEN_EXPORT,          // 44: export
+    TOKEN_LBRACE,          // 45: {
+    TOKEN_RBRACE,          // 46: }
+    TOKEN_INVALID,         // 47: Invalid token
     // New token types for control structures
-    TOKEN_WHILE,           // 47: while
-    TOKEN_DO,              // 48: do
-    TOKEN_SWITCH,          // 49: switch
-    TOKEN_CASE,            // 50: case
-    TOKEN_DEFAULT,         // 51: default
-    TOKEN_BREAK,           // 52: break
-    TOKEN_TRY,             // 53: try
-    TOKEN_CATCH,           // 54: catch
-    TOKEN_FINALLY,         // 55: finally
-    TOKEN_THROW            // 56: throw
+    TOKEN_WHILE,           // 48: while
+    TOKEN_DO,              // 49: do
+    TOKEN_SWITCH,          // 50: switch
+    TOKEN_CASE,            // 51: case
+    TOKEN_DEFAULT,         // 52: default
+    TOKEN_BREAK,           // 53: break
+    TOKEN_TRY,             // 54: try
+    TOKEN_CATCH,           // 55: catch
+    TOKEN_FINALLY,         // 56: finally
+    TOKEN_THROW,           // 57: throw
+    TOKEN_MATCH,           // 58: match
+    TOKEN_WHEN,            // 59: when
+    TOKEN_OTHERWISE,       // 60: otherwise
+    TOKEN_COMPOSE,         // 61: >> (function composition)
+    TOKEN_MACRO,           // 62: macro
+    TOKEN_EXPAND,          // 63: expand
+    TOKEN_CONCAT,          // 64: ## (macro concatenation)
+    TOKEN_STRINGIFY,       // 65: # (macro stringification)
+    TOKEN_ASPECT,          // 66: aspect
+    TOKEN_POINTCUT,        // 67: pointcut
+    TOKEN_ADVICE,          // 68: advice
+    TOKEN_BEFORE,          // 69: before
+    TOKEN_AFTER,           // 70: after
+    TOKEN_AROUND           // 71: around
 } TokenType;
 
 /**
@@ -77,6 +92,10 @@ typedef struct {
     char lexeme[256];       ///< Cadena del token.
     int line;               ///< Línea donde aparece.
     int col;                ///< Columna donde aparece.
+    union {
+        char string[256];  // Para valores string
+        double number;     // Para valores numéricos
+    } value;
 } Token;
 
 /**

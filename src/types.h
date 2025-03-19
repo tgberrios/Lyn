@@ -5,10 +5,10 @@
 #include "error.h"
 #include "logger.h"
 
-// Forward declaration
+// Forward declarations
 struct AstNode;
 
-// Enumerador para los tipos básicos y compuestos
+// First define the TypeKind enum
 typedef enum {
     TYPE_INT,
     TYPE_FLOAT,
@@ -19,9 +19,11 @@ typedef enum {
     TYPE_ARRAY,
     TYPE_CLASS,
     TYPE_FUNCTION,
-    TYPE_LAMBDA
+    TYPE_LAMBDA,
+    TYPE_CURRIED     // New type for curried functions
 } TypeKind;
 
+// Then define the Type structure
 typedef struct Type {
     TypeKind kind;
     char typeName[64];  // Campo para almacenar el nombre del tipo en forma de cadena
@@ -41,8 +43,40 @@ typedef struct Type {
             struct Type** paramTypes;
             int paramCount;
         } functionType;
+        // Tipo curried function: tipo base y argumentos ya aplicados
+        struct {
+            struct Type* baseType;      // Base function type
+            int appliedArgCount;        // Number of arguments already applied
+        } curriedType;
     };
 } Type;
+
+// Now we can define the reflection structures that use Type
+typedef struct {
+    char name[256];
+    Type* type;
+    int modifiers;  // public, private, etc.
+} FieldInfo;
+
+typedef struct {
+    char name[256];
+    Type* returnType;
+    Type** paramTypes;
+    int paramCount;
+    char** paramNames;
+    int modifiers;
+} MethodInfo;
+
+typedef struct {
+    char name[256];
+    Type* type;
+    FieldInfo** fields;
+    int fieldCount;
+    MethodInfo** methods;
+    int methodCount;
+    Type* baseType;
+    bool isBuiltin;
+} TypeInfo;
 
 // Configuración del nivel de depuración del sistema de tipos
 void types_set_debug_level(int level);
@@ -65,6 +99,7 @@ Type* createBasicType(TypeKind kind);
 Type* createArrayType(Type* elementType);
 Type* createClassType(const char* name, Type* baseClass);
 Type* createFunctionType(Type* returnType, Type** paramTypes, int paramCount);
+Type* create_curried_type(Type* baseType, int appliedArgCount);
 Type* clone_type(Type* type);
 const char* typeToString(Type* type);
 void typeToC(Type* type, char* buffer, int bufferSize);
@@ -88,5 +123,11 @@ void check_types(struct AstNode* node, Type* expected);
 // Type system utilities
 const char* type_kind_to_string(TypeKind kind);
 Type* get_member_type(Type* classType, const char* memberName);
+
+// Type introspection functions
+const char* typeof_value(struct AstNode* expr);
+TypeInfo* get_type_info(Type* type);
+FieldInfo** get_fields(Type* type, int* count);
+MethodInfo** get_methods(Type* type, int* count);
 
 #endif

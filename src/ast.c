@@ -252,6 +252,44 @@ void freeAstNode(AstNode* node) {
             // No additional fields to free
             break;
             
+        case AST_CURRY_EXPR:
+            freeAstNode(node->curryExpr.baseFunc);
+            if (node->curryExpr.appliedArgs) {
+                for (int i = 0; i < node->curryExpr.appliedCount; i++) {
+                    freeAstNode(node->curryExpr.appliedArgs[i]);
+                }
+                free(node->curryExpr.appliedArgs);
+            }
+            break;
+            
+        case AST_PATTERN_MATCH:
+            freeAstNode(node->patternMatch.expr);
+            if (node->patternMatch.cases) {
+                for (int i = 0; i < node->patternMatch.caseCount; i++) {
+                    freeAstNode(node->patternMatch.cases[i]);
+                }
+                free(node->patternMatch.cases);
+            }
+            if (node->patternMatch.otherwise) {
+                freeAstNode(node->patternMatch.otherwise);
+            }
+            break;
+            
+        case AST_PATTERN_CASE:
+            freeAstNode(node->patternCase.pattern);
+            if (node->patternCase.body) {
+                for (int i = 0; i < node->patternCase.bodyCount; i++) {
+                    freeAstNode(node->patternCase.body[i]);
+                }
+                free(node->patternCase.body);
+            }
+            break;
+        
+        case AST_FUNC_COMPOSE:
+            freeAstNode(node->funcCompose.left);
+            freeAstNode(node->funcCompose.right);
+            break;
+            
         default:
             break;
     }

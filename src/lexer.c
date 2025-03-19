@@ -226,6 +226,16 @@ Token getNextToken(void) {
         else if (strcmp(token.lexeme, "catch") == 0) token.type = TOKEN_CATCH;
         else if (strcmp(token.lexeme, "finally") == 0) token.type = TOKEN_FINALLY;
         else if (strcmp(token.lexeme, "throw") == 0) token.type = TOKEN_THROW;
+        else if (strcmp(token.lexeme, "match") == 0) token.type = TOKEN_MATCH;
+        else if (strcmp(token.lexeme, "when") == 0) token.type = TOKEN_WHEN;
+        else if (strcmp(token.lexeme, "otherwise") == 0) token.type = TOKEN_OTHERWISE;
+        // Añadir nuevos tokens para aspectos antes del else token.type = TOKEN_IDENTIFIER
+        else if (strcmp(token.lexeme, "aspect") == 0) token.type = TOKEN_ASPECT;
+        else if (strcmp(token.lexeme, "pointcut") == 0) token.type = TOKEN_POINTCUT;
+        else if (strcmp(token.lexeme, "advice") == 0) token.type = TOKEN_ADVICE;
+        else if (strcmp(token.lexeme, "before") == 0) token.type = TOKEN_BEFORE;
+        else if (strcmp(token.lexeme, "after") == 0) token.type = TOKEN_AFTER;
+        else if (strcmp(token.lexeme, "around") == 0) token.type = TOKEN_AROUND;
         else token.type = TOKEN_IDENTIFIER;
         
         // Log del token reconocido
@@ -366,6 +376,10 @@ Token getNextToken(void) {
                 advance();
                 token.type = TOKEN_GTE;
                 strcpy(token.lexeme, ">=");
+            } else if (peek() == '>') {
+                advance();
+                token.type = TOKEN_COMPOSE;
+                strcpy(token.lexeme, ">>");
             } else {
                 token.type = TOKEN_GT;
                 token.lexeme[0] = '>';
@@ -467,10 +481,13 @@ const char* tokenTypeToString(TokenType type) {
         "TOKEN_LBRACE", "TOKEN_RBRACE", "TOKEN_INVALID", "TOKEN_WHILE",
         "TOKEN_DO", "TOKEN_SWITCH", "TOKEN_CASE", "TOKEN_DEFAULT",
         "TOKEN_BREAK", "TOKEN_TRY", "TOKEN_CATCH", "TOKEN_FINALLY",
-        "TOKEN_THROW"
+        "TOKEN_THROW", "TOKEN_MATCH", "TOKEN_WHEN", "TOKEN_OTHERWISE",
+        "TOKEN_COMPOSE", "TOKEN_STRINGIFY", "TOKEN_ASPECT",
+        "TOKEN_POINTCUT", "TOKEN_ADVICE", "TOKEN_BEFORE",
+        "TOKEN_AFTER", "TOKEN_AROUND"
     };
     
-    if (type >= 0 && type <= TOKEN_THROW) {
+    if (type >= 0 && type <= TOKEN_AROUND) {
         return tokenNames[type];
     }
     return "UNKNOWN_TOKEN_TYPE";

@@ -608,6 +608,185 @@ El compilador de Lyn incluye un potente sistema de optimización que mejora el r
 
 El compilador ofrece tres niveles de optimización:
 
+### Programación Funcional
+
+#### Currificación
+
+```lyn
+// Definición de función currificada
+func sumar(a: int) -> (int) -> int
+    return (b: int) -> int => a + b
+end
+
+// Uso de currificación
+suma5 = sumar(5)    // Crea una función que suma 5
+resultado = suma5(3) // 8
+
+// Encadenamiento de currying
+func multiplicar(a: int)(b: int)(c: int) -> int
+    return a * b * c
+end
+
+doble = multiplicar(2)      // Currying parcial
+porCuatro = doble(2)       // Más currying
+resultado = porCuatro(5)    // 20
+```
+
+#### Pattern Matching
+
+```lyn
+// Pattern matching con tipos de datos
+match valor
+    when 0 =>
+        print("Cero")
+    when n if n > 0 =>
+        print("Positivo")
+    when n if n < 0 =>
+        print("Negativo")
+    otherwise =>
+        print("Otro caso")
+end
+
+// Pattern matching con estructuras
+match persona
+    when {nombre: "Juan", edad: 25} =>
+        print("Es Juan de 25")
+    when {nombre: n, edad: e} if e > 18 =>
+        print(n + " es mayor de edad")
+    otherwise =>
+        print("No coincide")
+end
+```
+
+#### Composición de Funciones
+
+```lyn
+// Definición de funciones a componer
+func duplicar(x: int) -> int
+    return x * 2
+end
+
+func sumarUno(x: int) -> int
+    return x + 1
+end
+
+// Composición usando >>
+resultado = duplicar >> sumarUno // Crea una nueva función
+valor = resultado(5)             // (5 * 2) + 1 = 11
+
+// Encadenamiento de composiciones
+procesamiento = filtrar >> mapear >> reducir
+```
+
+### Programación Orientada a Aspectos
+
+#### Definición de Aspectos Básicos
+
+```lyn
+aspect Logging
+    // Define el pointcut
+    pointcut metodosBD "*.save*() || *.update*() || *.delete*()"
+
+    // Advice que se ejecuta antes
+    advice before metodosBD
+        print("Iniciando operación de BD: " + currentMethod())
+    end
+
+    // Advice que se ejecuta después
+    advice after metodosBD
+        print("Operación completada")
+    end
+end
+```
+
+#### Aspectos con Context Binding
+
+```lyn
+aspect Security
+    pointcut operacionesSensibles "*.delete*() || *.admin*()"
+
+    advice before operacionesSensibles
+        if not checkUserPermissions()
+            throw "Acceso denegado"
+        end
+        logAccess(getCurrentUser(), currentMethod())
+    end
+end
+```
+
+#### Aspectos con Around Advice
+
+```lyn
+aspect Performance
+    pointcut operacionesLentas "*.procesamiento*()"
+
+    advice around operacionesLentas
+        startTime = getCurrentTime()
+        try
+            // Ejecuta el método original
+            proceed()
+        finally
+            endTime = getCurrentTime()
+            duration = endTime - startTime
+            if duration > 1000
+                logSlowOperation(duration)
+            end
+        end
+    end
+end
+```
+
+#### Ejemplo Completo de AOP
+
+```lyn
+// Definición de la clase base
+class Usuario
+    nombre string
+    permisos string[]
+
+    func eliminarCuenta(self: Usuario) -> bool
+        // Lógica de eliminación
+        return true
+    end
+end
+
+// Aspecto para auditoría
+aspect Auditoria
+    pointcut operacionesCriticas "*.eliminar*()"
+
+    advice before operacionesCriticas
+        usuario = getCurrentUser()
+        operacion = currentMethod()
+        logAuditoria("Iniciando " + operacion + " por " + usuario)
+    end
+
+    advice after operacionesCriticas
+        logAuditoria("Operación completada")
+    end
+
+    advice around operacionesCriticas
+        if not tienePermisosAdmin()
+            throw "Permisos insuficientes"
+        end
+        proceed()
+        notificarAdmins("Operación crítica ejecutada")
+    end
+end
+
+// Uso del sistema
+main
+    usuario = Usuario()
+    Usuario_init(usuario, "Juan", ["user"])
+
+    // Los aspectos se aplican automáticamente
+    try
+        Usuario_eliminarCuenta(usuario)
+    catch error
+        print("Error: " + error)
+    end
+end
+```
+
 ## Buenas Prácticas
 
 ### Convenciones de Nombrado
@@ -619,34 +798,38 @@ El compilador ofrece tres niveles de optimización:
 ### Estructura de Proyectos
 
 ```
+
 /proyecto
-  /src
-    main.lyn          // Punto de entrada
-    /modulos
-      matematica.lyn
-      utilidades.lyn
-  /ui
-    principal.ui
-    formulario.ui
-  /css
-    estilos.css
+/src
+main.lyn // Punto de entrada
+/modulos
+matematica.lyn
+utilidades.lyn
+/ui
+principal.ui
+formulario.ui
+/css
+estilos.css
+
 ```
 
 ### Comentarios y Documentación
 
 ```
+
 // Función para calcular el factorial de un número
 // Parámetros:
-//   n: Número del que se calculará el factorial
+// n: Número del que se calculará el factorial
 // Retorna:
-//   El factorial de n
+// El factorial de n
 func factorial(n: int) -> int
-    if n <= 1
-        return 1
-    else
-        return n * factorial(n - 1)
-    end
+if n <= 1
+return 1
+else
+return n \* factorial(n - 1)
 end
+end
+
 ```
 
 ## Ejemplos Completos
@@ -654,9 +837,10 @@ end
 ### Calculadora Básica
 
 ```
+
 main
-    print("Calculadora básica")
-    print("------------------")
+print("Calculadora básica")
+print("------------------")
 
     // Obtener valores
     a = 10
@@ -675,18 +859,21 @@ main
     print("a - b = " + resta)
     print("a * b = " + producto)
     print("a / b = " + division)
+
 end
+
 ```
 
 ### Sistema de Gestión de Biblioteca
 
 ```
+
 main
-    // Definición de clases
-    class Libro
-        titulo string
-        autor string
-        prestado bool
+// Definición de clases
+class Libro
+titulo string
+autor string
+prestado bool
 
         func init(self: Libro, titulo: string, autor: string) -> void
             self.titulo = titulo
@@ -745,19 +932,22 @@ main
     print("----------------")
     print(Libro_toString(libro1))
     print(Libro_toString(libro2))
+
 end
+
 ```
 
 ### Ejemplo con Manejo de Errores
 
 ```
+
 main
-    func dividir(a: float, b: float) -> float
-        if b == 0
-            throw "División por cero no permitida"
-        end
-        return a / b
-    end
+func dividir(a: float, b: float) -> float
+if b == 0
+throw "División por cero no permitida"
+end
+return a / b
+end
 
     // Ejemplo de uso de try-catch
     print("Calculando divisiones...")
@@ -775,18 +965,21 @@ main
     end
 
     print("Programa finalizado")
+
 end
+
 ```
 
 ### Juego Simple
 
 ```
+
 main
-    // Inicializar juego
-    intentosMax = 5
-    intentos = 0
-    numeroSecreto = 42  // En un juego real sería aleatorio
-    adivinado = false
+// Inicializar juego
+intentosMax = 5
+intentos = 0
+numeroSecreto = 42 // En un juego real sería aleatorio
+adivinado = false
 
     print("¡Adivina el número!")
     print("Tienes " + intentosMax + " intentos para adivinar un número entre 1 y 100.")
@@ -829,7 +1022,9 @@ main
     if not adivinado
         print("\n¡Se acabaron los intentos! El número era " + numeroSecreto)
     end
+
 end
+
 ```
 
 Este manual proporciona una referencia completa para el lenguaje Lyn y debería servir como guía para nuevos usuarios y referencia para usuarios experimentados.
