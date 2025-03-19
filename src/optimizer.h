@@ -29,9 +29,28 @@ typedef struct {
     int constant_folding_applied;
     int dead_code_removed;
     int redundant_assignments_removed;
+    int constants_propagated;    // New counter for constant propagation
+    int cse_eliminated;          // New counter for common subexpressions eliminated
+    int variables_scoped;        // New counter for variables with proper scope analysis
     int total_optimizations;
 } OptimizationStats;
 
 OptimizationStats optimizer_get_stats(void);
+
+// New function to enable or disable specific optimizations
+typedef struct {
+    bool enable_constant_folding;
+    bool enable_dead_code_elimination;
+    bool enable_redundant_stmt_removal;
+    bool enable_constant_propagation;    // New optimization
+    bool enable_common_subexpr_elimination;  // New optimization
+    bool enable_scope_analysis;         // New optimization
+} OptimizerOptions;
+
+// Set optimizer options
+void optimizer_set_options(OptimizerOptions options);
+
+// Get current optimizer options
+OptimizerOptions optimizer_get_options(void);
 
 #endif // OPTIMIZER_H

@@ -600,6 +600,14 @@ register_event("click", botonEnviar, (e) -> void => {
 })
 ```
 
+### Sistema de Optimización
+
+El compilador de Lyn incluye un potente sistema de optimización que mejora el rendimiento y la eficiencia del código. Este sistema implementa varias técnicas de optimización modernas:
+
+#### Niveles de Optimización
+
+El compilador ofrece tres niveles de optimización:
+
 ## Buenas Prácticas
 
 ### Convenciones de Nombrado
