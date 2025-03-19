@@ -135,10 +135,48 @@ int main() {
     float* float_array __attribute__((unused)) = NULL;
     double* mixed_array __attribute__((unused)) = NULL;
     const char* day_name __attribute__((unused)) = "";
-    int a =     5    ;
-    int b =     3    ;
-    double c =     (    a     +     b    )    ;
-    printf("Resultado:\n");
-    printf("%g\n",     c    );
+    int entero = 42;
+    double decimal = 3.14;
+    const char* texto =     "Hola, Lyn!"    ;
+    printf("%s\n", "\n=== Variables and their values ===");
+    printf("%s\n", "entero = ");
+    printf("%d\n", entero);
+    printf("%s\n", "decimal = ");
+    printf("%g\n", decimal);
+    printf("%s\n", "texto = ");
+    printf("%s\n", texto);
+    printf("%s\n", "\n=== Arithmetic operations ===");
+    double suma;
+    suma =     (    5     +     3    )    ;
+    printf("%s\n", "5 + 3 = ");
+    printf("%g\n", suma);
+    double resta;
+    resta =     (    10     -     4    )    ;
+    printf("%s\n", "10 - 4 = ");
+    printf("%g\n", resta);
+    double producto;
+    producto =     (    3     *     7    )    ;
+    printf("%s\n", "3 * 7 = ");
+    printf("%g\n", producto);
+    double division;
+    division =     (    20     /     4    )    ;
+    printf("%s\n", "20 / 4 = ");
+    printf("%g\n", division);
+    printf("%s\n", "\n=== Control flow statements ===");
+    int valor = 42;
+    if (    (    valor     >     10    )    ) {
+        printf("%s\n", "valor is greater than 10");
+    }
+    else {
+        printf("%s\n", "valor is less than or equal to 10");
+    }
+    int edad = 25;
+    if (    (    edad     >=     18    )    ) {
+        printf("%s\n", "You are an adult");
+    }
+    else {
+        printf("%s\n", "You are not yet an adult");
+    }
+    printf("%s\n", "\n=== Test completed successfully! ===");
     return 0;
 }

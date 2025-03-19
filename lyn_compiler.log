@@ -1213,3 +1213,1499 @@
 [2025-03-18 23:16:39] [INFO] Compilation completed successfully
 
 ========== SESIÓN DE LOG FINALIZADA 2025-03-18 23:16:39 ==========
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-19 16:10:49 ==========
+
+[2025-03-19 16:10:49] [INFO] Lyn compiler starting
+[2025-03-19 16:10:49] [INFO] Lexer debug level set to 1
+[2025-03-19 16:10:49] [INFO] Parser debug level set to 1
+[2025-03-19 16:10:49] [INFO] Compiler debug level set to 1
+[2025-03-19 16:10:49] [INFO] Optimizer debug level set to 1
+[2025-03-19 16:10:49] [INFO] Type system debug level set to 1
+[2025-03-19 16:10:49] [INFO] Global debug level set to 1
+[2025-03-19 16:10:49] [INFO] Starting compilation of test.lyn
+[2025-03-19 16:10:49] [INFO] Debug level: 1, Optimization level: 1
+[2025-03-19 16:10:49] [DEBUG] Output C file: test.c
+[2025-03-19 16:10:49] [DEBUG] Output executable: test.out
+[2025-03-19 16:10:49] [INFO] Reading source file: test.lyn
+[2025-03-19 16:10:49] [DEBUG] File read successfully: 158 bytes
+[2025-03-19 16:10:49] [INFO] Initializing compiler components
+[2025-03-19 16:10:49] [INFO] Initializing lexer
+[2025-03-19 16:10:49] [INFO] Optimizer initialized with level 1
+[2025-03-19 16:10:49] [INFO] Parsing source code...
+[2025-03-19 16:10:49] [INFO] Starting to parse program
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 0
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 1
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 5
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 1
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 5
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 3
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 3
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 12
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 5
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 2
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 15
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 3
+[2025-03-19 16:10:49] [DEBUG] Created AST node of type 15
+[2025-03-19 16:10:49] [INFO] Program parsing complete: 10 nodes created, 5 statements
+[2025-03-19 16:10:49] [DEBUG] Source code read: 158 bytes
+[2025-03-19 16:10:49] [INFO] Source parsed successfully
+[2025-03-19 16:10:49] [INFO] Performing type checking...
+[2025-03-19 16:10:49] [WARNING] Type checking resulted in unknown type, proceeding with caution
+[2025-03-19 16:10:49] [INFO] Optimizing AST...
+[2025-03-19 16:10:49] [INFO] Starting AST optimization at level 1
+[2025-03-19 16:10:49] [DEBUG] Applying constant folding
+[2025-03-19 16:10:49] [DEBUG] Removing redundant statements
+[2025-03-19 16:10:49] [INFO] Optimization complete: 0 optimizations applied (0 constants folded, 0 redundant assignments, 0 dead code blocks)
+[2025-03-19 16:10:49] [INFO] Generating C code: test.c
+[2025-03-19 16:10:49] [INFO] Starting compilation to 'test.c'
+[2025-03-19 16:10:49] [DEBUG] Compiling node of type 0
+[2025-03-19 16:10:49] [INFO] Compiling program with 5 statements
+[2025-03-19 16:10:49] [DEBUG] Generating preamble with includes
+[2025-03-19 16:10:49] [DEBUG] Emitting constant definitions
+[2025-03-19 16:10:49] [DEBUG] Initializing global variables
+[2025-03-19 16:10:49] [DEBUG] Added variable 'error_caught' of type 'bool'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'error_caught' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'finally_executed' of type 'bool'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'finally_executed' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'sum' of type 'double'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'sum' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'product' of type 'double'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'product' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'int_val' of type 'int'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'int_val' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'float_val' of type 'float'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'float_val' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'sum_val' of type 'double'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'sum_val' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'p1' of type 'Point*'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'p1' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'p2' of type 'Point*'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'p2' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'v1' of type 'Vector3*'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'v1' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'c1' of type 'Circle*'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'c1' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'i' of type 'int'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'i' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'j' of type 'int'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'j' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'count' of type 'int'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'count' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'do_while_count' of type 'int'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'do_while_count' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'day' of type 'int'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'day' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'int_array' of type 'int*'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'int_array' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'float_array' of type 'float*'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'float_array' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'mixed_array' of type 'double*'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'mixed_array' as declared
+[2025-03-19 16:10:49] [DEBUG] Added variable 'day_name' of type 'const char*'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'day_name' as declared
+[2025-03-19 16:10:49] [DEBUG] Compiling node of type 5
+[2025-03-19 16:10:49] [DEBUG] Variable 'a' not found in table
+[2025-03-19 16:10:49] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:10:49] [DEBUG] Added variable 'a' of type 'int'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'a' as declared
+[2025-03-19 16:10:49] [DEBUG] Compiling node of type 5
+[2025-03-19 16:10:49] [DEBUG] Variable 'b' not found in table
+[2025-03-19 16:10:49] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:10:49] [DEBUG] Added variable 'b' of type 'int'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'b' as declared
+[2025-03-19 16:10:49] [DEBUG] Compiling node of type 5
+[2025-03-19 16:10:49] [DEBUG] Variable 'c' not found in table
+[2025-03-19 16:10:49] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:10:49] [DEBUG] Added variable 'c' of type 'double'
+[2025-03-19 16:10:49] [DEBUG] Marked variable 'c' as declared
+[2025-03-19 16:10:49] [DEBUG] Compiling node of type 15
+[2025-03-19 16:10:49] [DEBUG] Compiling node of type 15
+[2025-03-19 16:10:49] [INFO] Compilation completed. Processed 5 nodes, 0 functions, 23 variables
+[2025-03-19 16:10:49] [INFO] Compiler statistics: 5 nodes processed, 0 functions compiled
+[2025-03-19 16:10:49] [INFO] Compiling C code to executable...
+[2025-03-19 16:10:49] [INFO] Compiling C code 'test.c' to executable 'test.out'
+[2025-03-19 16:10:49] [DEBUG] Executing compiler command: gcc -o test.out test.c -lm -Wall
+[2025-03-19 16:10:49] [INFO] C compilation successful
+[2025-03-19 16:10:49] [INFO] Running compiled program...
+[2025-03-19 16:10:49] [INFO] Program executed successfully
+[2025-03-19 16:10:49] [DEBUG] Cleaning up resources...
+[2025-03-19 16:10:49] [DEBUG] Starting to free AST tree
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:10:49] [DEBUG] Freed AST node of type 0
+[2025-03-19 16:10:49] [INFO] Compilation completed successfully
+
+========== SESIÓN DE LOG FINALIZADA 2025-03-19 16:10:49 ==========
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-19 16:13:00 ==========
+
+[2025-03-19 16:13:00] [INFO] Lyn compiler starting
+[2025-03-19 16:13:00] [INFO] Lexer debug level set to 1
+[2025-03-19 16:13:00] [INFO] Parser debug level set to 1
+[2025-03-19 16:13:00] [INFO] Compiler debug level set to 1
+[2025-03-19 16:13:00] [INFO] Optimizer debug level set to 1
+[2025-03-19 16:13:00] [INFO] Type system debug level set to 1
+[2025-03-19 16:13:00] [INFO] Global debug level set to 1
+[2025-03-19 16:13:00] [INFO] Starting compilation of test.lyn
+[2025-03-19 16:13:00] [INFO] Debug level: 1, Optimization level: 1
+[2025-03-19 16:13:00] [DEBUG] Output C file: test.c
+[2025-03-19 16:13:00] [DEBUG] Output executable: test.out
+[2025-03-19 16:13:00] [INFO] Reading source file: test.lyn
+[2025-03-19 16:13:00] [DEBUG] File read successfully: 8436 bytes
+[2025-03-19 16:13:00] [INFO] Initializing compiler components
+[2025-03-19 16:13:00] [INFO] Initializing lexer
+[2025-03-19 16:13:00] [INFO] Optimizer initialized with level 1
+[2025-03-19 16:13:00] [INFO] Parsing source code...
+[2025-03-19 16:13:00] [INFO] Starting to parse program
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 0
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 2
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 15
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 5
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 5
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 3
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 5
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 2
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 5
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 2
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 3
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 12
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 15
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 2
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 3
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 12
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 15
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 2
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 3
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 12
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 15
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 2
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 3
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 12
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 15
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 18
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 5
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 18
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 18
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 1
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 18
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 18
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 5
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 2
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 3
+[2025-03-19 16:13:00] [DEBUG] Created AST node of type 12
+[2025-03-19 16:13:00] [ERROR] [parser:20:39] Expected ')' after print expression (got '[')
+[2025-03-19 16:13:00] [INFO] Suggestion: Check syntax near this location
+[2025-03-19 16:13:00] [ERROR] Syntax error at line 20, col 39: Expected ')' after print expression
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-19 16:22:52 ==========
+
+[2025-03-19 16:22:52] [INFO] Lyn compiler starting
+[2025-03-19 16:22:52] [INFO] Lexer debug level set to 1
+[2025-03-19 16:22:52] [INFO] Parser debug level set to 1
+[2025-03-19 16:22:52] [INFO] Compiler debug level set to 1
+[2025-03-19 16:22:52] [INFO] Optimizer debug level set to 1
+[2025-03-19 16:22:52] [INFO] Type system debug level set to 1
+[2025-03-19 16:22:52] [INFO] Global debug level set to 1
+[2025-03-19 16:22:52] [INFO] Starting compilation of test.lyn
+[2025-03-19 16:22:52] [INFO] Debug level: 1, Optimization level: 1
+[2025-03-19 16:22:52] [DEBUG] Output C file: test.c
+[2025-03-19 16:22:52] [DEBUG] Output executable: test.out
+[2025-03-19 16:22:52] [INFO] Reading source file: test.lyn
+[2025-03-19 16:22:52] [DEBUG] File read successfully: 802 bytes
+[2025-03-19 16:22:52] [INFO] Initializing compiler components
+[2025-03-19 16:22:52] [INFO] Lexer initialized with 41 keywords
+[2025-03-19 16:22:52] [INFO] Initializing lexer
+[2025-03-19 16:22:52] [INFO] Optimizer initialized with level 1
+[2025-03-19 16:22:52] [INFO] Parsing source code...
+[2025-03-19 16:22:52] [INFO] Starting to parse program
+[2025-03-19 16:22:52] [ERROR] [parser:28:8] Expected token type 9, got 1 (got 'edad')
+[2025-03-19 16:22:52] [INFO] Suggestion: Check syntax near this location
+[2025-03-19 16:22:52] [ERROR] Syntax error at line 28, col 8: Expected token type 9, got 1
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-19 16:24:27 ==========
+
+[2025-03-19 16:24:27] [INFO] Lyn compiler starting
+[2025-03-19 16:24:27] [INFO] Lexer debug level set to 1
+[2025-03-19 16:24:27] [INFO] Parser debug level set to 1
+[2025-03-19 16:24:27] [INFO] Compiler debug level set to 1
+[2025-03-19 16:24:27] [INFO] Optimizer debug level set to 1
+[2025-03-19 16:24:27] [INFO] Type system debug level set to 1
+[2025-03-19 16:24:27] [INFO] Global debug level set to 1
+[2025-03-19 16:24:27] [INFO] Starting compilation of test.lyn
+[2025-03-19 16:24:27] [INFO] Debug level: 1, Optimization level: 1
+[2025-03-19 16:24:27] [DEBUG] Output C file: test.c
+[2025-03-19 16:24:27] [DEBUG] Output executable: test.out
+[2025-03-19 16:24:27] [INFO] Reading source file: test.lyn
+[2025-03-19 16:24:27] [DEBUG] File read successfully: 804 bytes
+[2025-03-19 16:24:27] [INFO] Initializing compiler components
+[2025-03-19 16:24:27] [INFO] Lexer initialized with 41 keywords
+[2025-03-19 16:24:27] [INFO] Initializing lexer
+[2025-03-19 16:24:27] [INFO] Optimizer initialized with level 1
+[2025-03-19 16:24:27] [INFO] Parsing source code...
+[2025-03-19 16:24:27] [INFO] Starting to parse program
+[2025-03-19 16:24:27] [INFO] Program parsing complete: 60 nodes created, 20 statements
+[2025-03-19 16:24:27] [DEBUG] Source code read: 804 bytes
+[2025-03-19 16:24:27] [INFO] Source parsed successfully
+[2025-03-19 16:24:27] [INFO] Performing type checking...
+[2025-03-19 16:24:27] [WARNING] Type checking resulted in unknown type, proceeding with caution
+[2025-03-19 16:24:27] [INFO] Optimizing AST...
+[2025-03-19 16:24:27] [INFO] Starting AST optimization at level 1
+[2025-03-19 16:24:27] [DEBUG] Applying constant folding
+[2025-03-19 16:24:27] [DEBUG] Removing redundant statements
+[2025-03-19 16:24:27] [INFO] Optimization complete: 0 optimizations applied (0 constants folded, 0 redundant assignments, 0 dead code blocks)
+[2025-03-19 16:24:27] [INFO] Generating C code: test.c
+[2025-03-19 16:24:27] [INFO] Starting compilation to 'test.c'
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 0
+[2025-03-19 16:24:27] [INFO] Compiling program with 20 statements
+[2025-03-19 16:24:27] [DEBUG] Generating preamble with includes
+[2025-03-19 16:24:27] [DEBUG] Emitting constant definitions
+[2025-03-19 16:24:27] [DEBUG] Initializing global variables
+[2025-03-19 16:24:27] [DEBUG] Added variable 'error_caught' of type 'bool'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'error_caught' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'finally_executed' of type 'bool'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'finally_executed' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'sum' of type 'double'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'sum' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'product' of type 'double'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'product' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'int_val' of type 'int'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'int_val' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'float_val' of type 'float'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'float_val' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'sum_val' of type 'double'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'sum_val' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'p1' of type 'Point*'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'p1' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'p2' of type 'Point*'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'p2' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'v1' of type 'Vector3*'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'v1' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'c1' of type 'Circle*'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'c1' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'i' of type 'int'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'i' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'j' of type 'int'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'j' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'count' of type 'int'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'count' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'do_while_count' of type 'int'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'do_while_count' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'day' of type 'int'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'day' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'int_array' of type 'int*'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'int_array' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'float_array' of type 'float*'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'float_array' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'mixed_array' of type 'double*'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'mixed_array' as declared
+[2025-03-19 16:24:27] [DEBUG] Added variable 'day_name' of type 'const char*'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'day_name' as declared
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 5
+[2025-03-19 16:24:27] [DEBUG] Variable 'entero' not found in table
+[2025-03-19 16:24:27] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:24:27] [DEBUG] Added variable 'entero' of type 'int'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'entero' as declared
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 5
+[2025-03-19 16:24:27] [DEBUG] Variable 'decimal' not found in table
+[2025-03-19 16:24:27] [DEBUG] Inferred type for node type 1: double
+[2025-03-19 16:24:27] [DEBUG] Added variable 'decimal' of type 'double'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'decimal' as declared
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 5
+[2025-03-19 16:24:27] [DEBUG] Variable 'texto' not found in table
+[2025-03-19 16:24:27] [DEBUG] Inferred type for node type 2: const char*
+[2025-03-19 16:24:27] [DEBUG] Added variable 'texto' of type 'const char*'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'texto' as declared
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 5
+[2025-03-19 16:24:27] [DEBUG] Variable 'suma' not found in table
+[2025-03-19 16:24:27] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:24:27] [DEBUG] Added variable 'suma' of type 'double'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'suma' as declared
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 5
+[2025-03-19 16:24:27] [DEBUG] Variable 'resta' not found in table
+[2025-03-19 16:24:27] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:24:27] [DEBUG] Added variable 'resta' of type 'double'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'resta' as declared
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 5
+[2025-03-19 16:24:27] [DEBUG] Variable 'producto' not found in table
+[2025-03-19 16:24:27] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:24:27] [DEBUG] Added variable 'producto' of type 'double'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'producto' as declared
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 5
+[2025-03-19 16:24:27] [DEBUG] Variable 'division' not found in table
+[2025-03-19 16:24:27] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:24:27] [DEBUG] Added variable 'division' of type 'double'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'division' as declared
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 5
+[2025-03-19 16:24:27] [DEBUG] Variable 'edad' not found in table
+[2025-03-19 16:24:27] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:24:27] [DEBUG] Added variable 'edad' of type 'int'
+[2025-03-19 16:24:27] [DEBUG] Marked variable 'edad' as declared
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 8
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [DEBUG] Compiling node of type 15
+[2025-03-19 16:24:27] [INFO] Compilation completed. Processed 22 nodes, 0 functions, 28 variables
+[2025-03-19 16:24:27] [INFO] Compiler statistics: 22 nodes processed, 0 functions compiled
+[2025-03-19 16:24:27] [INFO] Compiling C code to executable...
+[2025-03-19 16:24:27] [INFO] Compiling C code 'test.c' to executable 'test.out'
+[2025-03-19 16:24:27] [DEBUG] Executing compiler command: gcc -o test.out test.c -lm -Wall
+[2025-03-19 16:24:27] [INFO] C compilation successful
+[2025-03-19 16:24:27] [INFO] Running compiled program...
+[2025-03-19 16:24:27] [ERROR] Program execution failed with return code: 139
+[2025-03-19 16:24:27] [ERROR] [test.lyn:0:0] Program execution failed
+[2025-03-19 16:24:27] [DEBUG] Cleaning up resources...
+[2025-03-19 16:24:27] [DEBUG] Starting to free AST tree
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 8
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:24:27] [DEBUG] Freed AST node of type 0
+[2025-03-19 16:24:27] [INFO] Compilation completed successfully
+
+========== SESIÓN DE LOG FINALIZADA 2025-03-19 16:24:27 ==========
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-19 16:25:52 ==========
+
+[2025-03-19 16:25:52] [INFO] Lyn compiler starting
+[2025-03-19 16:25:52] [INFO] Lexer debug level set to 1
+[2025-03-19 16:25:52] [INFO] Parser debug level set to 1
+[2025-03-19 16:25:52] [INFO] Compiler debug level set to 1
+[2025-03-19 16:25:52] [INFO] Optimizer debug level set to 1
+[2025-03-19 16:25:52] [INFO] Type system debug level set to 1
+[2025-03-19 16:25:52] [INFO] Global debug level set to 1
+[2025-03-19 16:25:52] [INFO] Starting compilation of test.lyn
+[2025-03-19 16:25:52] [INFO] Debug level: 1, Optimization level: 1
+[2025-03-19 16:25:52] [DEBUG] Output C file: test.c
+[2025-03-19 16:25:52] [DEBUG] Output executable: test.out
+[2025-03-19 16:25:52] [INFO] Reading source file: test.lyn
+[2025-03-19 16:25:52] [DEBUG] File read successfully: 217 bytes
+[2025-03-19 16:25:52] [INFO] Initializing compiler components
+[2025-03-19 16:25:52] [INFO] Lexer initialized with 41 keywords
+[2025-03-19 16:25:52] [INFO] Initializing lexer
+[2025-03-19 16:25:52] [INFO] Optimizer initialized with level 1
+[2025-03-19 16:25:52] [INFO] Parsing source code...
+[2025-03-19 16:25:52] [INFO] Starting to parse program
+[2025-03-19 16:25:52] [INFO] Program parsing complete: 14 nodes created, 8 statements
+[2025-03-19 16:25:52] [DEBUG] Source code read: 217 bytes
+[2025-03-19 16:25:52] [INFO] Source parsed successfully
+[2025-03-19 16:25:52] [INFO] Performing type checking...
+[2025-03-19 16:25:52] [WARNING] Type checking resulted in unknown type, proceeding with caution
+[2025-03-19 16:25:52] [INFO] Optimizing AST...
+[2025-03-19 16:25:52] [INFO] Starting AST optimization at level 1
+[2025-03-19 16:25:52] [DEBUG] Applying constant folding
+[2025-03-19 16:25:52] [DEBUG] Removing redundant statements
+[2025-03-19 16:25:52] [INFO] Optimization complete: 0 optimizations applied (0 constants folded, 0 redundant assignments, 0 dead code blocks)
+[2025-03-19 16:25:52] [INFO] Generating C code: test.c
+[2025-03-19 16:25:52] [INFO] Starting compilation to 'test.c'
+[2025-03-19 16:25:52] [DEBUG] Compiling node of type 0
+[2025-03-19 16:25:52] [INFO] Compiling program with 8 statements
+[2025-03-19 16:25:52] [DEBUG] Generating preamble with includes
+[2025-03-19 16:25:52] [DEBUG] Emitting constant definitions
+[2025-03-19 16:25:52] [DEBUG] Initializing global variables
+[2025-03-19 16:25:52] [DEBUG] Added variable 'error_caught' of type 'bool'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'error_caught' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'finally_executed' of type 'bool'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'finally_executed' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'sum' of type 'double'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'sum' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'product' of type 'double'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'product' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'int_val' of type 'int'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'int_val' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'float_val' of type 'float'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'float_val' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'sum_val' of type 'double'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'sum_val' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'p1' of type 'Point*'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'p1' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'p2' of type 'Point*'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'p2' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'v1' of type 'Vector3*'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'v1' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'c1' of type 'Circle*'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'c1' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'i' of type 'int'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'i' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'j' of type 'int'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'j' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'count' of type 'int'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'count' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'do_while_count' of type 'int'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'do_while_count' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'day' of type 'int'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'day' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'int_array' of type 'int*'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'int_array' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'float_array' of type 'float*'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'float_array' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'mixed_array' of type 'double*'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'mixed_array' as declared
+[2025-03-19 16:25:52] [DEBUG] Added variable 'day_name' of type 'const char*'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'day_name' as declared
+[2025-03-19 16:25:52] [DEBUG] Compiling node of type 5
+[2025-03-19 16:25:52] [DEBUG] Variable 'texto' not found in table
+[2025-03-19 16:25:52] [DEBUG] Inferred type for node type 2: const char*
+[2025-03-19 16:25:52] [DEBUG] Added variable 'texto' of type 'const char*'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'texto' as declared
+[2025-03-19 16:25:52] [DEBUG] Compiling node of type 15
+[2025-03-19 16:25:52] [DEBUG] Compiling node of type 5
+[2025-03-19 16:25:52] [DEBUG] Variable 'numero' not found in table
+[2025-03-19 16:25:52] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:25:52] [DEBUG] Added variable 'numero' of type 'int'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'numero' as declared
+[2025-03-19 16:25:52] [DEBUG] Compiling node of type 15
+[2025-03-19 16:25:52] [DEBUG] Compiling node of type 5
+[2025-03-19 16:25:52] [DEBUG] Variable 'a' not found in table
+[2025-03-19 16:25:52] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:25:52] [DEBUG] Added variable 'a' of type 'int'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'a' as declared
+[2025-03-19 16:25:52] [DEBUG] Compiling node of type 5
+[2025-03-19 16:25:52] [DEBUG] Variable 'b' not found in table
+[2025-03-19 16:25:52] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:25:52] [DEBUG] Added variable 'b' of type 'int'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'b' as declared
+[2025-03-19 16:25:52] [DEBUG] Compiling node of type 5
+[2025-03-19 16:25:52] [DEBUG] Variable 'c' not found in table
+[2025-03-19 16:25:52] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:25:52] [DEBUG] Added variable 'c' of type 'double'
+[2025-03-19 16:25:52] [DEBUG] Marked variable 'c' as declared
+[2025-03-19 16:25:52] [DEBUG] Compiling node of type 15
+[2025-03-19 16:25:52] [INFO] Compilation completed. Processed 8 nodes, 0 functions, 25 variables
+[2025-03-19 16:25:52] [INFO] Compiler statistics: 8 nodes processed, 0 functions compiled
+[2025-03-19 16:25:52] [INFO] Compiling C code to executable...
+[2025-03-19 16:25:52] [INFO] Compiling C code 'test.c' to executable 'test.out'
+[2025-03-19 16:25:52] [DEBUG] Executing compiler command: gcc -o test.out test.c -lm -Wall
+[2025-03-19 16:25:52] [INFO] C compilation successful
+[2025-03-19 16:25:52] [INFO] Running compiled program...
+[2025-03-19 16:25:52] [INFO] Program executed successfully
+[2025-03-19 16:25:52] [DEBUG] Cleaning up resources...
+[2025-03-19 16:25:52] [DEBUG] Starting to free AST tree
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:25:52] [DEBUG] Freed AST node of type 0
+[2025-03-19 16:25:52] [INFO] Compilation completed successfully
+
+========== SESIÓN DE LOG FINALIZADA 2025-03-19 16:25:52 ==========
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-19 16:28:11 ==========
+
+[2025-03-19 16:28:11] [INFO] Lyn compiler starting
+[2025-03-19 16:28:11] [INFO] Lexer debug level set to 1
+[2025-03-19 16:28:11] [INFO] Parser debug level set to 1
+[2025-03-19 16:28:11] [INFO] Compiler debug level set to 1
+[2025-03-19 16:28:11] [INFO] Optimizer debug level set to 1
+[2025-03-19 16:28:11] [INFO] Type system debug level set to 1
+[2025-03-19 16:28:11] [INFO] Global debug level set to 1
+[2025-03-19 16:28:11] [INFO] Starting compilation of test.lyn
+[2025-03-19 16:28:11] [INFO] Debug level: 1, Optimization level: 1
+[2025-03-19 16:28:11] [DEBUG] Output C file: test.c
+[2025-03-19 16:28:11] [DEBUG] Output executable: test.out
+[2025-03-19 16:28:11] [INFO] Reading source file: test.lyn
+[2025-03-19 16:28:11] [DEBUG] File read successfully: 1078 bytes
+[2025-03-19 16:28:11] [INFO] Initializing compiler components
+[2025-03-19 16:28:11] [INFO] Lexer initialized with 41 keywords
+[2025-03-19 16:28:11] [INFO] Initializing lexer
+[2025-03-19 16:28:11] [INFO] Optimizer initialized with level 1
+[2025-03-19 16:28:11] [INFO] Parsing source code...
+[2025-03-19 16:28:11] [INFO] Starting to parse program
+[2025-03-19 16:28:11] [INFO] Program parsing complete: 70 nodes created, 27 statements
+[2025-03-19 16:28:11] [DEBUG] Source code read: 1078 bytes
+[2025-03-19 16:28:11] [INFO] Source parsed successfully
+[2025-03-19 16:28:11] [INFO] Performing type checking...
+[2025-03-19 16:28:11] [WARNING] Type checking resulted in unknown type, proceeding with caution
+[2025-03-19 16:28:11] [INFO] Optimizing AST...
+[2025-03-19 16:28:11] [INFO] Starting AST optimization at level 1
+[2025-03-19 16:28:11] [DEBUG] Applying constant folding
+[2025-03-19 16:28:11] [DEBUG] Removing redundant statements
+[2025-03-19 16:28:11] [INFO] Optimization complete: 0 optimizations applied (0 constants folded, 0 redundant assignments, 0 dead code blocks)
+[2025-03-19 16:28:11] [INFO] Generating C code: test.c
+[2025-03-19 16:28:11] [INFO] Starting compilation to 'test.c'
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 0
+[2025-03-19 16:28:11] [INFO] Compiling program with 27 statements
+[2025-03-19 16:28:11] [DEBUG] Generating preamble with includes
+[2025-03-19 16:28:11] [DEBUG] Emitting constant definitions
+[2025-03-19 16:28:11] [DEBUG] Initializing global variables
+[2025-03-19 16:28:11] [DEBUG] Added variable 'error_caught' of type 'bool'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'error_caught' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'finally_executed' of type 'bool'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'finally_executed' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'sum' of type 'double'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'sum' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'product' of type 'double'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'product' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'int_val' of type 'int'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'int_val' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'float_val' of type 'float'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'float_val' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'sum_val' of type 'double'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'sum_val' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'p1' of type 'Point*'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'p1' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'p2' of type 'Point*'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'p2' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'v1' of type 'Vector3*'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'v1' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'c1' of type 'Circle*'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'c1' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'i' of type 'int'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'i' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'j' of type 'int'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'j' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'count' of type 'int'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'count' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'do_while_count' of type 'int'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'do_while_count' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'day' of type 'int'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'day' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'int_array' of type 'int*'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'int_array' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'float_array' of type 'float*'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'float_array' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'mixed_array' of type 'double*'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'mixed_array' as declared
+[2025-03-19 16:28:11] [DEBUG] Added variable 'day_name' of type 'const char*'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'day_name' as declared
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 5
+[2025-03-19 16:28:11] [DEBUG] Variable 'entero' not found in table
+[2025-03-19 16:28:11] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:28:11] [DEBUG] Added variable 'entero' of type 'int'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'entero' as declared
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 5
+[2025-03-19 16:28:11] [DEBUG] Variable 'decimal' not found in table
+[2025-03-19 16:28:11] [DEBUG] Inferred type for node type 1: double
+[2025-03-19 16:28:11] [DEBUG] Added variable 'decimal' of type 'double'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'decimal' as declared
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 5
+[2025-03-19 16:28:11] [DEBUG] Variable 'texto' not found in table
+[2025-03-19 16:28:11] [DEBUG] Inferred type for node type 2: const char*
+[2025-03-19 16:28:11] [DEBUG] Added variable 'texto' of type 'const char*'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'texto' as declared
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 5
+[2025-03-19 16:28:11] [DEBUG] Variable 'suma' not found in table
+[2025-03-19 16:28:11] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:28:11] [DEBUG] Added variable 'suma' of type 'double'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'suma' as declared
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 5
+[2025-03-19 16:28:11] [DEBUG] Variable 'resta' not found in table
+[2025-03-19 16:28:11] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:28:11] [DEBUG] Added variable 'resta' of type 'double'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'resta' as declared
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 5
+[2025-03-19 16:28:11] [DEBUG] Variable 'producto' not found in table
+[2025-03-19 16:28:11] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:28:11] [DEBUG] Added variable 'producto' of type 'double'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'producto' as declared
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 5
+[2025-03-19 16:28:11] [DEBUG] Variable 'division' not found in table
+[2025-03-19 16:28:11] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:28:11] [DEBUG] Added variable 'division' of type 'double'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'division' as declared
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 5
+[2025-03-19 16:28:11] [DEBUG] Variable 'valor' not found in table
+[2025-03-19 16:28:11] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:28:11] [DEBUG] Added variable 'valor' of type 'int'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'valor' as declared
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 8
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 5
+[2025-03-19 16:28:11] [DEBUG] Variable 'edad' not found in table
+[2025-03-19 16:28:11] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:28:11] [DEBUG] Added variable 'edad' of type 'int'
+[2025-03-19 16:28:11] [DEBUG] Marked variable 'edad' as declared
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 8
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [DEBUG] Compiling node of type 15
+[2025-03-19 16:28:11] [INFO] Compilation completed. Processed 30 nodes, 0 functions, 29 variables
+[2025-03-19 16:28:11] [INFO] Compiler statistics: 30 nodes processed, 0 functions compiled
+[2025-03-19 16:28:11] [INFO] Compiling C code to executable...
+[2025-03-19 16:28:11] [INFO] Compiling C code 'test.c' to executable 'test.out'
+[2025-03-19 16:28:11] [DEBUG] Executing compiler command: gcc -o test.out test.c -lm -Wall
+[2025-03-19 16:28:11] [INFO] C compilation successful
+[2025-03-19 16:28:11] [INFO] Running compiled program...
+[2025-03-19 16:28:11] [INFO] Program executed successfully
+[2025-03-19 16:28:11] [DEBUG] Cleaning up resources...
+[2025-03-19 16:28:11] [DEBUG] Starting to free AST tree
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 8
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 8
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:28:11] [DEBUG] Freed AST node of type 0
+[2025-03-19 16:28:11] [INFO] Compilation completed successfully
+
+========== SESIÓN DE LOG FINALIZADA 2025-03-19 16:28:11 ==========
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-19 16:31:28 ==========
+
+[2025-03-19 16:31:28] [INFO] Lyn compiler starting
+[2025-03-19 16:31:28] [INFO] Lexer debug level set to 1
+[2025-03-19 16:31:28] [INFO] Parser debug level set to 1
+[2025-03-19 16:31:28] [INFO] Compiler debug level set to 1
+[2025-03-19 16:31:28] [INFO] Optimizer debug level set to 1
+[2025-03-19 16:31:28] [INFO] Type system debug level set to 1
+[2025-03-19 16:31:28] [INFO] Global debug level set to 1
+[2025-03-19 16:31:28] [INFO] Starting compilation of test.lyn
+[2025-03-19 16:31:28] [INFO] Debug level: 1, Optimization level: 1
+[2025-03-19 16:31:28] [DEBUG] Output C file: test.c
+[2025-03-19 16:31:28] [DEBUG] Output executable: test.out
+[2025-03-19 16:31:28] [INFO] Reading source file: test.lyn
+[2025-03-19 16:31:28] [DEBUG] File read successfully: 1171 bytes
+[2025-03-19 16:31:28] [INFO] Initializing compiler components
+[2025-03-19 16:31:28] [INFO] Lexer initialized with 41 keywords
+[2025-03-19 16:31:28] [INFO] Initializing lexer
+[2025-03-19 16:31:28] [INFO] Optimizer initialized with level 1
+[2025-03-19 16:31:28] [INFO] Parsing source code...
+[2025-03-19 16:31:28] [INFO] Starting to parse program
+[2025-03-19 16:31:28] [INFO] Program parsing complete: 70 nodes created, 31 statements
+[2025-03-19 16:31:28] [DEBUG] Source code read: 1171 bytes
+[2025-03-19 16:31:28] [INFO] Source parsed successfully
+[2025-03-19 16:31:28] [INFO] Performing type checking...
+[2025-03-19 16:31:28] [WARNING] Type checking resulted in unknown type, proceeding with caution
+[2025-03-19 16:31:28] [INFO] Optimizing AST...
+[2025-03-19 16:31:28] [INFO] Starting AST optimization at level 1
+[2025-03-19 16:31:28] [DEBUG] Applying constant folding
+[2025-03-19 16:31:28] [DEBUG] Removing redundant statements
+[2025-03-19 16:31:28] [INFO] Optimization complete: 0 optimizations applied (0 constants folded, 0 redundant assignments, 0 dead code blocks)
+[2025-03-19 16:31:28] [INFO] Generating C code: test.c
+[2025-03-19 16:31:28] [INFO] Starting compilation to 'test.c'
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 0
+[2025-03-19 16:31:28] [INFO] Compiling program with 31 statements
+[2025-03-19 16:31:28] [DEBUG] Generating preamble with includes
+[2025-03-19 16:31:28] [DEBUG] Emitting constant definitions
+[2025-03-19 16:31:28] [DEBUG] Initializing global variables
+[2025-03-19 16:31:28] [DEBUG] Added variable 'error_caught' of type 'bool'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'error_caught' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'finally_executed' of type 'bool'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'finally_executed' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'sum' of type 'double'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'sum' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'product' of type 'double'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'product' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'int_val' of type 'int'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'int_val' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'float_val' of type 'float'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'float_val' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'sum_val' of type 'double'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'sum_val' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'p1' of type 'Point*'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'p1' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'p2' of type 'Point*'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'p2' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'v1' of type 'Vector3*'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'v1' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'c1' of type 'Circle*'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'c1' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'i' of type 'int'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'i' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'j' of type 'int'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'j' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'count' of type 'int'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'count' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'do_while_count' of type 'int'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'do_while_count' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'day' of type 'int'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'day' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'int_array' of type 'int*'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'int_array' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'float_array' of type 'float*'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'float_array' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'mixed_array' of type 'double*'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'mixed_array' as declared
+[2025-03-19 16:31:28] [DEBUG] Added variable 'day_name' of type 'const char*'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'day_name' as declared
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 5
+[2025-03-19 16:31:28] [DEBUG] Variable 'entero' not found in table
+[2025-03-19 16:31:28] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:31:28] [DEBUG] Added variable 'entero' of type 'int'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'entero' as declared
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 5
+[2025-03-19 16:31:28] [DEBUG] Variable 'decimal' not found in table
+[2025-03-19 16:31:28] [DEBUG] Inferred type for node type 1: double
+[2025-03-19 16:31:28] [DEBUG] Added variable 'decimal' of type 'double'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'decimal' as declared
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 5
+[2025-03-19 16:31:28] [DEBUG] Variable 'texto' not found in table
+[2025-03-19 16:31:28] [DEBUG] Inferred type for node type 2: const char*
+[2025-03-19 16:31:28] [DEBUG] Added variable 'texto' of type 'const char*'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'texto' as declared
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 5
+[2025-03-19 16:31:28] [DEBUG] Variable 'suma' not found in table
+[2025-03-19 16:31:28] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:31:28] [DEBUG] Added variable 'suma' of type 'double'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'suma' as declared
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 5
+[2025-03-19 16:31:28] [DEBUG] Variable 'resta' not found in table
+[2025-03-19 16:31:28] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:31:28] [DEBUG] Added variable 'resta' of type 'double'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'resta' as declared
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 5
+[2025-03-19 16:31:28] [DEBUG] Variable 'producto' not found in table
+[2025-03-19 16:31:28] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:31:28] [DEBUG] Added variable 'producto' of type 'double'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'producto' as declared
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 5
+[2025-03-19 16:31:28] [DEBUG] Variable 'division' not found in table
+[2025-03-19 16:31:28] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:31:28] [DEBUG] Added variable 'division' of type 'double'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'division' as declared
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 5
+[2025-03-19 16:31:28] [DEBUG] Variable 'valor' not found in table
+[2025-03-19 16:31:28] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:31:28] [DEBUG] Added variable 'valor' of type 'int'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'valor' as declared
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 8
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 5
+[2025-03-19 16:31:28] [DEBUG] Variable 'edad' not found in table
+[2025-03-19 16:31:28] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:31:28] [DEBUG] Added variable 'edad' of type 'int'
+[2025-03-19 16:31:28] [DEBUG] Marked variable 'edad' as declared
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 8
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [DEBUG] Compiling node of type 15
+[2025-03-19 16:31:28] [INFO] Compilation completed. Processed 34 nodes, 0 functions, 29 variables
+[2025-03-19 16:31:28] [INFO] Compiler statistics: 34 nodes processed, 0 functions compiled
+[2025-03-19 16:31:28] [INFO] Compiling C code to executable...
+[2025-03-19 16:31:28] [INFO] Compiling C code 'test.c' to executable 'test.out'
+[2025-03-19 16:31:28] [DEBUG] Executing compiler command: gcc -o test.out test.c -lm -Wall
+[2025-03-19 16:31:28] [INFO] C compilation successful
+[2025-03-19 16:31:28] [INFO] Running compiled program...
+[2025-03-19 16:31:28] [INFO] Program executed successfully
+[2025-03-19 16:31:28] [DEBUG] Cleaning up resources...
+[2025-03-19 16:31:28] [DEBUG] Starting to free AST tree
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 8
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 8
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:31:28] [DEBUG] Freed AST node of type 0
+[2025-03-19 16:31:28] [INFO] Compilation completed successfully
+
+========== SESIÓN DE LOG FINALIZADA 2025-03-19 16:31:28 ==========
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-19 16:33:25 ==========
+
+[2025-03-19 16:33:25] [INFO] Lyn compiler starting
+[2025-03-19 16:33:25] [INFO] Lexer debug level set to 1
+[2025-03-19 16:33:25] [INFO] Parser debug level set to 1
+[2025-03-19 16:33:25] [INFO] Compiler debug level set to 1
+[2025-03-19 16:33:25] [INFO] Optimizer debug level set to 1
+[2025-03-19 16:33:25] [INFO] Type system debug level set to 1
+[2025-03-19 16:33:25] [INFO] Global debug level set to 1
+[2025-03-19 16:33:25] [INFO] Starting compilation of test.lyn
+[2025-03-19 16:33:25] [INFO] Debug level: 1, Optimization level: 1
+[2025-03-19 16:33:25] [DEBUG] Output C file: test.c
+[2025-03-19 16:33:25] [DEBUG] Output executable: test.out
+[2025-03-19 16:33:25] [INFO] Reading source file: test.lyn
+[2025-03-19 16:33:25] [DEBUG] File read successfully: 481 bytes
+[2025-03-19 16:33:25] [INFO] Initializing compiler components
+[2025-03-19 16:33:25] [INFO] Lexer initialized with 41 keywords
+[2025-03-19 16:33:25] [INFO] Initializing lexer
+[2025-03-19 16:33:25] [INFO] Optimizer initialized with level 1
+[2025-03-19 16:33:25] [INFO] Parsing source code...
+[2025-03-19 16:33:25] [INFO] Starting to parse program
+[2025-03-19 16:33:25] [INFO] Program parsing complete: 39 nodes created, 18 statements
+[2025-03-19 16:33:25] [DEBUG] Source code read: 481 bytes
+[2025-03-19 16:33:25] [INFO] Source parsed successfully
+[2025-03-19 16:33:25] [INFO] Performing type checking...
+[2025-03-19 16:33:25] [WARNING] Type checking resulted in unknown type, proceeding with caution
+[2025-03-19 16:33:25] [INFO] Optimizing AST...
+[2025-03-19 16:33:25] [INFO] Starting AST optimization at level 1
+[2025-03-19 16:33:25] [DEBUG] Applying constant folding
+[2025-03-19 16:33:25] [DEBUG] Removing redundant statements
+[2025-03-19 16:33:25] [INFO] Optimization complete: 0 optimizations applied (0 constants folded, 0 redundant assignments, 0 dead code blocks)
+[2025-03-19 16:33:25] [INFO] Generating C code: test.c
+[2025-03-19 16:33:25] [INFO] Starting compilation to 'test.c'
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 0
+[2025-03-19 16:33:25] [INFO] Compiling program with 18 statements
+[2025-03-19 16:33:25] [DEBUG] Generating preamble with includes
+[2025-03-19 16:33:25] [DEBUG] Emitting constant definitions
+[2025-03-19 16:33:25] [DEBUG] Initializing global variables
+[2025-03-19 16:33:25] [DEBUG] Added variable 'error_caught' of type 'bool'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'error_caught' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'finally_executed' of type 'bool'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'finally_executed' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'sum' of type 'double'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'sum' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'product' of type 'double'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'product' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'int_val' of type 'int'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'int_val' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'float_val' of type 'float'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'float_val' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'sum_val' of type 'double'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'sum_val' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'p1' of type 'Point*'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'p1' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'p2' of type 'Point*'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'p2' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'v1' of type 'Vector3*'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'v1' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'c1' of type 'Circle*'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'c1' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'i' of type 'int'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'i' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'j' of type 'int'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'j' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'count' of type 'int'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'count' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'do_while_count' of type 'int'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'do_while_count' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'day' of type 'int'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'day' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'int_array' of type 'int*'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'int_array' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'float_array' of type 'float*'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'float_array' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'mixed_array' of type 'double*'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'mixed_array' as declared
+[2025-03-19 16:33:25] [DEBUG] Added variable 'day_name' of type 'const char*'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'day_name' as declared
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 5
+[2025-03-19 16:33:25] [DEBUG] Variable 'a' not found in table
+[2025-03-19 16:33:25] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:33:25] [DEBUG] Added variable 'a' of type 'int'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'a' as declared
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 5
+[2025-03-19 16:33:25] [DEBUG] Variable 'b' not found in table
+[2025-03-19 16:33:25] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:33:25] [DEBUG] Added variable 'b' of type 'int'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'b' as declared
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 5
+[2025-03-19 16:33:25] [DEBUG] Variable 'c' not found in table
+[2025-03-19 16:33:25] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:33:25] [DEBUG] Added variable 'c' of type 'double'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'c' as declared
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 15
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 15
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 15
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 15
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 15
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 15
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 5
+[2025-03-19 16:33:25] [DEBUG] Variable 'd' not found in table
+[2025-03-19 16:33:25] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:33:25] [DEBUG] Added variable 'd' of type 'double'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'd' as declared
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 5
+[2025-03-19 16:33:25] [DEBUG] Variable 'e' not found in table
+[2025-03-19 16:33:25] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:33:25] [DEBUG] Added variable 'e' of type 'double'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'e' as declared
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 5
+[2025-03-19 16:33:25] [DEBUG] Variable 'f' not found in table
+[2025-03-19 16:33:25] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:33:25] [DEBUG] Added variable 'f' of type 'double'
+[2025-03-19 16:33:25] [DEBUG] Marked variable 'f' as declared
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 15
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 15
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 15
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 15
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 15
+[2025-03-19 16:33:25] [DEBUG] Compiling node of type 15
+[2025-03-19 16:33:25] [INFO] Compilation completed. Processed 18 nodes, 0 functions, 26 variables
+[2025-03-19 16:33:25] [INFO] Compiler statistics: 18 nodes processed, 0 functions compiled
+[2025-03-19 16:33:25] [INFO] Compiling C code to executable...
+[2025-03-19 16:33:25] [INFO] Compiling C code 'test.c' to executable 'test.out'
+[2025-03-19 16:33:25] [DEBUG] Executing compiler command: gcc -o test.out test.c -lm -Wall
+[2025-03-19 16:33:25] [INFO] C compilation successful
+[2025-03-19 16:33:25] [INFO] Running compiled program...
+[2025-03-19 16:33:25] [INFO] Program executed successfully
+[2025-03-19 16:33:25] [DEBUG] Cleaning up resources...
+[2025-03-19 16:33:25] [DEBUG] Starting to free AST tree
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:33:25] [DEBUG] Freed AST node of type 0
+[2025-03-19 16:33:25] [INFO] Compilation completed successfully
+
+========== SESIÓN DE LOG FINALIZADA 2025-03-19 16:33:25 ==========
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-19 16:46:24 ==========
+
+[2025-03-19 16:46:24] [INFO] Lyn compiler starting
+[2025-03-19 16:46:24] [INFO] Lexer debug level set to 1
+[2025-03-19 16:46:24] [INFO] Parser debug level set to 1
+[2025-03-19 16:46:24] [INFO] Compiler debug level set to 1
+[2025-03-19 16:46:24] [INFO] Optimizer debug level set to 1
+[2025-03-19 16:46:24] [INFO] Type system debug level set to 1
+[2025-03-19 16:46:24] [INFO] Global debug level set to 1
+[2025-03-19 16:46:24] [INFO] Starting compilation of test.lyn
+[2025-03-19 16:46:24] [INFO] Debug level: 1, Optimization level: 1
+[2025-03-19 16:46:24] [DEBUG] Output C file: test.c
+[2025-03-19 16:46:24] [DEBUG] Output executable: test.out
+[2025-03-19 16:46:24] [INFO] Reading source file: test.lyn
+[2025-03-19 16:46:24] [DEBUG] File read successfully: 1995 bytes
+[2025-03-19 16:46:24] [INFO] Initializing compiler components
+[2025-03-19 16:46:24] [INFO] Lexer initialized with 41 keywords
+[2025-03-19 16:46:24] [INFO] Initializing lexer
+[2025-03-19 16:46:24] [INFO] Optimizer initialized with level 1
+[2025-03-19 16:46:24] [INFO] Parsing source code...
+[2025-03-19 16:46:24] [INFO] Starting to parse program
+[2025-03-19 16:46:24] [INFO] Program parsing complete: 68 nodes created, 29 statements
+[2025-03-19 16:46:24] [DEBUG] Source code read: 1995 bytes
+[2025-03-19 16:46:24] [INFO] Source parsed successfully
+[2025-03-19 16:46:24] [INFO] Performing type checking...
+[2025-03-19 16:46:24] [WARNING] Type checking resulted in unknown type, proceeding with caution
+[2025-03-19 16:46:24] [INFO] Optimizing AST...
+[2025-03-19 16:46:24] [INFO] Starting AST optimization at level 1
+[2025-03-19 16:46:24] [DEBUG] Applying constant folding
+[2025-03-19 16:46:24] [DEBUG] Removing redundant statements
+[2025-03-19 16:46:24] [INFO] Optimization complete: 0 optimizations applied (0 constants folded, 0 redundant assignments, 0 dead code blocks)
+[2025-03-19 16:46:24] [INFO] Generating C code: test.c
+[2025-03-19 16:46:24] [INFO] Starting compilation to 'test.c'
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 0
+[2025-03-19 16:46:24] [INFO] Compiling program with 29 statements
+[2025-03-19 16:46:24] [DEBUG] Generating preamble with includes
+[2025-03-19 16:46:24] [DEBUG] Emitting constant definitions
+[2025-03-19 16:46:24] [DEBUG] Initializing global variables
+[2025-03-19 16:46:24] [DEBUG] Added variable 'error_caught' of type 'bool'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'error_caught' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'finally_executed' of type 'bool'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'finally_executed' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'sum' of type 'double'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'sum' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'product' of type 'double'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'product' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'int_val' of type 'int'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'int_val' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'float_val' of type 'float'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'float_val' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'sum_val' of type 'double'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'sum_val' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'p1' of type 'Point*'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'p1' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'p2' of type 'Point*'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'p2' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'v1' of type 'Vector3*'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'v1' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'c1' of type 'Circle*'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'c1' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'i' of type 'int'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'i' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'j' of type 'int'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'j' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'count' of type 'int'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'count' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'do_while_count' of type 'int'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'do_while_count' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'day' of type 'int'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'day' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'int_array' of type 'int*'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'int_array' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'float_array' of type 'float*'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'float_array' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'mixed_array' of type 'double*'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'mixed_array' as declared
+[2025-03-19 16:46:24] [DEBUG] Added variable 'day_name' of type 'const char*'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'day_name' as declared
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 5
+[2025-03-19 16:46:24] [DEBUG] Variable 'entero' not found in table
+[2025-03-19 16:46:24] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:46:24] [DEBUG] Added variable 'entero' of type 'int'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'entero' as declared
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 5
+[2025-03-19 16:46:24] [DEBUG] Variable 'decimal' not found in table
+[2025-03-19 16:46:24] [DEBUG] Inferred type for node type 1: double
+[2025-03-19 16:46:24] [DEBUG] Added variable 'decimal' of type 'double'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'decimal' as declared
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 5
+[2025-03-19 16:46:24] [DEBUG] Variable 'texto' not found in table
+[2025-03-19 16:46:24] [DEBUG] Inferred type for node type 2: const char*
+[2025-03-19 16:46:24] [DEBUG] Added variable 'texto' of type 'const char*'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'texto' as declared
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 5
+[2025-03-19 16:46:24] [DEBUG] Variable 'suma' not found in table
+[2025-03-19 16:46:24] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:46:24] [DEBUG] Added variable 'suma' of type 'double'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'suma' as declared
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 5
+[2025-03-19 16:46:24] [DEBUG] Variable 'resta' not found in table
+[2025-03-19 16:46:24] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:46:24] [DEBUG] Added variable 'resta' of type 'double'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'resta' as declared
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 5
+[2025-03-19 16:46:24] [DEBUG] Variable 'producto' not found in table
+[2025-03-19 16:46:24] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:46:24] [DEBUG] Added variable 'producto' of type 'double'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'producto' as declared
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 5
+[2025-03-19 16:46:24] [DEBUG] Variable 'division' not found in table
+[2025-03-19 16:46:24] [DEBUG] Inferred type for node type 12: double
+[2025-03-19 16:46:24] [DEBUG] Added variable 'division' of type 'double'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'division' as declared
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 5
+[2025-03-19 16:46:24] [DEBUG] Variable 'valor' not found in table
+[2025-03-19 16:46:24] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:46:24] [DEBUG] Added variable 'valor' of type 'int'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'valor' as declared
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 8
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 5
+[2025-03-19 16:46:24] [DEBUG] Variable 'edad' not found in table
+[2025-03-19 16:46:24] [DEBUG] Inferred type for node type 1: int
+[2025-03-19 16:46:24] [DEBUG] Added variable 'edad' of type 'int'
+[2025-03-19 16:46:24] [DEBUG] Marked variable 'edad' as declared
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 8
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [DEBUG] Compiling node of type 15
+[2025-03-19 16:46:24] [INFO] Compilation completed. Processed 33 nodes, 0 functions, 29 variables
+[2025-03-19 16:46:24] [INFO] Compiler statistics: 33 nodes processed, 0 functions compiled
+[2025-03-19 16:46:24] [INFO] Compiling C code to executable...
+[2025-03-19 16:46:24] [INFO] Compiling C code 'test.c' to executable 'test.out'
+[2025-03-19 16:46:24] [DEBUG] Executing compiler command: gcc -o test.out test.c -lm -Wall
+[2025-03-19 16:46:24] [INFO] C compilation successful
+[2025-03-19 16:46:24] [INFO] Running compiled program...
+[2025-03-19 16:46:24] [INFO] Program executed successfully
+[2025-03-19 16:46:24] [DEBUG] Cleaning up resources...
+[2025-03-19 16:46:24] [DEBUG] Starting to free AST tree
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 8
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 5
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 3
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 1
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 12
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 8
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 2
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 15
+[2025-03-19 16:46:24] [DEBUG] Freed AST node of type 0
+[2025-03-19 16:46:24] [INFO] Compilation completed successfully
+
+========== SESIÓN DE LOG FINALIZADA 2025-03-19 16:46:24 ==========

@@ -46,7 +46,10 @@ typedef enum {
     AST_ADVICE,           // Advice declaration
     AST_BEFORE,           // Add if not exists
     AST_AFTER,            // Add if not exists
-    AST_AROUND            // Add if not exists
+    AST_AROUND,           // Add if not exists
+    AST_ARRAY_ACCESS,     // Nodo para acceso a arreglos
+    AST_BOOLEAN_LITERAL,  // Nodo para literal booleano
+    AST_UNARY_OP          // Nodo para operación unaria
 } AstNodeType;
 
 // Enumerador para operadores binarios (usando el carácter)
@@ -320,6 +323,23 @@ typedef struct AstNode {
             struct AstNode** body;       // Código del advice
             int bodyCount;
         } advice;
+        
+        // Nodo para acceso a arreglos: array[index]
+        struct {
+            struct AstNode *array;  // Expresión del arreglo
+            struct AstNode *index;  // Expresión del índice
+        } arrayAccess;
+        
+        // Nodo para literal booleano
+        struct {
+            bool value;  // true o false
+        } boolLiteral;
+        
+        // Nodo para operación unaria
+        struct {
+            char op;             // Operador ('N' para not)
+            struct AstNode *expr;  // Expresión
+        } unaryOp;
         
     };
 } AstNode;

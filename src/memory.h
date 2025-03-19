@@ -22,6 +22,9 @@ void* memory_alloc(size_t size);
 void* memory_realloc(void* ptr, size_t new_size);
 void memory_free(void* ptr);
 
+// String functions
+char* memory_strdup(const char* str);
+
 /* ============================
    Memory Pooling para Objetos Fijos
    ============================ */

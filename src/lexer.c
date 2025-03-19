@@ -23,6 +23,64 @@ static int col = 1;
 // Nivel de depuración (0=mínimo, 3=máximo)
 static int debug_level = 1;
 
+// Hash table for keywords
+#define KEYWORD_TABLE_SIZE 101
+static struct {
+    char* keyword;
+    TokenType type;
+} keyword_table[KEYWORD_TABLE_SIZE];
+static int keyword_count = 0;
+
+// Function to insert a keyword into the hash table
+static void insertKeyword(const char* word, TokenType type) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)insertKeyword);
+    
+    if (keyword_count >= KEYWORD_TABLE_SIZE) {
+        logger_log(LOG_ERROR, "Keyword table is full, cannot add more keywords");
+        return;
+    }
+    
+    keyword_table[keyword_count].keyword = memory_strdup(word);
+    keyword_table[keyword_count].type = type;
+    keyword_count++;
+    
+    if (debug_level >= 3) {
+        logger_log(LOG_DEBUG, "Added keyword '%s' with token type %d", word, type);
+    }
+}
+
+// Function to look up a keyword in the hash table
+static TokenType lookupKeyword(const char* word) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)lookupKeyword);
+    
+    for (int i = 0; i < keyword_count; i++) {
+        if (strcmp(keyword_table[i].keyword, word) == 0) {
+            return keyword_table[i].type;
+        }
+    }
+    
+    return TOKEN_IDENTIFIER; // Not found, treat as identifier
+}
+
+// Forward declaration of the initializeKeywords function
+static void initializeKeywords(void);
+
+// Initialize the lexer by setting up keywords
+void lexerInitialize() {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)lexerInitialize);
+    
+    // Reset keyword table
+    for (int i = 0; i < keyword_count; i++) {
+        memory_free(keyword_table[i].keyword);
+    }
+    keyword_count = 0;
+    
+    // Add keywords
+    initializeKeywords();
+    
+    logger_log(LOG_INFO, "Lexer initialized with %d keywords", keyword_count);
+}
+
 /**
  * @brief Inicializa el lexer con la fuente de entrada.
  *
@@ -191,52 +249,8 @@ Token getNextToken(void) {
         strncpy(token.lexeme, source + start, length);
         token.lexeme[length] = '\0';
 
-        // Verificación de palabras clave (código existente)
-        // ...existing code for keyword checks...
-        
-        if (strcmp(token.lexeme, "func") == 0) token.type = TOKEN_FUNC;
-        else if (strcmp(token.lexeme, "return") == 0) token.type = TOKEN_RETURN;
-        else if (strcmp(token.lexeme, "print") == 0) token.type = TOKEN_PRINT;
-        else if (strcmp(token.lexeme, "class") == 0) token.type = TOKEN_CLASS;
-        else if (strcmp(token.lexeme, "if") == 0) token.type = TOKEN_IF;
-        else if (strcmp(token.lexeme, "else") == 0) token.type = TOKEN_ELSE;
-        else if (strcmp(token.lexeme, "for") == 0) token.type = TOKEN_FOR;
-        else if (strcmp(token.lexeme, "in") == 0) token.type = TOKEN_IN;
-        else if (strcmp(token.lexeme, "end") == 0) token.type = TOKEN_END;
-        else if (strcmp(token.lexeme, "import") == 0) token.type = TOKEN_IMPORT;
-        else if (strcmp(token.lexeme, "ui") == 0) token.type = TOKEN_UI;
-        else if (strcmp(token.lexeme, "css") == 0) token.type = TOKEN_CSS;
-        else if (strcmp(token.lexeme, "register_event") == 0) token.type = TOKEN_REGISTER_EVENT;
-        else if (strcmp(token.lexeme, "range") == 0) token.type = TOKEN_RANGE;
-        else if (strcmp(token.lexeme, "int") == 0) {
-            token.type = TOKEN_INT;
-            DBG_PRINT("Detected token: int as TOKEN_INT\n");
-        }
-        else if (strcmp(token.lexeme, "float") == 0) token.type = TOKEN_FLOAT;
-        else if (strcmp(token.lexeme, "module") == 0) token.type = TOKEN_MODULE;
-        else if (strcmp(token.lexeme, "export") == 0) token.type = TOKEN_EXPORT;
-        // New keywords for control structures
-        else if (strcmp(token.lexeme, "while") == 0) token.type = TOKEN_WHILE;
-        else if (strcmp(token.lexeme, "do") == 0) token.type = TOKEN_DO;
-        else if (strcmp(token.lexeme, "switch") == 0) token.type = TOKEN_SWITCH;
-        else if (strcmp(token.lexeme, "case") == 0) token.type = TOKEN_CASE;
-        else if (strcmp(token.lexeme, "default") == 0) token.type = TOKEN_DEFAULT;
-        else if (strcmp(token.lexeme, "break") == 0) token.type = TOKEN_BREAK;
-        else if (strcmp(token.lexeme, "try") == 0) token.type = TOKEN_TRY;
-        else if (strcmp(token.lexeme, "catch") == 0) token.type = TOKEN_CATCH;
-        else if (strcmp(token.lexeme, "finally") == 0) token.type = TOKEN_FINALLY;
-        else if (strcmp(token.lexeme, "throw") == 0) token.type = TOKEN_THROW;
-        else if (strcmp(token.lexeme, "match") == 0) token.type = TOKEN_MATCH;
-        else if (strcmp(token.lexeme, "when") == 0) token.type = TOKEN_WHEN;
-        else if (strcmp(token.lexeme, "otherwise") == 0) token.type = TOKEN_OTHERWISE;
-        // Añadir nuevos tokens para aspectos antes del else token.type = TOKEN_IDENTIFIER
-        else if (strcmp(token.lexeme, "aspect") == 0) token.type = TOKEN_ASPECT;
-        else if (strcmp(token.lexeme, "pointcut") == 0) token.type = TOKEN_POINTCUT;
-        else if (strcmp(token.lexeme, "advice") == 0) token.type = TOKEN_ADVICE;
-        else if (strcmp(token.lexeme, "before") == 0) token.type = TOKEN_BEFORE;
-        else if (strcmp(token.lexeme, "after") == 0) token.type = TOKEN_AFTER;
-        else if (strcmp(token.lexeme, "around") == 0) token.type = TOKEN_AROUND;
-        else token.type = TOKEN_IDENTIFIER;
+        // Use the lookup function to determine if it's a keyword
+        token.type = lookupKeyword(token.lexeme);
         
         // Log del token reconocido
         if (debug_level >= 2) {
@@ -409,11 +423,13 @@ Token getNextToken(void) {
             break;
         case '[':
             token.type = TOKEN_LBRACKET;
-            strcpy(token.lexeme, "[");
+            token.lexeme[0] = '[';
+            token.lexeme[1] = '\0';
             break;
         case ']':
             token.type = TOKEN_RBRACKET;
-            strcpy(token.lexeme, "]");
+            token.lexeme[0] = ']';
+            token.lexeme[1] = '\0';
             break;
         case '{':   // Add this case
             token.type = TOKEN_LBRACE;
@@ -484,10 +500,11 @@ const char* tokenTypeToString(TokenType type) {
         "TOKEN_THROW", "TOKEN_MATCH", "TOKEN_WHEN", "TOKEN_OTHERWISE",
         "TOKEN_COMPOSE", "TOKEN_STRINGIFY", "TOKEN_ASPECT",
         "TOKEN_POINTCUT", "TOKEN_ADVICE", "TOKEN_BEFORE",
-        "TOKEN_AFTER", "TOKEN_AROUND"
+        "TOKEN_AFTER", "TOKEN_AROUND", "TOKEN_TRUE", "TOKEN_FALSE",
+        "TOKEN_AND", "TOKEN_OR"
     };
     
-    if (type >= 0 && type <= TOKEN_AROUND) {
+    if (type >= 0 && type <= TOKEN_OR) {
         return tokenNames[type];
     }
     return "UNKNOWN_TOKEN_TYPE";
@@ -496,4 +513,66 @@ const char* tokenTypeToString(TokenType type) {
 void lexer_set_debug_level(int level) {
     debug_level = level;
     logger_log(LOG_INFO, "Lexer debug level set to %d", level);
+}
+
+/* initializeKeywords: Inicializa la tabla hash de palabras clave */
+static void initializeKeywords(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)initializeKeywords);
+    
+    // Basic keywords
+    insertKeyword("func", TOKEN_FUNC);
+    insertKeyword("return", TOKEN_RETURN);
+    insertKeyword("print", TOKEN_PRINT);
+    insertKeyword("class", TOKEN_CLASS);
+    insertKeyword("if", TOKEN_IF);
+    insertKeyword("else", TOKEN_ELSE);
+    insertKeyword("for", TOKEN_FOR);
+    insertKeyword("in", TOKEN_IN);
+    insertKeyword("end", TOKEN_END);
+    insertKeyword("import", TOKEN_IMPORT);
+    insertKeyword("ui", TOKEN_UI);
+    insertKeyword("css", TOKEN_CSS);
+    insertKeyword("register_event", TOKEN_REGISTER_EVENT);
+    insertKeyword("range", TOKEN_RANGE);
+    insertKeyword("int", TOKEN_INT);
+    insertKeyword("float", TOKEN_FLOAT);
+    insertKeyword("module", TOKEN_MODULE);
+    insertKeyword("export", TOKEN_EXPORT);
+    
+    // Control flow keywords
+    insertKeyword("while", TOKEN_WHILE);
+    insertKeyword("do", TOKEN_DO);
+    insertKeyword("switch", TOKEN_SWITCH);
+    insertKeyword("case", TOKEN_CASE);
+    insertKeyword("default", TOKEN_DEFAULT);
+    insertKeyword("break", TOKEN_BREAK);
+    
+    // Exception handling
+    insertKeyword("try", TOKEN_TRY);
+    insertKeyword("catch", TOKEN_CATCH);
+    insertKeyword("finally", TOKEN_FINALLY);
+    insertKeyword("throw", TOKEN_THROW);
+    
+    // Pattern matching
+    insertKeyword("match", TOKEN_MATCH);
+    insertKeyword("when", TOKEN_WHEN);
+    insertKeyword("otherwise", TOKEN_OTHERWISE);
+    
+    // AOP keywords
+    insertKeyword("aspect", TOKEN_ASPECT);
+    insertKeyword("pointcut", TOKEN_POINTCUT);
+    insertKeyword("advice", TOKEN_ADVICE);
+    insertKeyword("before", TOKEN_BEFORE);
+    insertKeyword("after", TOKEN_AFTER);
+    insertKeyword("around", TOKEN_AROUND);
+    
+    // Boolean literals and operators
+    insertKeyword("true", TOKEN_TRUE);
+    insertKeyword("false", TOKEN_FALSE);
+    insertKeyword("and", TOKEN_AND);
+    insertKeyword("or", TOKEN_OR);
+    
+    if (debug_level >= 2) {
+        logger_log(LOG_DEBUG, "Initialized %d keywords", keyword_count);
+    }
 }

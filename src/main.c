@@ -224,6 +224,10 @@ int main(int argc, char* argv[]) {
 
     // Initialize core components
     logger_log(LOG_INFO, "Initializing compiler components");
+    
+    // Initialize the lexer before using it
+    lexerInitialize();
+    
     lexerInit(source);
     optimizer_init((OptimizerLevel)optimization_level);
 

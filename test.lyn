@@ -1,10 +1,74 @@
+// ************************************************************************
+// * Basic Testing Script for Lyn Language
+// ************************************************************************
+
 main
-    // Solo variables simples y operaciones básicas
-    a = 5
-    b = 3
-    c = a + b
+    // ===================================================================
+    // Variables and Type Tests
+    // ===================================================================
     
-    // Print simple
-    print("Resultado:")
-    print(c)
+    // Basic variable assignments
+    entero = 42               // Integer value
+    decimal = 3.14            // Floating point value
+    texto = "Hola, Lyn!"      // String value
+    
+    // Print variable values
+    print("\n=== Variables and their values ===")
+    print("entero = ")
+    print(entero)
+    print("decimal = ")
+    print(decimal)
+    print("texto = ")
+    print(texto)
+    
+    // ===================================================================
+    // Arithmetic Operations
+    // ===================================================================
+    
+    print("\n=== Arithmetic operations ===")
+    
+    // Addition
+    suma = 5 + 3
+    print("5 + 3 = ")
+    print(suma)
+    
+    // Subtraction
+    resta = 10 - 4
+    print("10 - 4 = ")
+    print(resta)
+    
+    // Multiplication
+    producto = 3 * 7
+    print("3 * 7 = ")
+    print(producto)
+    
+    // Division
+    division = 20 / 4
+    print("20 / 4 = ")
+    print(division)
+    
+    // ===================================================================
+    // Control Flow
+    // ===================================================================
+    
+    print("\n=== Control flow statements ===")
+    
+    // If-else statement
+    valor = 42
+    
+    if (valor > 10)
+        print("valor is greater than 10")
+    else
+        print("valor is less than or equal to 10")
+    end
+    
+    // Another if-else with a different condition
+    edad = 25
+    if (edad >= 18)
+        print("You are an adult")
+    else
+        print("You are not yet an adult")
+    end
+    
+    print("\n=== Test completed successfully! ===")
 end

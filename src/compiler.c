@@ -567,7 +567,28 @@ static void compileNode(AstNode* node) {
                 const char* type = inferType(node->varAssign.initializer);
                 addVariable(node->varAssign.name, type);
                 markVariableDeclared(node->varAssign.name);
-                emit("%s %s = ", type, node->varAssign.name);
+                
+                // For numeric literals, directly use the value to avoid garbage values
+                if (node->varAssign.initializer->type == AST_NUMBER_LITERAL) {
+                    double value = node->varAssign.initializer->numberLiteral.value;
+                    if (value == (int)value) {
+                        emitLine("int %s = %d;", node->varAssign.name, (int)value);
+                    } else {
+                        emitLine("double %s = %g;", node->varAssign.name, value);
+                    }
+                    return;
+                }
+                // For binary operations, make sure we evaluate them properly
+                else if (node->varAssign.initializer->type == AST_BINARY_OP) {
+                    emitLine("%s %s;", type, node->varAssign.name);
+                    emit("%s = ", node->varAssign.name);
+                    compileExpression(node->varAssign.initializer);
+                    emitLine(";");
+                    return;
+                }
+                else {
+                    emit("%s %s = ", type, node->varAssign.name);
+                }
             } else {
                 emit("%s = ", node->varAssign.name);
             }
@@ -837,6 +858,7 @@ static void compileMemberAccess(AstNode* node) {
     }
 }
 
+/* Genera código para la sentencia print */
 static void compilePrintStmt(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)compilePrintStmt);
     
@@ -844,65 +866,59 @@ static void compilePrintStmt(AstNode* node) {
         emitLine("printf(\"NULL\\n\");");
         return;
     }
-    if (node->printStmt.expr->type == AST_STRING_LITERAL) {
-        emitLine("printf(\"%s\\n\");", node->printStmt.expr->stringLiteral.value);
-    } else if (node->printStmt.expr->type == AST_BINARY_OP &&
-               node->printStmt.expr->binaryOp.op == '+' &&
-               (node->printStmt.expr->binaryOp.left->type == AST_STRING_LITERAL ||
-                node->printStmt.expr->binaryOp.right->type == AST_STRING_LITERAL)) {
-        AstNode* left = node->printStmt.expr->binaryOp.left;
-        AstNode* right = node->printStmt.expr->binaryOp.right;
-        emitLine("{");
-        indent();
-        emitLine("char _buffer[512];");
-        if (left->type == AST_STRING_LITERAL) {
-            emitLine("strcpy(_buffer, \"%s\");", left->stringLiteral.value);
-        } else if (left->type == AST_IDENTIFIER) {
-            emitLine("sprintf(_buffer, \"%%s\", %s);", left->identifier.name);
+    
+    // Special handling for variables to print their correct type
+    if (node->printStmt.expr->type == AST_IDENTIFIER) {
+        const char* varName = node->printStmt.expr->identifier.name;
+        const char* varType = getVariableType(varName);
+        
+        if (strcmp(varType, "const char*") == 0) {
+            emitLine("printf(\"%%s\\n\", %s);", varName);
+        } else if (strcmp(varType, "int") == 0) {
+            emitLine("printf(\"%%d\\n\", %s);", varName);
         } else {
-            emitLine("sprintf(_buffer, \"%%g\", ");
-            compileExpression(left);
-            emit(");");
+            emitLine("printf(\"%%g\\n\", %s);", varName);
         }
-        if (right->type == AST_STRING_LITERAL) {
-            emitLine("strcat(_buffer, \"%s\");", right->stringLiteral.value);
-        } else if (right->type == AST_IDENTIFIER) {
-            emitLine("char _temp[256];");
-            emitLine("sprintf(_temp, \"%%s\", %s);", right->identifier.name);
-            emitLine("strcat(_buffer, _temp);");
-        } else {
-            emitLine("char _temp[256];");
-            emitLine("sprintf(_temp, \"%%g\", ");
-            compileExpression(right);
-            emit(");");
-            emitLine("strcat(_buffer, _temp);");
-        }
-        emitLine("printf(\"%%s\\n\", _buffer);");
-        outdent();
-        emitLine("}");
-    } else if (node->printStmt.expr->type == AST_FUNC_CALL) {
-        const char* funcName = node->printStmt.expr->funcCall.name;
-        if (strcmp(funcName, "Point_distance") == 0 || 
-            strcmp(funcName, "Vector3_magnitude") == 0 || 
-            strcmp(funcName, "Circle_area") == 0) {
-            emitLine("{");
-            indent();
-            emit("double result = ");
-            compileFuncCall(node->printStmt.expr);
-            emitLine(";");
-            emitLine("printf(\"%%.6f\\n\", result);");
-            outdent();
-            emitLine("}");
-        } else {
-            emit("printf(\"%%g\\n\", ");
-            compileFuncCall(node->printStmt.expr);
-            emitLine(");");
-        }
-    } else {
-        emit("printf(\"%%g\\n\", ");
-        compileExpression(node->printStmt.expr);
-        emitLine(");");
+        return;
     }
+    
+    // Direct output for literals
+    if (node->printStmt.expr->type == AST_STRING_LITERAL) {
+        emitLine("printf(\"%%s\\n\", \"%s\");", node->printStmt.expr->stringLiteral.value);
+        return;
+    }
+    
+    if (node->printStmt.expr->type == AST_NUMBER_LITERAL) {
+        double value = node->printStmt.expr->numberLiteral.value;
+        if (value == (int)value) {
+            emitLine("printf(\"%%d\\n\", %d);", (int)value);
+        } else {
+            emitLine("printf(\"%%g\\n\", %g);", value);
+        }
+        return;
+    }
+    
+    // For other expression types, evaluate and then print
+    emitLine("{");
+    indent();
+    
+    // Create a temporary variable of the appropriate type
+    const char* exprType = inferType(node->printStmt.expr);
+    emitLine("%s _result;", exprType);
+    emit("_result = ");
+    compileExpression(node->printStmt.expr);
+    emitLine(";");
+    
+    if (strcmp(exprType, "int") == 0) {
+        emitLine("printf(\"%%d\\n\", _result);");
+    } else if (strcmp(exprType, "const char*") == 0) {
+        emitLine("printf(\"%%s\\n\", _result);");
+    } else {
+        emitLine("printf(\"%%g\\n\", _result);");
+    }
+    
+    outdent();
+    emitLine("}");
 }
 
 static void compileIf(AstNode* node) {

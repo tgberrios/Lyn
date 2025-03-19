@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
+#include <assert.h>
 
 #ifdef USE_GC
 #include <stdatomic.h>
@@ -141,6 +142,23 @@ void memory_free(void* ptr) {
     if (debug_level >= 3) {
         logger_log(LOG_DEBUG, "Freed memory at %p", ptr);
     }
+}
+
+/**
+ * @brief Duplicate a string with tracked memory
+ * 
+ * @param str String to duplicate
+ * @return char* New allocated string or NULL on failure
+ */
+char* memory_strdup(const char* str) {
+    if (!str) return NULL;
+    
+    size_t len = strlen(str) + 1;
+    char* new_str = memory_alloc(len);
+    if (new_str) {
+        memcpy(new_str, str, len);
+    }
+    return new_str;
 }
 
 /* ============================
@@ -401,6 +419,7 @@ void memory_dec_ref(void *ptr) {
             if (expected == 1) {
                 free(header);
                 globalFreeCount++;
+
                 if (debug_level >= 2) {
                     logger_log(LOG_DEBUG, "GC freed object %p (header: %p)", ptr, (void*)header);
                 }

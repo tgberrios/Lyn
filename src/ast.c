@@ -10,19 +10,28 @@
 // Eliminamos el stub para report_error ya que usaremos error_report directamente
 
 AstNode* createAstNode(AstNodeType type) {
-    AstNode* node = (AstNode*)malloc(sizeof(AstNode));
-    if (!node) {
-        error_report("AST", 0, 0, "Failed to allocate memory for AST node", ERROR_MEMORY);
-        return NULL;
-    }
+    AstNode* node = malloc(sizeof(AstNode));
+    if (!node) return NULL;
+    
+    memset(node, 0, sizeof(AstNode));
     node->type = type;
-    node->line = 0;
-    node->inferredType = NULL;
     
-    // Debug tracking
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)createAstNode);
+    // Initialize any fields that need specific initialization
+    switch (type) {
+        case AST_ARRAY_ACCESS:
+            node->arrayAccess.array = NULL;
+            node->arrayAccess.index = NULL;
+            break;
+        case AST_BOOLEAN_LITERAL:
+            node->boolLiteral.value = false;
+            break;
+        case AST_UNARY_OP:
+            node->unaryOp.op = 0;
+            node->unaryOp.expr = NULL;
+            break;
+        // ...handle other node types...
+    }
     
-    logger_log(LOG_DEBUG, "Created AST node of type %d", type);
     return node;
 }
 

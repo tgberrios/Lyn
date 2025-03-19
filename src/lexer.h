@@ -51,37 +51,41 @@ typedef enum {
     TOKEN_UNKNOWN,         // 39: Caracteres no reconocidos
     TOKEN_LBRACKET,        // 40: [
     TOKEN_RBRACKET,        // 41: ]
-    TOKEN_COLON,           // 42: :
-    TOKEN_MODULE,          // 43: module
-    TOKEN_EXPORT,          // 44: export
-    TOKEN_LBRACE,          // 45: {
-    TOKEN_RBRACE,          // 46: }
-    TOKEN_INVALID,         // 47: Invalid token
+    TOKEN_TRUE,            // 42: true
+    TOKEN_FALSE,           // 43: false
+    TOKEN_AND,             // 44: and
+    TOKEN_OR,              // 45: or
+    TOKEN_COLON,           // 46: :
+    TOKEN_MODULE,          // 47: module
+    TOKEN_EXPORT,          // 48: export
+    TOKEN_LBRACE,          // 49: {
+    TOKEN_RBRACE,          // 50: }
+    TOKEN_INVALID,         // 51: Invalid token
     // New token types for control structures
-    TOKEN_WHILE,           // 48: while
-    TOKEN_DO,              // 49: do
-    TOKEN_SWITCH,          // 50: switch
-    TOKEN_CASE,            // 51: case
-    TOKEN_DEFAULT,         // 52: default
-    TOKEN_BREAK,           // 53: break
-    TOKEN_TRY,             // 54: try
-    TOKEN_CATCH,           // 55: catch
-    TOKEN_FINALLY,         // 56: finally
-    TOKEN_THROW,           // 57: throw
-    TOKEN_MATCH,           // 58: match
-    TOKEN_WHEN,            // 59: when
-    TOKEN_OTHERWISE,       // 60: otherwise
-    TOKEN_COMPOSE,         // 61: >> (function composition)
-    TOKEN_MACRO,           // 62: macro
-    TOKEN_EXPAND,          // 63: expand
-    TOKEN_CONCAT,          // 64: ## (macro concatenation)
-    TOKEN_STRINGIFY,       // 65: # (macro stringification)
-    TOKEN_ASPECT,          // 66: aspect
-    TOKEN_POINTCUT,        // 67: pointcut
-    TOKEN_ADVICE,          // 68: advice
-    TOKEN_BEFORE,          // 69: before
-    TOKEN_AFTER,           // 70: after
-    TOKEN_AROUND           // 71: around
+    TOKEN_WHILE,           // 52: while
+    TOKEN_DO,              // 53: do
+    TOKEN_SWITCH,          // 54: switch
+    TOKEN_CASE,            // 55: case
+    TOKEN_DEFAULT,         // 56: default
+    TOKEN_BREAK,           // 57: break
+    TOKEN_TRY,             // 58: try
+    TOKEN_CATCH,           // 59: catch
+    TOKEN_FINALLY,         // 60: finally
+    TOKEN_THROW,           // 61: throw
+    TOKEN_MATCH,           // 62: match
+    TOKEN_WHEN,            // 63: when
+    TOKEN_OTHERWISE,       // 64: otherwise
+    TOKEN_COMPOSE,         // 65: >> (function composition)
+    TOKEN_MACRO,           // 66: macro
+    TOKEN_EXPAND,          // 67: expand
+    TOKEN_CONCAT,          // 68: ## (macro concatenation)
+    TOKEN_STRINGIFY,       // 69: # (macro stringification)
+    TOKEN_ASPECT,          // 70: aspect
+    TOKEN_POINTCUT,        // 71: pointcut
+    TOKEN_ADVICE,          // 72: advice
+    TOKEN_BEFORE,          // 73: before
+    TOKEN_AFTER,           // 74: after
+    TOKEN_AROUND           // 75: around
 } TokenType;
 
 /**
@@ -110,6 +114,7 @@ typedef struct {
 
 /* Funciones públicas del lexer */
 void lexerInit(const char *source);
+void lexerInitialize(void);  // Add this new function
 Token getNextToken(void);
 LexerState lexSaveState(void);
 void lexRestoreState(LexerState state);

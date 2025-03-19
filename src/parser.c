@@ -183,7 +183,7 @@ static int isLambdaLookahead(void) {
     return result;
 }
 
-/* parsePostfix: Maneja encadenamiento de '.' y '()' */
+/* parsePostfix: Maneja encadenamiento de '.', '()', y '[]' */
 static AstNode *parsePostfix(AstNode *node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)parsePostfix);
     
@@ -277,6 +277,27 @@ static AstNode *parsePostfix(AstNode *node) {
         advanceToken(); // consume ')'
         node = funcCall;
         return parsePostfix(node);
+    } else if (currentToken.type == TOKEN_LBRACKET) {
+        // Handle array access: expr[index]
+        advanceToken(); // consume '['
+        
+        AstNode *arrayAccess = createAstNode(AST_ARRAY_ACCESS);
+        parser_stats.nodes_created++;
+        
+        arrayAccess->arrayAccess.array = node;
+        arrayAccess->arrayAccess.index = parseExpression();
+        
+        if (currentToken.type != TOKEN_RBRACKET)
+            parserError("Expected ']' after array index", currentToken);
+        
+        advanceToken(); // consume ']'
+        
+        if (debug_level >= 2) {
+            logger_log(LOG_DEBUG, "Created array access node");
+        }
+        
+        // Allow chained indexing like array[i][j]
+        return parsePostfix(arrayAccess);
     }
     
     return node;
@@ -561,7 +582,7 @@ static AstNode *parseStatement(void) {
     return result;
 }
 
-/* parseExpression: Maneja operadores '+', '-', comparaciones y composición de funciones */
+/* parseExpression: Maneja operadores de adición y comparación, pero también permitirá concatenaciones */
 static AstNode *parseExpression(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)parseExpression);
     
@@ -608,7 +629,8 @@ static AstNode *parseExpression(void) {
     while (currentToken.type == TOKEN_PLUS || currentToken.type == TOKEN_MINUS ||
            currentToken.type == TOKEN_GT || currentToken.type == TOKEN_LT ||
            currentToken.type == TOKEN_GTE || currentToken.type == TOKEN_LTE ||
-           currentToken.type == TOKEN_EQ || currentToken.type == TOKEN_NEQ) {
+           currentToken.type == TOKEN_EQ || currentToken.type == TOKEN_NEQ ||
+           currentToken.type == TOKEN_AND || currentToken.type == TOKEN_OR) {
         
         char op;
         switch (currentToken.type) {
@@ -620,6 +642,8 @@ static AstNode *parseExpression(void) {
             case TOKEN_LTE: op = 'L'; break;
             case TOKEN_EQ: op = 'E'; break;
             case TOKEN_NEQ: op = 'N'; break;
+            case TOKEN_AND: op = 'A'; break;
+            case TOKEN_OR: op = 'O'; break;
             default: op = currentToken.lexeme[0];
         }
         
@@ -710,6 +734,17 @@ static AstNode *parseFactor(void) {
         
         advanceToken();
         
+        // Handle special keywords for logical operators
+        if (strcmp(node->identifier.name, "not") == 0) {
+            AstNode* notExpr = createAstNode(AST_UNARY_OP);
+            parser_stats.nodes_created++;
+            
+            notExpr->unaryOp.op = 'N'; // 'N' for NOT
+            notExpr->unaryOp.expr = parseFactor();
+            
+            return notExpr;
+        }
+        
         // Look ahead for currying pattern: function(arg1)(arg2)...
         if (currentToken.type == TOKEN_LPAREN) {
             // This could be a regular function call or the start of a curry
@@ -757,6 +792,18 @@ static AstNode *parseFactor(void) {
         advanceToken();
     } else if (currentToken.type == TOKEN_LBRACKET) {
         node = parseArrayLiteral();
+    } else if (currentToken.type == TOKEN_TRUE || currentToken.type == TOKEN_FALSE) {
+        node = createAstNode(AST_BOOLEAN_LITERAL);
+        parser_stats.nodes_created++;
+        
+        node->boolLiteral.value = (currentToken.type == TOKEN_TRUE);
+        
+        if (debug_level >= 3) {
+            logger_log(LOG_DEBUG, "Created boolean literal: %s", 
+                      node->boolLiteral.value ? "true" : "false");
+        }
+        
+        advanceToken();
     } else {
         parserError("Unexpected token in expression", currentToken);
     }
@@ -1528,30 +1575,64 @@ static AstNode *parseReturn(void) {
     return node;
 }
 
+/* parseIfStmt: if condition ... [else ...] end */
 static AstNode *parseIfStmt(void) {
-    AstNode *node = createAstNode(AST_IF_STMT);
-    if (!node) return NULL;
-
-    // Skip 'if' keyword
-    nextToken();
+    advanceToken(); // consume 'if'
     
-    expectToken(TOKEN_LPAREN);
-    node->ifStmt.condition = parseExpression();
-    expectToken(TOKEN_RPAREN);
-    
-    // Parse then branch
-    node->ifStmt.thenBranch = parseBlock(&node->ifStmt.thenCount);
-    
-    // Parse optional else branch
-    if (currentToken.type == TOKEN_ELSE) {
-        nextToken();
-        node->ifStmt.elseBranch = parseBlock(&node->ifStmt.elseCount);
+    // We'll make parentheses optional instead of required
+    AstNode *condition;
+    if (currentToken.type == TOKEN_LPAREN) {
+        advanceToken(); // consume '('
+        condition = parseExpression();
+        if (currentToken.type != TOKEN_RPAREN)
+            parserError("Expected ')' after if condition", currentToken);
+        advanceToken(); // consume ')'
     } else {
-        node->ifStmt.elseBranch = NULL;
-        node->ifStmt.elseCount = 0;
+        // Allow for condition without parentheses
+        condition = parseExpression();
     }
-
-    return node;
+    
+    skipStatementSeparators();
+    
+    AstNode **thenBranch = NULL;
+    int thenCount = 0;
+    
+    while (currentToken.type != TOKEN_ELSE && 
+           currentToken.type != TOKEN_END && 
+           currentToken.type != TOKEN_EOF) {
+        AstNode *stmt = parseStatement();
+        thenBranch = memory_realloc(thenBranch, (thenCount + 1) * sizeof(AstNode *));
+        thenBranch[thenCount++] = stmt;
+        skipStatementSeparators();
+    }
+    
+    AstNode **elseBranch = NULL;
+    int elseCount = 0;
+    
+    if (currentToken.type == TOKEN_ELSE) {
+        advanceToken(); // consume 'else'
+        skipStatementSeparators();
+        
+        while (currentToken.type != TOKEN_END && currentToken.type != TOKEN_EOF) {
+            AstNode *stmt = parseStatement();
+            elseBranch = memory_realloc(elseBranch, (elseCount + 1) * sizeof(AstNode *));
+            elseBranch[elseCount++] = stmt;
+            skipStatementSeparators();
+        }
+    }
+    
+    if (currentToken.type != TOKEN_END)
+        parserError("Expected 'end' to close if statement", currentToken);
+    advanceToken(); // consume 'end'
+    
+    AstNode *ifNode = createAstNode(AST_IF_STMT);
+    ifNode->ifStmt.condition = condition;
+    ifNode->ifStmt.thenBranch = thenBranch;
+    ifNode->ifStmt.thenCount = thenCount;
+    ifNode->ifStmt.elseBranch = elseBranch;
+    ifNode->ifStmt.elseCount = elseCount;
+    
+    return ifNode;
 }
 
 static AstNode *parseForStmt(void) {
