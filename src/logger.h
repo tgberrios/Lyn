@@ -13,4 +13,7 @@ void logger_set_level(LogLevel level);
 void logger_log(LogLevel level, const char* format, ...);
 void logger_close(void);
 
+// Función para obtener el nivel de log actual
+LogLevel logger_get_level(void);
+
 #endif // LYN_LOGGER_H

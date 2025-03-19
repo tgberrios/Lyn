@@ -2,10 +2,21 @@
 #define MEMORY_H
 
 #include <stddef.h>
+#include "error.h"   // Incluimos el sistema de errores
+#include "logger.h"  // Incluimos el sistema de logging
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// Inicialización y limpieza del subsistema de memoria
+void memory_init(void);
+void memory_cleanup(void);
+void memory_stats(void);
+
+// Funciones de debug para el sistema de memoria
+void memory_set_debug_level(int level);
+int memory_get_debug_level(void);
 
 void* memory_alloc(size_t size);
 void* memory_realloc(void* ptr, size_t new_size);

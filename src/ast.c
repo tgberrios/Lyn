@@ -1,25 +1,28 @@
 #include "ast.h"
 #include "memory.h"   // Usa malloc/free o tus funciones personalizadas
 #include "error.h"
+#include "logger.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>    // Para fprintf, stderr
 #include <stdint.h>   // For uintptr_t
 
-// Stub para report_error si no está definido en otro módulo
-void report_error(int errorCode, const char* msg) {
-    fprintf(stderr, "Error %d: %s\n", errorCode, msg);
-}
+// Eliminamos el stub para report_error ya que usaremos error_report directamente
 
 AstNode* createAstNode(AstNodeType type) {
     AstNode* node = (AstNode*)malloc(sizeof(AstNode));
     if (!node) {
-        report_error(1, "Failed to allocate memory for AST node");
+        error_report("AST", 0, 0, "Failed to allocate memory for AST node", ERROR_MEMORY);
         return NULL;
     }
     node->type = type;
     node->line = 0;
     node->inferredType = NULL;
+    
+    // Debug tracking
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)createAstNode);
+    
+    logger_log(LOG_DEBUG, "Created AST node of type %d", type);
     return node;
 }
 
@@ -37,7 +40,7 @@ void freeAstNode(AstNode* node) {
         (node_addr >= 0x2000000000 && node_addr <= 0x20ffffffffff) ||  // Detect pattern in corrupted pointers
         node_addr == 0x200a202020202020 ||  // Specific bad address we've seen
         node_addr == 0x200a3b2928746e69) {  // Another bad address we've seen
-        fprintf(stderr, "Warning: Skipping invalid AST node address %p\n", (void*)node);
+        logger_log(LOG_WARNING, "Skipping invalid AST node address %p", (void*)node);
         return;
     }
     
@@ -45,10 +48,13 @@ void freeAstNode(AstNode* node) {
     // This is a cautious approach to avoid dereferencing bad pointers
     AstNodeType type;
     if (!memcpy(&type, &node->type, sizeof(AstNodeType)) || 
-        (type < AST_PROGRAM || type > AST_IMPORT)) {
-        fprintf(stderr, "Warning: Detected invalid node type %d at address %p\n", type, (void*)node);
+        (type < AST_PROGRAM || type > AST_BREAK_STMT)) {  // Updated to include new types
+        logger_log(LOG_WARNING, "Detected invalid node type %d at address %p", type, (void*)node);
         return;
     }
+    
+    // Debug tracking
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)freeAstNode);
     
     // Now we can proceed with the normal cleanup
     switch (node->type) {
@@ -104,7 +110,12 @@ void freeAstNode(AstNode* node) {
             break;
         case AST_WHILE_STMT:
             freeAstNode(node->whileStmt.condition);
-            freeAstNode(node->whileStmt.body);
+            if (node->whileStmt.body) {
+                for (int i = 0; i < node->whileStmt.bodyCount; i++) {
+                    freeAstNode(node->whileStmt.body[i]);
+                }
+                free(node->whileStmt.body);
+            }
             break;
         case AST_FOR_STMT:
             freeAstNode(node->forStmt.rangeStart);
@@ -176,12 +187,119 @@ void freeAstNode(AstNode* node) {
             break;
         case AST_IMPORT:
             break;
+        case AST_DO_WHILE_STMT:
+            freeAstNode(node->doWhileStmt.condition);
+            if (node->doWhileStmt.body) {
+                for (int i = 0; i < node->doWhileStmt.bodyCount; i++) {
+                    freeAstNode(node->doWhileStmt.body[i]);
+                }
+                free(node->doWhileStmt.body);
+            }
+            break;
+        
+        case AST_SWITCH_STMT:
+            freeAstNode(node->switchStmt.expr);
+            if (node->switchStmt.cases) {
+                for (int i = 0; i < node->switchStmt.caseCount; i++) {
+                    freeAstNode(node->switchStmt.cases[i]);
+                }
+                free(node->switchStmt.cases);
+            }
+            if (node->switchStmt.defaultCase) {
+                for (int i = 0; i < node->switchStmt.defaultCaseCount; i++) {
+                    freeAstNode(node->switchStmt.defaultCase[i]);
+                }
+                free(node->switchStmt.defaultCase);
+            }
+            break;
+        
+        case AST_CASE_STMT:
+            freeAstNode(node->caseStmt.expr);
+            if (node->caseStmt.body) {
+                for (int i = 0; i < node->caseStmt.bodyCount; i++) {
+                    freeAstNode(node->caseStmt.body[i]);
+                }
+                free(node->caseStmt.body);
+            }
+            break;
+        
+        case AST_TRY_CATCH_STMT:
+            if (node->tryCatchStmt.tryBody) {
+                for (int i = 0; i < node->tryCatchStmt.tryCount; i++) {
+                    freeAstNode(node->tryCatchStmt.tryBody[i]);
+                }
+                free(node->tryCatchStmt.tryBody);
+            }
+            if (node->tryCatchStmt.catchBody) {
+                for (int i = 0; i < node->tryCatchStmt.catchCount; i++) {
+                    freeAstNode(node->tryCatchStmt.catchBody[i]);
+                }
+                free(node->tryCatchStmt.catchBody);
+            }
+            if (node->tryCatchStmt.finallyBody) {
+                for (int i = 0; i < node->tryCatchStmt.finallyCount; i++) {
+                    freeAstNode(node->tryCatchStmt.finallyBody[i]);
+                }
+                free(node->tryCatchStmt.finallyBody);
+            }
+            break;
+        
+        case AST_THROW_STMT:
+            freeAstNode(node->throwStmt.expr);
+            break;
+        
+        case AST_BREAK_STMT:
+            // No additional fields to free
+            break;
+            
+        case AST_CURRY_EXPR:
+            freeAstNode(node->curryExpr.baseFunc);
+            if (node->curryExpr.appliedArgs) {
+                for (int i = 0; i < node->curryExpr.appliedCount; i++) {
+                    freeAstNode(node->curryExpr.appliedArgs[i]);
+                }
+                free(node->curryExpr.appliedArgs);
+            }
+            break;
+            
+        case AST_PATTERN_MATCH:
+            freeAstNode(node->patternMatch.expr);
+            if (node->patternMatch.cases) {
+                for (int i = 0; i < node->patternMatch.caseCount; i++) {
+                    freeAstNode(node->patternMatch.cases[i]);
+                }
+                free(node->patternMatch.cases);
+            }
+            if (node->patternMatch.otherwise) {
+                freeAstNode(node->patternMatch.otherwise);
+            }
+            break;
+            
+        case AST_PATTERN_CASE:
+            freeAstNode(node->patternCase.pattern);
+            if (node->patternCase.body) {
+                for (int i = 0; i < node->patternCase.bodyCount; i++) {
+                    freeAstNode(node->patternCase.body[i]);
+                }
+                free(node->patternCase.body);
+            }
+            break;
+        
+        case AST_FUNC_COMPOSE:
+            freeAstNode(node->funcCompose.left);
+            freeAstNode(node->funcCompose.right);
+            break;
+            
         default:
             break;
     }
     free(node);
+    
+    logger_log(LOG_DEBUG, "Freed AST node of type %d", type);
 }
 
 void freeAst(AstNode* root) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)freeAst);
+    logger_log(LOG_DEBUG, "Starting to free AST tree");
     freeAstNode(root);
 }

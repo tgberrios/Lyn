@@ -6,9 +6,9 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-# Compilar el compilador Lyn
+# Compilar el compilador Lyn con -rdynamic para exportar símbolos
 echo -e "${YELLOW}Compilando el compilador Lyn...${NC}"
-gcc -o lyn src/*.c -I./src
+gcc -o lyn src/*.c -rdynamic -I./src
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error compilando el compilador${NC}"

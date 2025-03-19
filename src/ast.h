@@ -26,7 +26,27 @@ typedef enum {
     AST_LAMBDA,
     AST_ARRAY_LITERAL,
     AST_MODULE_DECL,
-    AST_IMPORT            // Nodo para importaciones
+    AST_IMPORT,           // Nodo para importaciones
+    // New AST node types for control structures
+    AST_DO_WHILE_STMT,    // Do-while statement
+    AST_SWITCH_STMT,      // Switch statement
+    AST_CASE_STMT,        // Case statement
+    AST_TRY_CATCH_STMT,   // Try-catch statement
+    AST_THROW_STMT,       // Throw statement
+    AST_BREAK_STMT,       // Break statement
+    AST_CURRY_EXPR,       // Curried function expression
+    AST_PATTERN_MATCH,    // Pattern matching expression
+    AST_PATTERN_CASE,     // Individual case in pattern matching
+    AST_FUNC_COMPOSE,     // Function composition (f >> g)
+    AST_MACRO_DEF,        // Macro definition
+    AST_MACRO_EXPAND,     // Macro expansion
+    AST_MACRO_PARAM,      // Macro parameter reference
+    AST_ASPECT_DEF,       // Aspect definition
+    AST_POINTCUT,         // Pointcut declaration
+    AST_ADVICE,           // Advice declaration
+    AST_BEFORE,           // Add if not exists
+    AST_AFTER,            // Add if not exists
+    AST_AROUND            // Add if not exists
 } AstNodeType;
 
 // Enumerador para operadores binarios (usando el carácter)
@@ -104,7 +124,8 @@ typedef struct AstNode {
         // Sentencia while
         struct {
             struct AstNode* condition;
-            struct AstNode* body;
+            struct AstNode** body;  // Change from single body to array of statements
+            int bodyCount;          // Add bodyCount field to match other statement types
         } whileStmt;
         
         // Sentencia for
@@ -180,6 +201,126 @@ typedef struct AstNode {
             char moduleType[64];   // Por ejemplo: "ui" o "css"
             char moduleName[256];
         } importStmt;
+        
+        // Do-while statement
+        struct {
+            struct AstNode* condition;
+            struct AstNode** body;  // List of statements in the do-while body
+            int bodyCount;
+        } doWhileStmt;
+        
+        // Switch statement
+        struct {
+            struct AstNode* expr;  // Expression to switch on
+            struct AstNode** cases;  // List of case statements
+            int caseCount;
+            struct AstNode** defaultCase;  // Default case statements
+            int defaultCaseCount;
+        } switchStmt;
+        
+        // Case statement
+        struct {
+            struct AstNode* expr;  // Case value expression
+            struct AstNode** body;  // List of statements in the case
+            int bodyCount;
+        } caseStmt;
+        
+        // Try-catch statement
+        struct {
+            struct AstNode** tryBody;  // List of statements in the try block
+            int tryCount;
+            struct AstNode** catchBody;  // List of statements in the catch block
+            int catchCount;
+            char errorVarName[256];  // Name of the error variable
+            struct AstNode** finallyBody;  // List of statements in the finally block
+            int finallyCount;
+        } tryCatchStmt;
+        
+        // Throw statement
+        struct {
+            struct AstNode* expr;  // Expression to throw
+        } throwStmt;
+        
+        // Break statement
+        struct {
+            // No additional fields needed
+        } breakStmt;
+        
+        // Curried function expression
+        struct {
+            struct AstNode* baseFunc;     // Base function to curry
+            struct AstNode** appliedArgs; // Arguments already applied
+            int appliedCount;             // Number of applied arguments
+            int totalArgCount;            // Total arguments expected
+        } curryExpr;
+        
+        // Pattern matching expression
+        struct {
+            struct AstNode* expr;       // Expression to match against
+            struct AstNode** cases;     // List of pattern cases
+            int caseCount;
+            struct AstNode* otherwise;  // Default case (optional)
+        } patternMatch;
+        
+        // Pattern case
+        struct {
+            struct AstNode* pattern;    // Pattern to match
+            struct AstNode** body;      // Body to execute if pattern matches
+            int bodyCount;
+        } patternCase;
+        
+        // Function composition
+        struct {
+            struct AstNode* left;      // Left function (executed first)
+            struct AstNode* right;     // Right function (executed second)
+        } funcCompose;
+        
+        // Macro definition
+        struct {
+            char name[256];
+            char** params;         // Parameter names
+            int paramCount;
+            struct AstNode** body; // Macro body statements
+            int bodyCount;
+        } macroDef;
+        
+        // Macro expansion
+        struct {
+            char name[256];
+            struct AstNode** args; // Arguments for expansion
+            int argCount;
+        } macroExpand;
+        
+        // Macro parameter reference
+        struct {
+            char name[256];
+            int index;  // Parameter index in macro definition
+        } macroParam;
+        
+        // Aspect definition
+        struct {
+            char name[256];
+            struct AstNode** pointcuts;  // Lista de pointcuts
+            int pointcutCount;
+            struct AstNode** advice;     // Lista de advice
+            int adviceCount;
+        } aspectDef;
+        
+        // Pointcut declaration
+        struct {
+            char name[256];
+            char pattern[512];           // Patrón de coincidencia (e.g., "*.onCreate()")
+            int type;                    // Tipo de pointcut (método, constructor, etc.)
+        } pointcut;
+        
+        // Advice declaration
+        struct {
+            int type;                    // BEFORE, AFTER, o AROUND
+            char pointcutName[256];      // Nombre del pointcut al que se aplica
+            struct AstNode** body;       // Código del advice
+            int bodyCount;
+        } advice;
+        
     };
 } AstNode;
 
