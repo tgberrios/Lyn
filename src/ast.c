@@ -1,25 +1,28 @@
 #include "ast.h"
 #include "memory.h"   // Usa malloc/free o tus funciones personalizadas
 #include "error.h"
+#include "logger.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>    // Para fprintf, stderr
 #include <stdint.h>   // For uintptr_t
 
-// Stub para report_error si no está definido en otro módulo
-void report_error(int errorCode, const char* msg) {
-    fprintf(stderr, "Error %d: %s\n", errorCode, msg);
-}
+// Eliminamos el stub para report_error ya que usaremos error_report directamente
 
 AstNode* createAstNode(AstNodeType type) {
     AstNode* node = (AstNode*)malloc(sizeof(AstNode));
     if (!node) {
-        report_error(1, "Failed to allocate memory for AST node");
+        error_report("AST", 0, 0, "Failed to allocate memory for AST node", ERROR_MEMORY);
         return NULL;
     }
     node->type = type;
     node->line = 0;
     node->inferredType = NULL;
+    
+    // Debug tracking
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)createAstNode);
+    
+    logger_log(LOG_DEBUG, "Created AST node of type %d", type);
     return node;
 }
 
@@ -37,7 +40,7 @@ void freeAstNode(AstNode* node) {
         (node_addr >= 0x2000000000 && node_addr <= 0x20ffffffffff) ||  // Detect pattern in corrupted pointers
         node_addr == 0x200a202020202020 ||  // Specific bad address we've seen
         node_addr == 0x200a3b2928746e69) {  // Another bad address we've seen
-        fprintf(stderr, "Warning: Skipping invalid AST node address %p\n", (void*)node);
+        logger_log(LOG_WARNING, "Skipping invalid AST node address %p", (void*)node);
         return;
     }
     
@@ -46,9 +49,12 @@ void freeAstNode(AstNode* node) {
     AstNodeType type;
     if (!memcpy(&type, &node->type, sizeof(AstNodeType)) || 
         (type < AST_PROGRAM || type > AST_BREAK_STMT)) {  // Updated to include new types
-        fprintf(stderr, "Warning: Detected invalid node type %d at address %p\n", type, (void*)node);
+        logger_log(LOG_WARNING, "Detected invalid node type %d at address %p", type, (void*)node);
         return;
     }
+    
+    // Debug tracking
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)freeAstNode);
     
     // Now we can proceed with the normal cleanup
     switch (node->type) {
@@ -250,8 +256,12 @@ void freeAstNode(AstNode* node) {
             break;
     }
     free(node);
+    
+    logger_log(LOG_DEBUG, "Freed AST node of type %d", type);
 }
 
 void freeAst(AstNode* root) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)freeAst);
+    logger_log(LOG_DEBUG, "Starting to free AST tree");
     freeAstNode(root);
 }

@@ -12,6 +12,7 @@
 #include "ast.h"
 #include "error.h"
 #include "types.h"
+#include "logger.h"  // Añadido para el sistema de logging
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +33,21 @@ static FILE* outputFile = NULL;
 static int indentLevel = 0;
 static VariableInfo variables[MAX_VARIABLES];
 static int variableCount = 0;
+static int debug_level = 0;  // Nivel de depuración
+
+// Estadísticas del compilador
+static CompilerStats stats = {0};
+
+// Establece el nivel de depuración
+void compiler_set_debug_level(int level) {
+    debug_level = level;
+    logger_log(LOG_INFO, "Compiler debug level set to %d", level);
+}
+
+// Obtiene estadísticas del compilador
+CompilerStats compiler_get_stats(void) {
+    return stats;
+}
 
 // Forward declare all internal functions to avoid ordering issues
 static void emit(const char* fmt, ...);
@@ -57,11 +73,14 @@ static void compileNode(AstNode* node);
 
 /* getCTypeString: retorna el nombre del tipo (almacenado en typeName) o "void*" si es NULL */
 static const char* getCTypeString(Type* type) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)getCTypeString);
     return type ? type->typeName : "void*";
 }
 
 /* Emite constantes especiales */
 static void emitConstants(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)emitConstants);
+    logger_log(LOG_DEBUG, "Emitting constant definitions");
     emitLine("// Boolean constants");
     emitLine("const bool TRUE = 1;");
     emitLine("const bool FALSE = 0;");
@@ -70,6 +89,8 @@ static void emitConstants(void) {
 
 /* Genera el preámbulo con los #include necesarios */
 static void generatePreamble(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)generatePreamble);
+    logger_log(LOG_DEBUG, "Generating preamble with includes");
     emitLine("#include <stddef.h>");   // Para NULL
     emitLine("#include <stdbool.h>");  // Para bool, true, false
     emitLine("#include <stdio.h>");    // Para printf, etc.
@@ -84,10 +105,13 @@ static void generatePreamble(void) {
 
 /* Funciones para manejar la tabla de variables */
 static void addVariable(const char* name, const char* type) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)addVariable);
+    
     for (int i = 0; i < variableCount; i++) {
         if (strcmp(variables[i].name, name) == 0) {
             if (strcmp(variables[i].type, "") == 0) {
                 strncpy(variables[i].type, type, sizeof(variables[i].type) - 1);
+                logger_log(LOG_DEBUG, "Updated type of variable '%s' to '%s'", name, type);
             }
             return;
         }
@@ -97,37 +121,54 @@ static void addVariable(const char* name, const char* type) {
         strncpy(variables[variableCount].type, type, sizeof(variables[variableCount].type) - 1);
         variables[variableCount].isDeclared = false;
         variableCount++;
+        stats.variables_declared++;
+        logger_log(LOG_DEBUG, "Added variable '%s' of type '%s'", name, type);
+    } else {
+        logger_log(LOG_ERROR, "Variable table overflow when adding '%s'", name);
+        error_report("Compiler", __LINE__, 0, "Too many variables defined", ERROR_MEMORY);
     }
 }
 
 static void markVariableDeclared(const char* name) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)markVariableDeclared);
+    
     for (int i = 0; i < variableCount; i++) {
         if (strcmp(variables[i].name, name) == 0) {
             variables[i].isDeclared = true;
+            logger_log(LOG_DEBUG, "Marked variable '%s' as declared", name);
             return;
         }
     }
+    logger_log(LOG_WARNING, "Attempted to mark undeclared variable '%s'", name);
 }
 
 static bool isVariableDeclared(const char* name) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)isVariableDeclared);
+    
     for (int i = 0; i < variableCount; i++) {
         if (strcmp(variables[i].name, name) == 0) {
             return variables[i].isDeclared;
         }
     }
+    logger_log(LOG_DEBUG, "Variable '%s' not found in table", name);
     return false;
 }
 
 static const char* getVariableType(const char* name) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)getVariableType);
+    
     for (int i = 0; i < variableCount; i++) {
         if (strcmp(variables[i].name, name) == 0) {
             return variables[i].type;
         }
     }
+    logger_log(LOG_WARNING, "Type lookup for unknown variable '%s', defaulting to double", name);
     return "double";  // Tipo por defecto
 }
 
 static void declareObjectVariable(const char* name, const char* objType) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)declareObjectVariable);
+    
     char type[64];
     snprintf(type, sizeof(type), "%s*", objType);
     for (int i = 0; i < variableCount; i++) {
@@ -135,6 +176,7 @@ static void declareObjectVariable(const char* name, const char* objType) {
             strncpy(variables[i].type, type, sizeof(variables[i].type) - 1);
             variables[i].isDeclared = true;
             variables[i].isPointer = true;
+            logger_log(LOG_DEBUG, "Declared object variable '%s' of type '%s'", name, type);
             return;
         }
     }
@@ -144,10 +186,13 @@ static void declareObjectVariable(const char* name, const char* objType) {
         variables[variableCount].isDeclared = true;
         variables[variableCount].isPointer = true;
         variableCount++;
+        logger_log(LOG_DEBUG, "Declared object variable '%s' of type '%s'", name, type);
     }
 }
 
 static bool isObjectType(const char* name) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)isObjectType);
+    
     return (strcmp(name, "new_Point") == 0 || 
             strcmp(name, "new_Vector3") == 0 || 
             strcmp(name, "new_Circle") == 0 ||
@@ -155,6 +200,8 @@ static bool isObjectType(const char* name) {
 }
 
 static bool isPointerVariable(const char* name) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)isPointerVariable);
+    
     for (int i = 0; i < variableCount; i++) {
         if (strcmp(variables[i].name, name) == 0) {
             return variables[i].isPointer;
@@ -165,6 +212,9 @@ static bool isPointerVariable(const char* name) {
 
 /* Inicializa las variables globales. Se emiten dentro de main y se actualiza la tabla de variables */
 static void initializeGlobalVariables(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)initializeGlobalVariables);
+    logger_log(LOG_DEBUG, "Initializing global variables");
+    
     emitLine("// Initialize required variables");
     
     emitLine("bool error_caught = false;");
@@ -250,11 +300,24 @@ static void initializeGlobalVariables(void) {
 
 /* Función principal para compilar nodos del AST */
 static void compileNode(AstNode* node) {
-    if (!node) return;
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)compileNode);
+    
+    if (!node) {
+        logger_log(LOG_WARNING, "Attempt to compile NULL AST node");
+        return;
+    }
+    
+    stats.nodes_processed++;
+    
+    if (debug_level > 0) {
+        logger_log(LOG_DEBUG, "Compiling node of type %d", node->type);
+    }
     
     switch (node->type) {
         case AST_PROGRAM:
+            logger_log(LOG_INFO, "Compiling program with %d statements", node->program.statementCount);
             variableCount = 0;
+            stats = (CompilerStats){0}; // Reset stats
             // Emitir preámbulo primero
             generatePreamble();
             emitLine("#include <stdio.h>");
@@ -435,6 +498,8 @@ static void compileNode(AstNode* node) {
             break;
             
         case AST_VAR_DECL:
+            logger_log(LOG_DEBUG, "Compiling variable declaration: %s (%s)", 
+                       node->varDecl.name, node->varDecl.type);
             markVariableDeclared(node->varDecl.name);
             if (node->varDecl.initializer) {
                 emit("%s %s = ", node->varDecl.type, node->varDecl.name);
@@ -487,6 +552,8 @@ static void compileNode(AstNode* node) {
         }
         
         case AST_FUNC_DEF:
+            logger_log(LOG_INFO, "Compiling function definition: %s", node->funcDef.name);
+            stats.functions_compiled++;
             compileFunction(node);
             break;
             
@@ -580,6 +647,7 @@ static void compileNode(AstNode* node) {
         
         case AST_TRY_CATCH_STMT:
         {
+            logger_log(LOG_DEBUG, "Compiling try-catch statement");
             emitLine("{");
             indent();
             emitLine("jmp_buf _env;");
@@ -624,11 +692,22 @@ static void compileNode(AstNode* node) {
             break;
             
         default:
+            logger_log(LOG_WARNING, "Unhandled AST node type: %d", node->type);
             break;
     }
 }
 
 static void compileFuncCall(AstNode* node) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)compileFuncCall);
+    
+    if (!node) {
+        logger_log(LOG_WARNING, "Attempted to compile NULL function call");
+        return;
+    }
+    
+    logger_log(LOG_DEBUG, "Compiling function call to '%s' with %d arguments", 
+              node->funcCall.name, node->funcCall.argCount);
+              
     if (!node) return;
     if (strcmp(node->funcCall.name, "Shape_init") == 0 && node->funcCall.argCount > 0) {
         emitLine("// Initialize Shape fields directly rather than calling Shape_init");
@@ -708,6 +787,8 @@ static void compileFuncCall(AstNode* node) {
 }
 
 static void compileMemberAccess(AstNode* node) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)compileMemberAccess);
+    
     if (!node || !node->memberAccess.object) {
         emit("0");
         return;
@@ -732,6 +813,8 @@ static void compileMemberAccess(AstNode* node) {
 }
 
 static void compilePrintStmt(AstNode* node) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)compilePrintStmt);
+    
     if (!node || !node->printStmt.expr) {
         emitLine("printf(\"NULL\\n\");");
         return;
@@ -798,6 +881,8 @@ static void compilePrintStmt(AstNode* node) {
 }
 
 static void compileIf(AstNode* node) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)compileIf);
+    
     emit("if (");
     if (node->ifStmt.condition->type == AST_BINARY_OP && 
         node->ifStmt.condition->binaryOp.op == 'E') {
@@ -835,6 +920,8 @@ static void compileIf(AstNode* node) {
 }
 
 static void compileFor(AstNode* node) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)compileFor);
+    
     emit("for (int %s = ", node->forStmt.iterator);
     compileExpression(node->forStmt.rangeStart);
     emit("; %s < ", node->forStmt.iterator);
@@ -849,6 +936,8 @@ static void compileFor(AstNode* node) {
 }
 
 static void compileLambda(AstNode* node) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)compileLambda);
+    
     char lambdaName[256];
     static int lambdaCounter = 0;
     snprintf(lambdaName, sizeof(lambdaName), "lambda_%d", lambdaCounter++);
@@ -877,6 +966,8 @@ static void compileLambda(AstNode* node) {
 }
 
 static void compileClass(AstNode* node) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)compileClass);
+    
     emitLine("// Class declaration: %s", node->classDef.name);
     for (int i = 0; i < node->classDef.memberCount; i++) {
         AstNode* member = node->classDef.members[i];
@@ -891,6 +982,8 @@ static void compileClass(AstNode* node) {
 }
 
 static void compileExpression(AstNode* node) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)compileExpression);
+    
     if (!node) {
         emit("0");
         return;
@@ -939,6 +1032,8 @@ static void compileExpression(AstNode* node) {
 }
 
 static void compileFunction(AstNode* node) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)compileFunction);
+    
     if (strstr(node->funcDef.name, "Point_") ||
         strstr(node->funcDef.name, "Vector3_") ||
         strstr(node->funcDef.name, "Shape_") ||
@@ -973,14 +1068,30 @@ static void compileFunction(AstNode* node) {
 }
 
 bool compileToC(AstNode* ast, const char* outputPath) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)compileToC);
+    
+    logger_log(LOG_INFO, "Starting compilation to '%s'", outputPath);
+    
     outputFile = fopen(outputPath, "w");
     if (!outputFile) {
-        fprintf(stderr, "Error: Could not open output file %s\n", outputPath);
+        char errMsg[512];
+        snprintf(errMsg, sizeof(errMsg), "Could not open output file %s", outputPath);
+        logger_log(LOG_ERROR, "%s", errMsg);
+        error_report("Compiler", __LINE__, 0, errMsg, ERROR_IO);
         return false;
     }
+    
+    // Reset stats before compilation
+    stats = (CompilerStats){0};
+    
     compileNode(ast);
+    
     fclose(outputFile);
     outputFile = NULL;
+    
+    logger_log(LOG_INFO, "Compilation completed. Processed %d nodes, %d functions, %d variables",
+              stats.nodes_processed, stats.functions_compiled, stats.variables_declared);
+              
     return true;
 }
 
@@ -996,6 +1107,8 @@ static void emit(const char* fmt, ...) {
 }
 
 static void emitLine(const char* fmt, ...) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)emitLine);
+    
     va_list args;
     va_start(args, fmt);
     for (int i = 0; i < indentLevel; i++) {
@@ -1004,6 +1117,15 @@ static void emitLine(const char* fmt, ...) {
     vfprintf(outputFile, fmt, args);
     fprintf(outputFile, "\n");
     va_end(args);
+    
+    // Log emitted code at highest debug level
+    if (debug_level >= 3) {
+        char buffer[1024];
+        va_start(args, fmt);
+        vsnprintf(buffer, sizeof(buffer), fmt, args);
+        va_end(args);
+        logger_log(LOG_DEBUG, "EMIT: %s", buffer);
+    }
 }
 
 static void indent(void) {
@@ -1017,6 +1139,8 @@ static void outdent(void) {
 
 /* Corrige literales de cadena en AST_STRING_LITERAL */
 static void compileStringLiteral(AstNode* node) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)compileStringLiteral);
+    
     if (!node || node->type != AST_STRING_LITERAL) return;
     char cleaned[512] = "";
     const char* src = node->stringLiteral.value;
@@ -1031,25 +1155,42 @@ static void compileStringLiteral(AstNode* node) {
 }
 
 static const char* inferType(AstNode* node) {
-    if (!node) return "double";
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)inferType);
+    
+    if (!node) {
+        logger_log(LOG_WARNING, "Attempted to infer type of NULL node");
+        return "double";
+    }
+    
+    const char* result = "double"; // Default type
+    
     switch (node->type) {
         case AST_NUMBER_LITERAL: {
             double value = node->numberLiteral.value;
-            return value == (int)value ? "int" : "double";
+            result = value == (int)value ? "int" : "double";
+            break;
         }
         case AST_STRING_LITERAL:
-            return "const char*";
+            result = "const char*";
+            break;
         case AST_IDENTIFIER:
-            return isVariableDeclared(node->identifier.name) ?
+            result = isVariableDeclared(node->identifier.name) ?
                    getVariableType(node->identifier.name) : "double";
+            break;
         case AST_FUNC_CALL:
             if (isObjectType(node->funcCall.name)) {
                 static char fullType[64];
                 snprintf(fullType, sizeof(fullType), "%s*", node->funcCall.name + 4);
-                return fullType;
+                result = fullType;
+            } else {
+                result = "double";
             }
-            return "double";
+            break;
         default:
-            return "double";
+            result = "double";
+            break;
     }
+    
+    logger_log(LOG_DEBUG, "Inferred type for node type %d: %s", node->type, result);
+    return result;
 }

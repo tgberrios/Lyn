@@ -1,6 +1,7 @@
 #include "lexer.h"
 #include "memory.h"
-#include "error.h"  // Añadir este include
+#include "error.h"
+#include "logger.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -19,20 +20,29 @@ static int position;
 static int line = 1;
 static int col = 1;
 
+// Nivel de depuración (0=mínimo, 3=máximo)
+static int debug_level = 1;
+
 /**
  * @brief Inicializa el lexer con la fuente de entrada.
  *
  * @param src Puntero a la cadena de entrada.
  */
 void lexerInit(const char *src) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)lexerInit);
+    logger_log(LOG_INFO, "Initializing lexer");
+    
     source = src;
     position = 0;
     line = 1;
     col = 1;
-    error_set_source(src);  // Añadido: configura el código fuente para el sistema de errores
+    error_set_source(src);  // Configura el código fuente para el sistema de errores
 }
 
 static void lexerError(const char* message) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)lexerError);
+    logger_log(LOG_ERROR, "Lexer error: %s at line %d, col %d", message, line, col);
+    
     error_report("lexer", line, col, message, ERROR_SYNTAX);
     error_print_current();
     exit(1);
@@ -44,6 +54,11 @@ static void lexerError(const char* message) {
  * @return LexerState Estado actual del lexer.
  */
 LexerState lexSaveState(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)lexSaveState);
+    if (debug_level >= 3) {
+        logger_log(LOG_DEBUG, "Saving lexer state at line %d, col %d, pos %d", line, col, position);
+    }
+    
     LexerState state = { source, position, line, col };
     return state;
 }
@@ -54,6 +69,12 @@ LexerState lexSaveState(void) {
  * @param state Estado a restaurar.
  */
 void lexRestoreState(LexerState state) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)lexRestoreState);
+    if (debug_level >= 3) {
+        logger_log(LOG_DEBUG, "Restoring lexer state to line %d, col %d, pos %d", 
+                  state.line, state.col, state.position);
+    }
+    
     source = state.source;
     position = state.position;
     line = state.line;
@@ -68,6 +89,7 @@ void lexRestoreState(LexerState state) {
  * @return char Carácter avanzado.
  */
 static char advance(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)advance);
     col++;
     return source[position++];
 }
@@ -78,6 +100,7 @@ static char advance(void) {
  * @return char Carácter actual.
  */
 static char peek(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)peek);
     return source[position];
 }
 
@@ -88,6 +111,12 @@ static char peek(void) {
  * para posicionar el lexer en el siguiente token relevante.
  */
 static void skipWhitespaceAndComments(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)skipWhitespaceAndComments);
+    
+    int oldLine = line;
+    int oldCol = col;
+    int oldPos = position;
+    
     while (1) {
         /* Saltar espacios y saltos de línea. */
         while (isspace(source[position])) {
@@ -122,6 +151,12 @@ static void skipWhitespaceAndComments(void) {
         }
         break;
     }
+    
+    // Registramos los saltos de línea encontrados para depuración avanzada
+    if (debug_level >= 3 && oldLine != line) {
+        logger_log(LOG_DEBUG, "Skipped from line %d, col %d to line %d, col %d", 
+                  oldLine, oldCol, line, col);
+    }
 }
 
 /**
@@ -132,10 +167,15 @@ static void skipWhitespaceAndComments(void) {
  * @return Token Estructura Token con tipo, lexema, línea y columna.
  */
 Token getNextToken(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)getNextToken);
+    
     skipWhitespaceAndComments();
 
     if (source[position] == '\0') {
         Token token = { TOKEN_EOF, "EOF", line, col };
+        if (debug_level >= 2) {
+            logger_log(LOG_DEBUG, "Lexer produced token: EOF at line %d, col %d", line, col);
+        }
         return token;
     }
 
@@ -151,6 +191,9 @@ Token getNextToken(void) {
         strncpy(token.lexeme, source + start, length);
         token.lexeme[length] = '\0';
 
+        // Verificación de palabras clave (código existente)
+        // ...existing code for keyword checks...
+        
         if (strcmp(token.lexeme, "func") == 0) token.type = TOKEN_FUNC;
         else if (strcmp(token.lexeme, "return") == 0) token.type = TOKEN_RETURN;
         else if (strcmp(token.lexeme, "print") == 0) token.type = TOKEN_PRINT;
@@ -184,6 +227,12 @@ Token getNextToken(void) {
         else if (strcmp(token.lexeme, "finally") == 0) token.type = TOKEN_FINALLY;
         else if (strcmp(token.lexeme, "throw") == 0) token.type = TOKEN_THROW;
         else token.type = TOKEN_IDENTIFIER;
+        
+        // Log del token reconocido
+        if (debug_level >= 2) {
+            logger_log(LOG_DEBUG, "Lexer produced token: %s '%s' at line %d, col %d", 
+                      tokenTypeToString(token.type), token.lexeme, token.line, token.col);
+        }
         return token;
     }
 
@@ -196,6 +245,21 @@ Token getNextToken(void) {
         strncpy(token.lexeme, source + start, length);
         token.lexeme[length] = '\0';
         token.type = TOKEN_NUMBER;
+        
+        // Validar formato de número para detectar errores comunes como '1.2.3'
+        int dotCount = 0;
+        for (int i = 0; i < length; i++) {
+            if (token.lexeme[i] == '.') dotCount++;
+        }
+        
+        if (dotCount > 1) {
+            lexerError("Invalid number format - multiple decimal points");
+        }
+        
+        if (debug_level >= 2) {
+            logger_log(LOG_DEBUG, "Lexer produced token: %s '%s' at line %d, col %d", 
+                      tokenTypeToString(token.type), token.lexeme, token.line, token.col);
+        }
         return token;
     }
 
@@ -216,6 +280,11 @@ Token getNextToken(void) {
         token.lexeme[length] = '\0';
         advance(); // Consume la comilla de cierre.
         token.type = TOKEN_STRING;
+        
+        if (debug_level >= 2) {
+            logger_log(LOG_DEBUG, "Lexer produced token: %s \"%s\" at line %d, col %d", 
+                      tokenTypeToString(token.type), token.lexeme, token.line, token.col);
+        }
         return token;
     }
 
@@ -342,14 +411,23 @@ Token getNextToken(void) {
             break;
         default:
             token.type = TOKEN_UNKNOWN;
-            snprintf(token.lexeme, sizeof(token.lexeme), "Unknown character");
+            snprintf(token.lexeme, sizeof(token.lexeme), "Unknown character '%c'", c);
+            logger_log(LOG_WARNING, "Unknown character '%c' (%d) at line %d, col %d", 
+                      c, (int)c, line, col-1);
             break;
+    }
+    
+    if (debug_level >= 2) {
+        logger_log(LOG_DEBUG, "Lexer produced token: %s '%s' at line %d, col %d", 
+                  tokenTypeToString(token.type), token.lexeme, token.line, token.col);
     }
     return token;
 }
 
 // Add TOKEN_LBRACE and TOKEN_RBRACE if they don't exist
 static TokenType charToToken(char c) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)charToToken);
+    
     switch (c) {
         case '(': return TOKEN_LPAREN;
         case ')': return TOKEN_RPAREN;
@@ -370,4 +448,35 @@ static TokenType charToToken(char c) {
         case '>': return TOKEN_GT;
         default: return TOKEN_INVALID;  // Then fix the charToToken function to use TOKEN_INVALID
     }
+}
+
+// Convertir tipo de token a cadena para depuración
+const char* tokenTypeToString(TokenType type) {
+    static const char* tokenNames[] = {
+        "TOKEN_EOF", "TOKEN_IDENTIFIER", "TOKEN_NUMBER", "TOKEN_STRING",
+        "TOKEN_ASSIGN", "TOKEN_PLUS", "TOKEN_MINUS", "TOKEN_ASTERISK", 
+        "TOKEN_SLASH", "TOKEN_LPAREN", "TOKEN_RPAREN", "TOKEN_COMMA", 
+        "TOKEN_ARROW", "TOKEN_FAT_ARROW", "TOKEN_FUNC", "TOKEN_RETURN",
+        "TOKEN_PRINT", "TOKEN_CLASS", "TOKEN_IF", "TOKEN_ELSE",
+        "TOKEN_FOR", "TOKEN_IN", "TOKEN_END", "TOKEN_IMPORT",
+        "TOKEN_UI", "TOKEN_CSS", "TOKEN_REGISTER_EVENT", "TOKEN_RANGE",
+        "TOKEN_INT", "TOKEN_FLOAT", "TOKEN_DOT", "TOKEN_SEMICOLON",
+        "TOKEN_GT", "TOKEN_LT", "TOKEN_GTE", "TOKEN_LTE",
+        "TOKEN_EQ", "TOKEN_NEQ", "TOKEN_UNKNOWN", "TOKEN_LBRACKET",
+        "TOKEN_RBRACKET", "TOKEN_COLON", "TOKEN_MODULE", "TOKEN_EXPORT",
+        "TOKEN_LBRACE", "TOKEN_RBRACE", "TOKEN_INVALID", "TOKEN_WHILE",
+        "TOKEN_DO", "TOKEN_SWITCH", "TOKEN_CASE", "TOKEN_DEFAULT",
+        "TOKEN_BREAK", "TOKEN_TRY", "TOKEN_CATCH", "TOKEN_FINALLY",
+        "TOKEN_THROW"
+    };
+    
+    if (type >= 0 && type <= TOKEN_THROW) {
+        return tokenNames[type];
+    }
+    return "UNKNOWN_TOKEN_TYPE";
+}
+
+void lexer_set_debug_level(int level) {
+    debug_level = level;
+    logger_log(LOG_INFO, "Lexer debug level set to %d", level);
 }

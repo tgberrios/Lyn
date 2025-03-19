@@ -1,9 +1,17 @@
 #include "types.h"
-#include "ast.h"  // Include ast.h to get AST_XXX definitions
+#include "ast.h"
+#include "error.h"
+#include "logger.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+
+// Nivel de depuración (0=mínimo, 3=máximo)
+static int debug_level = 1;
+
+// Estadísticas del sistema de tipos
+static TypeSystemStats stats = {0};
 
 // Definiciones estáticas para los tipos predefinidos
 static Type INTEGER_TYPE = { TYPE_INT, "int" };
@@ -13,12 +21,32 @@ static Type STRING_TYPE  = { TYPE_STRING, "string" };
 static Type VOID_TYPE    = { TYPE_VOID, "void" };
 static Type UNKNOWN_TYPE = { TYPE_UNKNOWN, "unknown" };
 
+void types_set_debug_level(int level) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)types_set_debug_level);
+    debug_level = level;
+    logger_log(LOG_INFO, "Type system debug level set to %d", level);
+}
+
+int types_get_debug_level(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)types_get_debug_level);
+    return debug_level;
+}
+
+TypeSystemStats types_get_stats(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)types_get_stats);
+    return stats;
+}
+
 Type* createBasicType(TypeKind kind) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)createBasicType);
+    
     Type* type = (Type*)malloc(sizeof(Type));
     if (!type) {
-        fprintf(stderr, "Error: no se pudo asignar memoria para el tipo\n");
+        error_report("TypeSystem", __LINE__, 0, "Failed to allocate memory for basic type", ERROR_MEMORY);
+        logger_log(LOG_ERROR, "Memory allocation failed for basic type");
         return NULL;
     }
+    
     type->kind = kind;
     switch(kind) {
         case TYPE_INT:   strcpy(type->typeName, "int"); break;
@@ -28,61 +56,134 @@ Type* createBasicType(TypeKind kind) {
         case TYPE_VOID:  strcpy(type->typeName, "void"); break;
         default:         strcpy(type->typeName, "unknown"); break;
     }
+    
+    stats.types_created++;
+    
+    if (debug_level >= 2) {
+        logger_log(LOG_DEBUG, "Created basic type: %s", type->typeName);
+    }
+    
     return type;
 }
 
 Type* createArrayType(Type* elementType) {
-    Type* type = (Type*)malloc(sizeof(Type));
-    if (!type) {
-        fprintf(stderr, "Error: no se pudo asignar memoria para el tipo array\n");
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)createArrayType);
+    
+    if (!elementType) {
+        logger_log(LOG_WARNING, "Creating array type with NULL element type");
         return NULL;
     }
+    
+    Type* type = (Type*)malloc(sizeof(Type));
+    if (!type) {
+        error_report("TypeSystem", __LINE__, 0, "Failed to allocate memory for array type", ERROR_MEMORY);
+        logger_log(LOG_ERROR, "Memory allocation failed for array type");
+        return NULL;
+    }
+    
     type->kind = TYPE_ARRAY;
     snprintf(type->typeName, sizeof(type->typeName), "[%s]", typeToString(elementType));
     type->arrayType.elementType = elementType;
+    
+    stats.types_created++;
+    
+    if (debug_level >= 2) {
+        logger_log(LOG_DEBUG, "Created array type: %s", type->typeName);
+    }
+    
     return type;
 }
 
 Type* createClassType(const char* name, Type* baseClass) {
-    Type* type = (Type*)malloc(sizeof(Type));
-    if (!type) {
-        fprintf(stderr, "Error: no se pudo asignar memoria para el tipo clase\n");
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)createClassType);
+    
+    if (!name || !*name) {
+        error_report("TypeSystem", __LINE__, 0, "Class type requires a name", ERROR_TYPE);
+        logger_log(LOG_ERROR, "Attempted to create class type with empty name");
         return NULL;
     }
+    
+    Type* type = (Type*)malloc(sizeof(Type));
+    if (!type) {
+        error_report("TypeSystem", __LINE__, 0, "Failed to allocate memory for class type", ERROR_MEMORY);
+        logger_log(LOG_ERROR, "Memory allocation failed for class type '%s'", name);
+        return NULL;
+    }
+    
     type->kind = TYPE_CLASS;
     strncpy(type->classType.name, name, sizeof(type->classType.name) - 1);
     type->classType.name[sizeof(type->classType.name)-1] = '\0';
     // Usamos el nombre de la clase como representación en C
     strcpy(type->typeName, name);
     type->classType.baseClass = baseClass;
+    
+    stats.types_created++;
+    stats.classes_declared++;
+    
+    if (debug_level >= 1) {
+        if (baseClass) {
+            logger_log(LOG_DEBUG, "Created class type '%s' inheriting from '%s'", 
+                      name, baseClass->classType.name);
+        } else {
+            logger_log(LOG_DEBUG, "Created class type '%s'", name);
+        }
+    }
+    
     return type;
 }
 
 Type* createFunctionType(Type* returnType, Type** paramTypes, int paramCount) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)createFunctionType);
+    
+    if (!returnType) {
+        error_report("TypeSystem", __LINE__, 0, "Function type requires return type", ERROR_TYPE);
+        logger_log(LOG_WARNING, "Creating function type with NULL return type");
+        returnType = &UNKNOWN_TYPE;
+    }
+    
     Type* type = (Type*)malloc(sizeof(Type));
     if (!type) {
-        fprintf(stderr, "Error: no se pudo asignar memoria para el tipo función\n");
+        error_report("TypeSystem", __LINE__, 0, "Failed to allocate memory for function type", ERROR_MEMORY);
+        logger_log(LOG_ERROR, "Memory allocation failed for function type");
         return NULL;
     }
+    
     type->kind = TYPE_FUNCTION;
     type->functionType.returnType = returnType;
     type->functionType.paramTypes = paramTypes;
     type->functionType.paramCount = paramCount;
+    
     char buffer[256] = "func(";
     for (int i = 0; i < paramCount; i++) {
         if (i > 0) strcat(buffer, ", ");
-        strcat(buffer, typeToString(paramTypes[i]));
+        const char* paramStr = paramTypes && paramTypes[i] ? typeToString(paramTypes[i]) : "unknown";
+        strcat(buffer, paramStr);
     }
     strcat(buffer, ") -> ");
     strcat(buffer, typeToString(returnType));
     strncpy(type->typeName, buffer, sizeof(type->typeName)-1);
     type->typeName[sizeof(type->typeName)-1] = '\0';
+    
+    stats.types_created++;
+    stats.functions_typed++;
+    
+    if (debug_level >= 2) {
+        logger_log(LOG_DEBUG, "Created function type: %s", type->typeName);
+    }
+    
     return type;
 }
 
 const char* typeToString(Type* type) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)typeToString);
+    
     static char buffer[256];
-    if (!type) return "unknown";
+    
+    if (!type) {
+        logger_log(LOG_WARNING, "Attempted to convert NULL type to string");
+        return "unknown";
+    }
+    
     switch(type->kind) {
         case TYPE_INT: return "int";
         case TYPE_FLOAT: return "float";
@@ -91,7 +192,8 @@ const char* typeToString(Type* type) {
         case TYPE_VOID: return "void";
         case TYPE_UNKNOWN: return "unknown";
         case TYPE_ARRAY:
-            snprintf(buffer, sizeof(buffer), "[%s]", typeToString(type->arrayType.elementType));
+            snprintf(buffer, sizeof(buffer), "[%s]", 
+                    type->arrayType.elementType ? typeToString(type->arrayType.elementType) : "unknown");
             return buffer;
         case TYPE_CLASS:
             return type->classType.name;
@@ -100,10 +202,18 @@ const char* typeToString(Type* type) {
             char temp[128] = "func(";
             for (int i = 0; i < type->functionType.paramCount; i++) {
                 if (i > 0) strcat(temp, ", ");
-                strcat(temp, typeToString(type->functionType.paramTypes[i]));
+                if (type->functionType.paramTypes && type->functionType.paramTypes[i]) {
+                    strcat(temp, typeToString(type->functionType.paramTypes[i]));
+                } else {
+                    strcat(temp, "unknown");
+                }
             }
             strcat(temp, ") -> ");
-            strcat(temp, typeToString(type->functionType.returnType));
+            if (type->functionType.returnType) {
+                strcat(temp, typeToString(type->functionType.returnType));
+            } else {
+                strcat(temp, "unknown");
+            }
             strncpy(buffer, temp, sizeof(buffer));
             return buffer;
         }
@@ -112,10 +222,19 @@ const char* typeToString(Type* type) {
 }
 
 void typeToC(Type* type, char* buffer, int bufferSize) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)typeToC);
+    
+    if (!buffer || bufferSize <= 0) {
+        logger_log(LOG_ERROR, "Invalid buffer for typeToC");
+        return;
+    }
+    
     if (!type) {
+        logger_log(LOG_WARNING, "Attempted to convert NULL type to C type");
         strncpy(buffer, "void*", bufferSize);
         return;
     }
+    
     switch(type->kind) {
         case TYPE_INT:
             strncpy(buffer, "int", bufferSize);
@@ -161,33 +280,71 @@ void typeToC(Type* type, char* buffer, int bufferSize) {
             break;
         }
     }
+    
+    if (debug_level >= 3) {
+        logger_log(LOG_DEBUG, "Converted type '%s' to C type '%s'", typeToString(type), buffer);
+    }
 }
 
 void freeType(Type* type) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)freeType);
+    
     if (!type) return;
+    
+    // No necesitamos liberar los tipos estáticos predefinidos
+    if (type == &INTEGER_TYPE || type == &FLOAT_TYPE || type == &BOOLEAN_TYPE ||
+        type == &STRING_TYPE || type == &VOID_TYPE || type == &UNKNOWN_TYPE) {
+        return;
+    }
+    
     switch (type->kind) {
         case TYPE_ARRAY:
-            freeType(type->arrayType.elementType);
+            if (type->arrayType.elementType) {
+                freeType(type->arrayType.elementType);
+            }
             break;
         case TYPE_CLASS:
-            // No liberamos baseClass aquí
+            // No liberamos baseClass aquí para evitar liberación recursiva
             break;
         case TYPE_FUNCTION:
         case TYPE_LAMBDA:
-            freeType(type->functionType.returnType);
-            for (int i = 0; i < type->functionType.paramCount; i++) {
-                freeType(type->functionType.paramTypes[i]);
+            if (type->functionType.returnType) {
+                freeType(type->functionType.returnType);
             }
-            free(type->functionType.paramTypes);
+            if (type->functionType.paramTypes) {
+                for (int i = 0; i < type->functionType.paramCount; i++) {
+                    if (type->functionType.paramTypes[i]) {
+                        freeType(type->functionType.paramTypes[i]);
+                    }
+                }
+                free(type->functionType.paramTypes);
+            }
             break;
         default:
             break;
     }
+    
+    if (debug_level >= 3) {
+        logger_log(LOG_DEBUG, "Freed type: %s", type->typeName);
+    }
+    
     free(type);
+    stats.types_freed++;
 }
 
 Type* clone_type(Type* type) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)clone_type);
+    
     if (!type) return NULL;
+    
+    // Los tipos predefinidos pueden retornarse directamente
+    if (type == &INTEGER_TYPE) return &INTEGER_TYPE;
+    if (type == &FLOAT_TYPE) return &FLOAT_TYPE;
+    if (type == &BOOLEAN_TYPE) return &BOOLEAN_TYPE;
+    if (type == &STRING_TYPE) return &STRING_TYPE;
+    if (type == &VOID_TYPE) return &VOID_TYPE;
+    if (type == &UNKNOWN_TYPE) return &UNKNOWN_TYPE;
+    
     switch (type->kind) {
         case TYPE_INT:
         case TYPE_FLOAT:
@@ -204,8 +361,13 @@ Type* clone_type(Type* type) {
         case TYPE_FUNCTION:
         case TYPE_LAMBDA: {
             Type** paramTypes = NULL;
-            if (type->functionType.paramCount > 0) {
+            if (type->functionType.paramCount > 0 && type->functionType.paramTypes) {
                 paramTypes = malloc(type->functionType.paramCount * sizeof(Type*));
+                if (!paramTypes) {
+                    logger_log(LOG_ERROR, "Memory allocation failed for function parameter types");
+                    error_report("TypeSystem", __LINE__, 0, "Failed to allocate memory for function parameter types", ERROR_MEMORY);
+                    return NULL;
+                }
                 for (int i = 0; i < type->functionType.paramCount; i++) {
                     paramTypes[i] = clone_type(type->functionType.paramTypes[i]);
                 }
@@ -218,6 +380,8 @@ Type* clone_type(Type* type) {
 }
 
 Type* create_primitive_type(TypeKind kind) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)create_primitive_type);
+    
     switch (kind) {
         case TYPE_INT:    return &INTEGER_TYPE;
         case TYPE_FLOAT:  return &FLOAT_TYPE;
@@ -225,15 +389,19 @@ Type* create_primitive_type(TypeKind kind) {
         case TYPE_STRING: return &STRING_TYPE;
         case TYPE_VOID:   return &VOID_TYPE;
         case TYPE_UNKNOWN:return &UNKNOWN_TYPE;
-        default:          return createBasicType(kind);
+        default:          
+            logger_log(LOG_WARNING, "Requested primitive type for non-primitive kind: %d", kind);
+            return createBasicType(kind);
     }
 }
 
 Type* create_function_type(Type* returnType, Type** paramTypes, int paramCount) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)create_function_type);
     return createFunctionType(returnType, paramTypes, paramCount);
 }
 
 Type* create_class_type(const char* name, Type* baseClass) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)create_class_type);
     return createClassType(name, baseClass);
 }
 
@@ -241,6 +409,8 @@ Type* create_class_type(const char* name, Type* baseClass) {
  * Returns string representation of a TypeKind
  */
 const char* type_kind_to_string(TypeKind kind) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)type_kind_to_string);
+    
     switch (kind) {
         case TYPE_INT:     return "int";
         case TYPE_FLOAT:   return "float";
@@ -252,7 +422,9 @@ const char* type_kind_to_string(TypeKind kind) {
         case TYPE_CLASS:   return "class";
         case TYPE_FUNCTION:return "function";
         case TYPE_LAMBDA:  return "lambda";
-        default:           return "invalid_type";
+        default:           
+            logger_log(LOG_WARNING, "Invalid type kind: %d", kind);
+            return "invalid_type";
     }
 }
 
@@ -260,11 +432,24 @@ const char* type_kind_to_string(TypeKind kind) {
  * Checks if two types are equal (exact same type)
  */
 bool are_types_equal(Type* type1, Type* type2) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)are_types_equal);
+    
     if (type1 == type2) return true; // Same instance
     
-    if (!type1 || !type2) return false;
+    if (!type1 || !type2) {
+        if (debug_level >= 2) {
+            logger_log(LOG_DEBUG, "Type equality check with NULL type");
+        }
+        return false;
+    }
     
-    if (type1->kind != type2->kind) return false;
+    if (type1->kind != type2->kind) {
+        if (debug_level >= 3) {
+            logger_log(LOG_DEBUG, "Types differ in kind: %s vs %s", 
+                      type_kind_to_string(type1->kind), type_kind_to_string(type2->kind));
+        }
+        return false;
+    }
     
     switch (type1->kind) {
         case TYPE_INT:
@@ -307,7 +492,12 @@ bool are_types_equal(Type* type1, Type* type2) {
  * Checks if type is a subtype of supertype (inheritance relationship)
  */
 bool is_subtype_of(Type* type, Type* supertype) {
-    if (!type || !supertype) return false;
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)is_subtype_of);
+    
+    if (!type || !supertype) {
+        logger_log(LOG_WARNING, "Subtype check with NULL type");
+        return false;
+    }
     
     // Same type
     if (are_types_equal(type, supertype)) return true;
@@ -323,9 +513,18 @@ bool is_subtype_of(Type* type, Type* supertype) {
         Type* current = type;
         while (current) {
             if (strcmp(current->classType.name, supertype->classType.name) == 0) {
+                if (debug_level >= 2) {
+                    logger_log(LOG_DEBUG, "Class '%s' is a subtype of '%s'", 
+                              type->classType.name, supertype->classType.name);
+                }
                 return true;
             }
             current = current->classType.baseClass;
+        }
+        
+        if (debug_level >= 3) {
+            logger_log(LOG_DEBUG, "Class '%s' is NOT a subtype of '%s'", 
+                      type->classType.name, supertype->classType.name);
         }
     }
     
@@ -336,7 +535,12 @@ bool is_subtype_of(Type* type, Type* supertype) {
  * Checks if two types are compatible (one can be assigned to the other)
  */
 bool are_types_compatible(Type* type1, Type* type2) {
-    if (!type1 || !type2) return false;
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)are_types_compatible);
+    
+    if (!type1 || !type2) {
+        logger_log(LOG_WARNING, "Type compatibility check with NULL type");
+        return false;
+    }
     
     // Same type
     if (are_types_equal(type1, type2)) return true;
@@ -362,18 +566,35 @@ bool are_types_compatible(Type* type1, Type* type2) {
         
         // Return types must be compatible
         if (!are_types_compatible(type1->functionType.returnType, 
-                                 type2->functionType.returnType))
+                                 type2->functionType.returnType)) {
+            if (debug_level >= 3) {
+                logger_log(LOG_DEBUG, "Function return types incompatible: %s vs %s", 
+                          typeToString(type1->functionType.returnType),
+                          typeToString(type2->functionType.returnType));
+            }
             return false;
+        }
         
         // Parameter count must match
-        if (type1->functionType.paramCount != type2->functionType.paramCount)
+        if (type1->functionType.paramCount != type2->functionType.paramCount) {
+            if (debug_level >= 3) {
+                logger_log(LOG_DEBUG, "Function parameter counts differ: %d vs %d", 
+                          type1->functionType.paramCount, type2->functionType.paramCount);
+            }
             return false;
+        }
         
         // Each parameter type must be compatible
         for (int i = 0; i < type1->functionType.paramCount; i++) {
             if (!are_types_compatible(type1->functionType.paramTypes[i], 
-                                     type2->functionType.paramTypes[i]))
+                                     type2->functionType.paramTypes[i])) {
+                if (debug_level >= 3) {
+                    logger_log(LOG_DEBUG, "Function parameter %d types incompatible: %s vs %s", 
+                              i, typeToString(type1->functionType.paramTypes[i]),
+                              typeToString(type2->functionType.paramTypes[i]));
+                }
                 return false;
+            }
         }
         return true;
     }
@@ -385,7 +606,20 @@ bool are_types_compatible(Type* type1, Type* type2) {
  * Get the type of a class member
  */
 Type* get_member_type(Type* classType, const char* memberName) {
-    if (!classType || !memberName || classType->kind != TYPE_CLASS) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)get_member_type);
+    
+    if (!classType) {
+        logger_log(LOG_WARNING, "Attempt to get member type from NULL class type");
+        return create_primitive_type(TYPE_UNKNOWN);
+    }
+    
+    if (!memberName) {
+        logger_log(LOG_WARNING, "Attempt to get member type with NULL member name");
+        return create_primitive_type(TYPE_UNKNOWN);
+    }
+    
+    if (classType->kind != TYPE_CLASS) {
+        logger_log(LOG_WARNING, "Attempt to get member from non-class type: %s", typeToString(classType));
         return create_primitive_type(TYPE_UNKNOWN);
     }
     

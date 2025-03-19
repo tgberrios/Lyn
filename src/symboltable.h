@@ -1,6 +1,9 @@
 #ifndef SYMBOLTABLE_H
 #define SYMBOLTABLE_H
 
+#include "error.h"
+#include "logger.h"
+
 // Forward declaration
 typedef struct Type Type;
 
@@ -41,5 +44,14 @@ Symbol* symbolTable_lookup(SymbolTable* table, const char* name);
 
 // Buscar un símbolo solo en el ámbito actual
 Symbol* symbolTable_lookupCurrentScope(SymbolTable* table, const char* name);
+
+// Establece el nivel de depuración para la tabla de símbolos
+void symbolTable_set_debug_level(int level);
+
+// Obtiene el conteo de símbolos en la tabla
+int symbolTable_get_count(SymbolTable* table);
+
+// Imprime todos los símbolos con sus tipos y ámbitos
+void symbolTable_dump(SymbolTable* table);
 
 #endif // SYMBOLTABLE_H

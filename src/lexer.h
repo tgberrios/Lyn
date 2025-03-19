@@ -3,6 +3,7 @@
 
 // Añadir la inclusión del sistema de errores
 #include "error.h"
+#include "logger.h"  // Añadimos el logger
 
 /**
  * Enumeración de los tipos de tokens.
@@ -93,5 +94,9 @@ void lexerInit(const char *source);
 Token getNextToken(void);
 LexerState lexSaveState(void);
 void lexRestoreState(LexerState state);
+
+// Nuevas funciones para depuración
+void lexer_set_debug_level(int level);  // Configura nivel de detalle de logs
+const char* tokenTypeToString(TokenType type);  // Convierte tipo de token a string
 
 #endif /* LEXER_H */

@@ -42,4 +42,7 @@ const ErrorInfo* error_get_last(void);
 // Obtiene un mensaje descriptivo según el tipo de error.
 const char* get_error_message(ErrorType type);
 
+// Push debug information for stack trace
+void error_push_debug(const char* func, const char* file, int line, void* addr);
+
 #endif /* LYN_ERROR_H */

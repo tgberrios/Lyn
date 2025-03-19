@@ -2,6 +2,8 @@
 #define LYN_MODULE_H
 
 #include "ast.h"
+#include "error.h"
+#include "logger.h"
 #include <stdbool.h>
 
 typedef struct {
@@ -18,6 +20,10 @@ typedef struct {
 void module_system_init(void);
 void module_system_cleanup(void);
 
+// Nivel de depuración para el sistema de módulos (0=mínimo, 3=máximo)
+void module_set_debug_level(int level);
+int module_get_debug_level(void);
+
 // Funciones principales
 Module* module_load(const char* name);
 bool module_import(Module* target, const char* moduleName);
@@ -26,5 +32,9 @@ AstNode* module_resolve_symbol(Module* module, const char* name);
 // Funciones de utilidad
 void module_add_export(Module* module, const char* name, AstNode* node);
 void module_print_info(Module* module);
+
+// Funciones de diagnóstico
+int module_count_loaded(void);
+const char* module_get_name(Module* module);
 
 #endif // LYN_MODULE_H

@@ -15682,3 +15682,153 @@
 [2025-03-18 19:53:45] [INFO] Parseando código fuente...
 [2025-03-18 19:53:45] [ERROR] [test.lyn:3:21] Unexpected token in expression
 [2025-03-18 19:53:45] [INFO] Suggestion: Check syntax near this location
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-18 20:22:35 ==========
+
+[2025-03-18 20:22:35] [INFO] Iniciando compilación de test.lyn
+[2025-03-18 20:22:35] [INFO] Parseando código fuente...
+[2025-03-18 20:22:35] [DEBUG] Created AST node of type 0
+[2025-03-18 20:22:35] [ERROR] [test.lyn:3:21] Unexpected token in expression
+[2025-03-18 20:22:35] [INFO] Suggestion: Check syntax near this location
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-18 20:28:20 ==========
+
+[2025-03-18 20:28:20] [INFO] Iniciando compilación de test.lyn
+[2025-03-18 20:28:20] [INFO] Parseando código fuente...
+[2025-03-18 20:28:20] [DEBUG] Created AST node of type 0
+[2025-03-18 20:28:20] [ERROR] [test.lyn:3:21] Unexpected token in expression
+[2025-03-18 20:28:20] [INFO] Suggestion: Check syntax near this location
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-18 20:32:44 ==========
+
+[2025-03-18 20:32:44] [INFO] Iniciando compilación de test.lyn
+[2025-03-18 20:32:44] [INFO] Initializing lexer
+[2025-03-18 20:32:44] [INFO] Parseando código fuente...
+[2025-03-18 20:32:44] [DEBUG] Created AST node of type 0
+[2025-03-18 20:32:44] [ERROR] [test.lyn:3:21] Unexpected token in expression
+[2025-03-18 20:32:44] [INFO] Suggestion: Check syntax near this location
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-18 20:37:16 ==========
+
+[2025-03-18 20:37:16] [INFO] Iniciando compilación de test.lyn
+[2025-03-18 20:37:16] [INFO] Initializing lexer
+[2025-03-18 20:37:16] [INFO] Parseando código fuente...
+[2025-03-18 20:37:16] [DEBUG] Created AST node of type 0
+[2025-03-18 20:37:16] [ERROR] [test.lyn:3:21] Unexpected token in expression
+[2025-03-18 20:37:16] [INFO] Suggestion: Check syntax near this location
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-18 20:40:57 ==========
+
+[2025-03-18 20:40:57] [INFO] Iniciando compilación de test.lyn
+[2025-03-18 20:40:57] [INFO] Initializing lexer
+[2025-03-18 20:40:57] [INFO] Parseando código fuente...
+[2025-03-18 20:40:57] [DEBUG] Created AST node of type 0
+[2025-03-18 20:40:57] [ERROR] [test.lyn:3:21] Unexpected token in expression
+[2025-03-18 20:40:57] [INFO] Suggestion: Check syntax near this location
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-18 20:45:29 ==========
+
+[2025-03-18 20:45:29] [INFO] Iniciando compilación de test.lyn
+[2025-03-18 20:45:29] [INFO] Initializing lexer
+[2025-03-18 20:45:29] [INFO] Optimizer initialized with level 2
+[2025-03-18 20:45:29] [INFO] Parseando código fuente...
+[2025-03-18 20:45:29] [DEBUG] Created AST node of type 0
+[2025-03-18 20:45:29] [ERROR] [test.lyn:3:21] Unexpected token in expression
+[2025-03-18 20:45:29] [INFO] Suggestion: Check syntax near this location
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-18 20:52:08 ==========
+
+[2025-03-18 20:52:08] [INFO] Iniciando compilación de test.lyn
+[2025-03-18 20:52:08] [INFO] Initializing lexer
+[2025-03-18 20:52:08] [INFO] Optimizer initialized with level 2
+[2025-03-18 20:52:08] [INFO] Parseando código fuente...
+[2025-03-18 20:52:08] [INFO] Starting to parse program
+[2025-03-18 20:52:08] [DEBUG] Created AST node of type 0
+[2025-03-18 20:52:08] [ERROR] [parser:3:21] Unexpected token in expression (got ';')
+[2025-03-18 20:52:08] [INFO] Suggestion: Check syntax near this location
+[2025-03-18 20:52:08] [ERROR] Syntax error at line 3, col 21: Unexpected token in expression
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-18 21:00:27 ==========
+
+[2025-03-18 21:00:27] [INFO] Iniciando compilación de test.lyn
+[2025-03-18 21:00:27] [INFO] Initializing lexer
+[2025-03-18 21:00:27] [INFO] Optimizer initialized with level 2
+[2025-03-18 21:00:27] [INFO] Parseando código fuente...
+[2025-03-18 21:00:27] [INFO] Starting to parse program
+[2025-03-18 21:00:27] [DEBUG] Created AST node of type 0
+[2025-03-18 21:00:27] [ERROR] [parser:3:21] Unexpected token in expression (got ';')
+[2025-03-18 21:00:27] [INFO] Suggestion: Check syntax near this location
+[2025-03-18 21:00:27] [ERROR] Syntax error at line 3, col 21: Unexpected token in expression
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-18 21:06:39 ==========
+
+[2025-03-18 21:06:39] [INFO] Iniciando compilación de test.lyn
+[2025-03-18 21:06:39] [INFO] Initializing lexer
+[2025-03-18 21:06:39] [INFO] Optimizer initialized with level 2
+[2025-03-18 21:06:39] [INFO] Parseando código fuente...
+[2025-03-18 21:06:39] [INFO] Starting to parse program
+[2025-03-18 21:06:39] [DEBUG] Created AST node of type 0
+[2025-03-18 21:06:39] [ERROR] [parser:3:21] Unexpected token in expression (got ';')
+[2025-03-18 21:06:39] [INFO] Suggestion: Check syntax near this location
+[2025-03-18 21:06:39] [ERROR] Syntax error at line 3, col 21: Unexpected token in expression
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-18 21:11:37 ==========
+
+[2025-03-18 21:11:37] [INFO] Lyn compiler starting
+[2025-03-18 21:11:37] [INFO] Lexer debug level set to 1
+[2025-03-18 21:11:37] [INFO] Parser debug level set to 1
+[2025-03-18 21:11:37] [INFO] Compiler debug level set to 1
+[2025-03-18 21:11:37] [INFO] Optimizer debug level set to 1
+[2025-03-18 21:11:37] [INFO] Type system debug level set to 1
+[2025-03-18 21:11:37] [INFO] Global debug level set to 1
+[2025-03-18 21:11:37] [INFO] Starting compilation of test.lyn
+[2025-03-18 21:11:37] [INFO] Debug level: 1, Optimization level: 1
+[2025-03-18 21:11:37] [DEBUG] Output C file: test.c
+[2025-03-18 21:11:37] [DEBUG] Output executable: test.out
+[2025-03-18 21:11:37] [INFO] Reading source file: test.lyn
+[2025-03-18 21:11:37] [DEBUG] File read successfully: 570 bytes
+[2025-03-18 21:11:37] [INFO] Initializing compiler components
+[2025-03-18 21:11:37] [INFO] Initializing lexer
+[2025-03-18 21:11:37] [INFO] Optimizer initialized with level 1
+[2025-03-18 21:11:37] [INFO] Parsing source code...
+[2025-03-18 21:11:37] [INFO] Starting to parse program
+[2025-03-18 21:11:37] [DEBUG] Created AST node of type 0
+[2025-03-18 21:11:37] [ERROR] [parser:3:21] Unexpected token in expression (got ';')
+[2025-03-18 21:11:37] [INFO] Suggestion: Check syntax near this location
+[2025-03-18 21:11:37] [ERROR] Syntax error at line 3, col 21: Unexpected token in expression
+
+
+========== SESIÓN DE LOG INICIADA 2025-03-18 21:12:52 ==========
+
+[2025-03-18 21:12:52] [INFO] Lyn compiler starting
+[2025-03-18 21:12:52] [INFO] Lexer debug level set to 1
+[2025-03-18 21:12:52] [INFO] Parser debug level set to 1
+[2025-03-18 21:12:52] [INFO] Compiler debug level set to 1
+[2025-03-18 21:12:52] [INFO] Optimizer debug level set to 1
+[2025-03-18 21:12:52] [INFO] Type system debug level set to 1
+[2025-03-18 21:12:52] [INFO] Global debug level set to 1
+[2025-03-18 21:12:52] [INFO] Starting compilation of test.lyn
+[2025-03-18 21:12:52] [INFO] Debug level: 1, Optimization level: 1
+[2025-03-18 21:12:52] [DEBUG] Output C file: test.c
+[2025-03-18 21:12:52] [DEBUG] Output executable: test.out
+[2025-03-18 21:12:52] [INFO] Reading source file: test.lyn
+[2025-03-18 21:12:52] [DEBUG] File read successfully: 570 bytes
+[2025-03-18 21:12:52] [INFO] Initializing compiler components
+[2025-03-18 21:12:52] [INFO] Initializing lexer
+[2025-03-18 21:12:52] [INFO] Optimizer initialized with level 1
+[2025-03-18 21:12:52] [INFO] Parsing source code...
+[2025-03-18 21:12:52] [INFO] Starting to parse program
+[2025-03-18 21:12:52] [DEBUG] Created AST node of type 0
+[2025-03-18 21:12:52] [ERROR] [parser:3:21] Unexpected token in expression (got ';')
+[2025-03-18 21:12:52] [INFO] Suggestion: Check syntax near this location
+[2025-03-18 21:12:52] [ERROR] Syntax error at line 3, col 21: Unexpected token in expression

@@ -1,7 +1,9 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include <stdbool.h>  // Added for bool type
+#include <stdbool.h>
+#include "error.h"
+#include "logger.h"
 
 // Forward declaration
 struct AstNode;
@@ -42,6 +44,22 @@ typedef struct Type {
     };
 } Type;
 
+// Configuración del nivel de depuración del sistema de tipos
+void types_set_debug_level(int level);
+int types_get_debug_level(void);
+
+// Estadísticas sobre el sistema de tipos
+typedef struct {
+    int types_created;         // Cuántos tipos se han creado
+    int types_freed;           // Cuántos tipos se han liberado
+    int type_errors_detected;  // Cuántos errores de tipo se han detectado
+    int classes_declared;      // Cuántas clases se han declarado
+    int functions_typed;       // Cuántas funciones tienen tipo asignado
+} TypeSystemStats;
+
+// Obtener estadísticas del sistema de tipos
+TypeSystemStats types_get_stats(void);
+
 // Prototipos de funciones para trabajar con tipos
 Type* createBasicType(TypeKind kind);
 Type* createArrayType(Type* elementType);
@@ -63,8 +81,6 @@ bool is_subtype_of(Type* type, Type* supertype);
 bool are_types_equal(Type* type1, Type* type2);
 
 // Type inference and checking
-// These functions will be defined in types.c, not in the header
-// to avoid circular dependencies
 Type* infer_type(struct AstNode* node);
 bool check_ast_types(struct AstNode* node);
 void check_types(struct AstNode* node, Type* expected);

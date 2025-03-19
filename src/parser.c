@@ -3,12 +3,40 @@
 #include "lexer.h"
 #include "memory.h"   // Usamos memory_realloc y memory_free para la gestión de memoria.
 #include "error.h"    // Para usar error_report() y error_print_current()
+#include "logger.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
+// Estadísticas del parser
+static struct {
+    int nodes_created;
+    int errors_found;
+} parser_stats = {0, 0};
+
+// Nivel de depuración
+static int debug_level = 1;
+
 /* Variable global para el token actual */
 static Token currentToken;
+
+void parser_set_debug_level(int level) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parser_set_debug_level);
+    debug_level = level;
+    logger_log(LOG_INFO, "Parser debug level set to %d", level);
+}
+
+int parser_get_debug_level(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parser_get_debug_level);
+    return debug_level;
+}
+
+void parser_get_stats(int* nodes_created, int* errors_found) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parser_get_stats);
+    
+    if (nodes_created) *nodes_created = parser_stats.nodes_created;
+    if (errors_found) *errors_found = parser_stats.errors_found;
+}
 
 /* Prototipos internos */
 static void advanceToken(void);
@@ -38,14 +66,36 @@ static AstNode *parseThrowStmt(void);
 
 /* Avanza al siguiente token */
 static void advanceToken(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)advanceToken);
+    
     currentToken = getNextToken();
-    printf("advanceToken: type=%d, lexeme='%s'\n", currentToken.type, currentToken.lexeme);
+    
+    if (debug_level >= 3) {
+        logger_log(LOG_DEBUG, "Token: type=%d, lexeme='%s', line=%d, col=%d",
+                  currentToken.type, currentToken.lexeme, currentToken.line, currentToken.col);
+    }
 }
 
-/* Reporta un error de parseo y termina */
+/* Reporta un error de parseo */
 static void parserError(const char *message, Token current) {
-    error_report("test.lyn", current.line, current.col, message, ERROR_SYNTAX);
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parserError);
+    
+    parser_stats.errors_found++;
+    
+    // Crear un mensaje de error detallado
+    char detailed_msg[512];
+    snprintf(detailed_msg, sizeof(detailed_msg), "%s (got '%s')", 
+            message, current.lexeme);
+    
+    // Reportar el error usando el sistema centralizado
+    error_report("parser", current.line, current.col, detailed_msg, ERROR_SYNTAX);
+    
+    // Imprimir el error con contexto
     error_print_current();
+    
+    logger_log(LOG_ERROR, "Syntax error at line %d, col %d: %s", 
+              current.line, current.col, message);
+    
     exit(1);
 }
 
@@ -54,8 +104,13 @@ static void parserError(const char *message, Token current) {
    si la secuencia actual corresponde a la sintaxis de una lambda:
    ( [paramName : paramType {, paramName : paramType}] ) -> returnType => ... */
 static int isLambdaLookahead(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)isLambdaLookahead);
+    
     LexerState saved = lexSaveState();
     Token tok1 = getNextToken(); // Primer token dentro del paréntesis.
+    
+    // Estado para recordar si detectamos una lambda
+    int result = 0;
     
     if (tok1.type == TOKEN_RPAREN) {
         Token tok2 = getNextToken();
@@ -71,8 +126,7 @@ static int isLambdaLookahead(void) {
             lexRestoreState(saved);
             return 0;
         }
-        lexRestoreState(saved);
-        return 1;
+        result = 1;
     } else {
         if (tok1.type != TOKEN_IDENTIFIER) { lexRestoreState(saved); return 0; }
         Token tokColon = getNextToken();
@@ -109,55 +163,75 @@ static int isLambdaLookahead(void) {
             lexRestoreState(saved);
             return 0;
         }
-        lexRestoreState(saved);
-        return 1;
+        result = 1;
     }
+    
+    lexRestoreState(saved);
+    
+    if (debug_level >= 3 && result) {
+        logger_log(LOG_DEBUG, "Lambda expression detected in lookahead");
+    }
+    
+    return result;
 }
 
 /* parsePostfix: Maneja encadenamiento de '.' y '()' */
 static AstNode *parsePostfix(AstNode *node) {
-    printf("parsePostfix: starting with node type=%d, current: type=%d, lexeme='%s'\n",
-           node->type, currentToken.type, currentToken.lexeme);
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parsePostfix);
+    
+    if (debug_level >= 2) {
+        logger_log(LOG_DEBUG, "Parsing postfix expression starting with node type %d", node->type);
+    }
 
     if (currentToken.type == TOKEN_DOT) {
         advanceToken(); // consume '.'
-        printf("parsePostfix: consumed '.', current type=%d, lexeme='%s'\n",
-               currentToken.type, currentToken.lexeme);
+        
         if (currentToken.type != TOKEN_IDENTIFIER)
             parserError("Expected identifier after '.'", currentToken);
+            
         AstNode *memberNode = createAstNode(AST_MEMBER_ACCESS);
+        parser_stats.nodes_created++;
+        
         memberNode->memberAccess.object = node;
         strncpy(memberNode->memberAccess.member, currentToken.lexeme, sizeof(memberNode->memberAccess.member));
+        
+        if (debug_level >= 2) {
+            logger_log(LOG_DEBUG, "Created member access node for %s", memberNode->memberAccess.member);
+        }
+        
         advanceToken(); // consume identifier
-        printf("parsePostfix: consumed identifier '%s', current type=%d, lexeme='%s'\n",
-               memberNode->memberAccess.member, currentToken.type, currentToken.lexeme);
 
         if (currentToken.type == TOKEN_LPAREN) {
             advanceToken(); // consume '('
-            printf("parsePostfix: consumed '(', current type=%d, lexeme='%s'\n",
-                   currentToken.type, currentToken.lexeme);
+            
             AstNode *funcCall = createAstNode(AST_FUNC_CALL);
+            parser_stats.nodes_created++;
+            
             strncpy(funcCall->funcCall.name, memberNode->memberAccess.member, sizeof(funcCall->funcCall.name));
             funcCall->funcCall.arguments = memory_realloc(funcCall->funcCall.arguments, sizeof(AstNode *));
             funcCall->funcCall.arguments[0] = memberNode->memberAccess.object;
             funcCall->funcCall.argCount = 1;
+            
+            if (debug_level >= 2) {
+                logger_log(LOG_DEBUG, "Converting member access to method call: %s", funcCall->funcCall.name);
+            }
+            
             freeAstNode(memberNode);
+            
             while (currentToken.type != TOKEN_RPAREN) {
                 AstNode *arg = parseExpression();
                 funcCall->funcCall.argCount++;
                 funcCall->funcCall.arguments = memory_realloc(funcCall->funcCall.arguments,
-                                                              funcCall->funcCall.argCount * sizeof(AstNode *));
+                                                            funcCall->funcCall.argCount * sizeof(AstNode *));
                 funcCall->funcCall.arguments[funcCall->funcCall.argCount - 1] = arg;
-                printf("parsePostfix: parsed argument, current type=%d, lexeme='%s'\n",
-                       currentToken.type, currentToken.lexeme);
+                
                 if (currentToken.type == TOKEN_COMMA)
                     advanceToken();
                 else if (currentToken.type != TOKEN_RPAREN)
                     parserError("Expected ',' or ')' in argument list", currentToken);
             }
+            
             advanceToken(); // consume ')'
-            printf("parsePostfix: consumed ')', current type=%d, lexeme='%s'\n",
-                   currentToken.type, currentToken.lexeme);
             node = funcCall;
         } else {
             node = memberNode;
@@ -165,40 +239,53 @@ static AstNode *parsePostfix(AstNode *node) {
         return parsePostfix(node);
     } else if (currentToken.type == TOKEN_LPAREN && node->type == AST_IDENTIFIER) {
         advanceToken(); // consume '('
-        printf("parsePostfix: consumed '(', current type=%d, lexeme='%s'\n",
-               currentToken.type, currentToken.lexeme);
+        
         AstNode *funcCall = createAstNode(AST_FUNC_CALL);
+        parser_stats.nodes_created++;
+        
         strncpy(funcCall->funcCall.name, node->identifier.name, sizeof(funcCall->funcCall.name));
         funcCall->funcCall.arguments = NULL;
         funcCall->funcCall.argCount = 0;
+        
+        if (debug_level >= 2) {
+            logger_log(LOG_DEBUG, "Created function call node for %s", funcCall->funcCall.name);
+        }
+        
         freeAstNode(node);
+        
         while (currentToken.type != TOKEN_RPAREN) {
             AstNode *arg = parseExpression();
             funcCall->funcCall.argCount++;
             funcCall->funcCall.arguments = memory_realloc(funcCall->funcCall.arguments,
-                                                          funcCall->funcCall.argCount * sizeof(AstNode *));
+                                                        funcCall->funcCall.argCount * sizeof(AstNode *));
             funcCall->funcCall.arguments[funcCall->funcCall.argCount - 1] = arg;
-            printf("parsePostfix: parsed argument, current type=%d, lexeme='%s'\n",
-                   currentToken.type, currentToken.lexeme);
+            
             if (currentToken.type == TOKEN_COMMA)
                 advanceToken();
             else if (currentToken.type != TOKEN_RPAREN)
                 parserError("Expected ',' or ')' in function call argument list", currentToken);
         }
+        
         advanceToken(); // consume ')'
-        printf("parsePostfix: consumed ')', current type=%d, lexeme='%s'\n",
-               currentToken.type, currentToken.lexeme);
         node = funcCall;
         return parsePostfix(node);
     }
-    printf("parsePostfix: returning, current type=%d, lexeme='%s'\n",
-           currentToken.type, currentToken.lexeme);
+    
     return node;
 }
 
 /* parseProgram: Se espera que el programa inicie con "main" */
 AstNode *parseProgram(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parseProgram);
+    
+    parser_stats.nodes_created = 0;
+    parser_stats.errors_found = 0;
+    
+    logger_log(LOG_INFO, "Starting to parse program");
+    
     AstNode *programNode = createAstNode(AST_PROGRAM);
+    parser_stats.nodes_created++;
+    
     programNode->program.statements = NULL;
     programNode->program.statementCount = 0;
     advanceToken();  // Obtener el primer token
@@ -212,8 +299,13 @@ AstNode *parseProgram(void) {
     while (currentToken.type != TOKEN_EOF &&
            !(currentToken.type == TOKEN_END && strcmp(currentToken.lexeme, "end") == 0)) {
         AstNode *stmt = parseStatement();
-        printf("Parsed statement, next token: type=%d, lexeme='%s'\n", currentToken.type, currentToken.lexeme);
+        
+        if (debug_level >= 2) {
+            logger_log(LOG_DEBUG, "Parsed statement of type %d", stmt->type);
+        }
+        
         skipStatementSeparators();
+        
         programNode->program.statementCount++;
         programNode->program.statements = memory_realloc(programNode->program.statements,
                                                           programNode->program.statementCount * sizeof(AstNode *));
@@ -221,15 +313,27 @@ AstNode *parseProgram(void) {
     }
     if (currentToken.type == TOKEN_END)
         advanceToken(); // consume final "end"
+    
+    logger_log(LOG_INFO, "Program parsing complete: %d nodes created, %d statements", 
+              parser_stats.nodes_created, programNode->program.statementCount);
+    
     return programNode;
 }
 
 /* parseStatement: Determina el tipo de sentencia según currentToken */
 static AstNode *parseStatement(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parseStatement);
+    
+    if (debug_level >= 3) {
+        logger_log(LOG_DEBUG, "Parsing statement, current token: %s", currentToken.lexeme);
+    }
+    
+    AstNode* result = NULL;
+    
     if (currentToken.type == TOKEN_FUNC) {
-        return parseFuncDef();
+        result = parseFuncDef();
     } else if (currentToken.type == TOKEN_RETURN) {
-        return parseReturn();
+        result = parseReturn();
     } else if (currentToken.type == TOKEN_PRINT) {
         advanceToken(); // consume "print"
         if (currentToken.type != TOKEN_LPAREN)
@@ -240,52 +344,56 @@ static AstNode *parseStatement(void) {
             parserError("Expected ')' after print expression", currentToken);
         advanceToken(); // consume ')'
         AstNode *printNode = createAstNode(AST_PRINT_STMT);
+        parser_stats.nodes_created++;
         printNode->printStmt.expr = expr;
-        return printNode;
+        result = printNode;
     } else if (currentToken.type == TOKEN_IF) {
-        return parseIfStmt();
+        result = parseIfStmt();
     } else if (currentToken.type == TOKEN_FOR) {
-        return parseForStmt();
+        result = parseForStmt();
     } else if (currentToken.type == TOKEN_WHILE) {
-        return parseWhileStmt();
+        result = parseWhileStmt();
     } else if (currentToken.type == TOKEN_DO) {
-        return parseDoWhileStmt();
+        result = parseDoWhileStmt();
     } else if (currentToken.type == TOKEN_SWITCH) {
-        return parseSwitchStmt();
+        result = parseSwitchStmt();
     } else if (currentToken.type == TOKEN_BREAK) {
-        return parseBreakStmt();
+        result = parseBreakStmt();
     } else if (currentToken.type == TOKEN_TRY) {
-        return parseTryCatchStmt();
+        result = parseTryCatchStmt();
     } else if (currentToken.type == TOKEN_THROW) {
-        return parseThrowStmt();
+        result = parseThrowStmt();
     } else if (currentToken.type == TOKEN_CLASS) {
-        return parseClassDef();
+        result = parseClassDef();
     } else if (currentToken.type == TOKEN_IMPORT) {
-        return parseImport();
+        result = parseImport();
     } else if (currentToken.type == TOKEN_UI) {
         AstNode *uiNode = createAstNode(AST_IMPORT);
+        parser_stats.nodes_created++;
         strncpy(uiNode->importStmt.moduleType, "ui", sizeof(uiNode->importStmt.moduleType));
         advanceToken(); // consume "ui"
         if (currentToken.type != TOKEN_STRING)
             parserError("Expected string after 'ui'", currentToken);
         strncpy(uiNode->importStmt.moduleName, currentToken.lexeme, sizeof(uiNode->importStmt.moduleName));
         advanceToken();
-        return uiNode;
+        result = uiNode;
     } else if (currentToken.type == TOKEN_CSS) {
         AstNode *cssNode = createAstNode(AST_IMPORT);
+        parser_stats.nodes_created++;
         strncpy(cssNode->importStmt.moduleType, "css", sizeof(cssNode->importStmt.moduleType));
         advanceToken(); // consume "css"
         if (currentToken.type != TOKEN_STRING)
             parserError("Expected string after 'css'", currentToken);
         strncpy(cssNode->importStmt.moduleName, currentToken.lexeme, sizeof(cssNode->importStmt.moduleName));
         advanceToken();
-        return cssNode;
+        result = cssNode;
     } else if (currentToken.type == TOKEN_REGISTER_EVENT) {
         advanceToken(); // consume "register_event"
         if (currentToken.type != TOKEN_LPAREN)
             parserError("Expected '(' after register_event", currentToken);
         advanceToken(); // consume '('
         AstNode *regCall = createAstNode(AST_FUNC_CALL);
+        parser_stats.nodes_created++;
         strncpy(regCall->funcCall.name, "register_event", sizeof(regCall->funcCall.name));
         regCall->funcCall.argCount = 0;
         regCall->funcCall.arguments = NULL;
@@ -293,18 +401,17 @@ static AstNode *parseStatement(void) {
             AstNode *arg = parseExpression();
             regCall->funcCall.argCount++;
             regCall->funcCall.arguments = memory_realloc(regCall->funcCall.arguments,
-                                                         regCall->funcCall.argCount * sizeof(AstNode *));
+                                                       regCall->funcCall.argCount * sizeof(AstNode *));
             regCall->funcCall.arguments[regCall->funcCall.argCount - 1] = arg;
-            printf("parseStatement: parsed argument, current type=%d, lexeme='%s'\n", currentToken.type, currentToken.lexeme);
             if (currentToken.type == TOKEN_COMMA)
                 advanceToken();
             else if (currentToken.type != TOKEN_RPAREN)
                 parserError("Expected ',' or ')' in register_event argument list", currentToken);
         }
         advanceToken(); // consume ')'
-        return regCall;
+        result = regCall;
     } else if (currentToken.type == TOKEN_MODULE) {
-        return parseModuleDecl();
+        result = parseModuleDecl();
     } else if (currentToken.type == TOKEN_IDENTIFIER) {
         Token temp = currentToken;
         LexerState saved = lexSaveState();
@@ -341,7 +448,7 @@ static AstNode *parseStatement(void) {
                 AstNode *init = parseExpression();
                 declNode->varDecl.initializer = init;
             }
-            return declNode;
+            result = declNode;
         }
         /* Fin de rama de declaración explícita */
 
@@ -351,6 +458,7 @@ static AstNode *parseStatement(void) {
             if (currentToken.type != TOKEN_IDENTIFIER)
                 parserError("Expected identifier after '.'", currentToken);
             AstNode *memberNode = createAstNode(AST_MEMBER_ACCESS);
+            parser_stats.nodes_created++;
             memberNode->memberAccess.object = createAstNode(AST_IDENTIFIER);
             strncpy(memberNode->memberAccess.object->identifier.name, temp.lexeme,
                     sizeof(memberNode->memberAccess.object->identifier.name));
@@ -373,9 +481,9 @@ static AstNode *parseStatement(void) {
                          "%s.%s", temp.lexeme, memberNode->memberAccess.member);
                 assignNode->varAssign.initializer = value;
                 freeAstNode(memberNode);
-                return assignNode;
+                result = assignNode;
             } else {
-                return parsePostfix(memberNode);
+                result = parsePostfix(memberNode);
             }
         }
         if (currentToken.type == TOKEN_ASSIGN) {
@@ -392,21 +500,23 @@ static AstNode *parseStatement(void) {
             AstNode *assignNode = createAstNode(AST_VAR_ASSIGN);
             strncpy(assignNode->varAssign.name, temp.lexeme, sizeof(assignNode->varAssign.name));
             assignNode->varAssign.initializer = value;
-            return assignNode;
+            result = assignNode;
         }
         else if (currentToken.type == TOKEN_INT ||
                  currentToken.type == TOKEN_FLOAT ||
                  (currentToken.type == TOKEN_IDENTIFIER &&
                   (strcmp(currentToken.lexeme, "int") == 0 || strcmp(currentToken.lexeme, "float") == 0))) {
             AstNode *declNode = createAstNode(AST_VAR_DECL);
+            parser_stats.nodes_created++;
             strncpy(declNode->varDecl.name, temp.lexeme, sizeof(declNode->varDecl.name));
             strncpy(declNode->varDecl.type, currentToken.lexeme, sizeof(declNode->varDecl.type));
             advanceToken(); // consume tipo
-            return declNode;
+            result = declNode;
         }
         else if (currentToken.type == TOKEN_LPAREN) {
             advanceToken(); // consume '('
             AstNode *funcCall = createAstNode(AST_FUNC_CALL);
+            parser_stats.nodes_created++;
             strncpy(funcCall->funcCall.name, temp.lexeme, sizeof(funcCall->funcCall.name));
             funcCall->funcCall.arguments = NULL;
             funcCall->funcCall.argCount = 0;
@@ -423,25 +533,37 @@ static AstNode *parseStatement(void) {
             }
             advanceToken(); // consume ')'
             AstNode *callNode = parsePostfix(funcCall);
-            return callNode;
+            result = callNode;
         } else {
             lexRestoreState(saved);
-            return parseExpression();
+            result = parseExpression();
         }
     } else {
-        return parseExpression();
+        result = parseExpression();
     }
+    
+    if (debug_level >= 3 && result) {
+        logger_log(LOG_DEBUG, "Finished parsing statement, type: %d", result->type);
+    }
+    
+    return result;
 }
 
 /* parseExpression: Maneja operadores '+', '-', comparaciones */
 static AstNode *parseExpression(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parseExpression);
+    
     AstNode *node = parseTerm();
-    printf("parseExpression: initial term parsed, current: type=%d, lexeme='%s'\n",
-           currentToken.type, currentToken.lexeme);
+    
+    if (debug_level >= 3) {
+        logger_log(LOG_DEBUG, "Parsed initial term for expression");
+    }
+    
     while (currentToken.type == TOKEN_PLUS || currentToken.type == TOKEN_MINUS ||
            currentToken.type == TOKEN_GT || currentToken.type == TOKEN_LT ||
            currentToken.type == TOKEN_GTE || currentToken.type == TOKEN_LTE ||
            currentToken.type == TOKEN_EQ || currentToken.type == TOKEN_NEQ) {
+        
         char op;
         switch (currentToken.type) {
             case TOKEN_PLUS: op = '+'; break;
@@ -454,52 +576,92 @@ static AstNode *parseExpression(void) {
             case TOKEN_NEQ: op = 'N'; break;
             default: op = currentToken.lexeme[0];
         }
+        
         advanceToken();
         AstNode *right = parseTerm();
-        printf("parseExpression: right term parsed, current: type=%d, lexeme='%s'\n",
-               currentToken.type, currentToken.lexeme);
+        
+        if (debug_level >= 3) {
+            logger_log(LOG_DEBUG, "Parsed right term, creating binary op with operator '%c'", op);
+        }
+        
         AstNode *binOp = createAstNode(AST_BINARY_OP);
+        parser_stats.nodes_created++;
+        
         binOp->binaryOp.left = node;
         binOp->binaryOp.op = op;
         binOp->binaryOp.right = right;
         node = binOp;
     }
+    
     return node;
 }
 
 /* parseTerm: Maneja operadores '*' y '/' */
 static AstNode *parseTerm(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parseTerm);
+    
     AstNode *left = parseFactor();
+    
     while (currentToken.type == TOKEN_ASTERISK || currentToken.type == TOKEN_SLASH) {
         char op = currentToken.lexeme[0];
         advanceToken();
+        
         AstNode *right = parseFactor();
+        
+        if (debug_level >= 3) {
+            logger_log(LOG_DEBUG, "Creating binary operation %c", op);
+        }
+        
         AstNode *binOp = createAstNode(AST_BINARY_OP);
+        parser_stats.nodes_created++;
+        
         binOp->binaryOp.left = left;
         binOp->binaryOp.op = op;
         binOp->binaryOp.right = right;
         left = binOp;
     }
+    
     return left;
 }
 
 /* parseFactor: Números, cadenas, identificadores, agrupación */
 static AstNode *parseFactor(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)parseFactor);
+    
     AstNode *node = NULL;
+    
     if (currentToken.type == TOKEN_LPAREN && isLambdaLookahead()) {
         return parseLambda();
     }
     if (currentToken.type == TOKEN_NUMBER) {
         node = createAstNode(AST_NUMBER_LITERAL);
+        parser_stats.nodes_created++;
         node->numberLiteral.value = atof(currentToken.lexeme);
+        
+        if (debug_level >= 3) {
+            logger_log(LOG_DEBUG, "Created number literal: %g", node->numberLiteral.value);
+        }
+        
         advanceToken();
     } else if (currentToken.type == TOKEN_STRING) {
         node = createAstNode(AST_STRING_LITERAL);
+        parser_stats.nodes_created++;
         strncpy(node->stringLiteral.value, currentToken.lexeme, sizeof(node->stringLiteral.value));
+        
+        if (debug_level >= 3) {
+            logger_log(LOG_DEBUG, "Created string literal: \"%s\"", node->stringLiteral.value);
+        }
+        
         advanceToken();
     } else if (currentToken.type == TOKEN_IDENTIFIER) {
         node = createAstNode(AST_IDENTIFIER);
+        parser_stats.nodes_created++;
         strncpy(node->identifier.name, currentToken.lexeme, sizeof(node->identifier.name));
+        
+        if (debug_level >= 3) {
+            logger_log(LOG_DEBUG, "Created identifier: %s", node->identifier.name);
+        }
+        
         advanceToken();
         node = parsePostfix(node);
     } else if (currentToken.type == TOKEN_LPAREN) {
@@ -513,6 +675,7 @@ static AstNode *parseFactor(void) {
     } else {
         parserError("Unexpected token in expression", currentToken);
     }
+    
     return node;
 }
 
@@ -795,8 +958,17 @@ static AstNode *parseArrayLiteral(void) {
 
 /* Función auxiliar para consumir separadores de sentencia */
 static void skipStatementSeparators(void) {
-    while (currentToken.type == TOKEN_SEMICOLON)
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)skipStatementSeparators);
+    
+    int count = 0;
+    while (currentToken.type == TOKEN_SEMICOLON) {
         advanceToken();
+        count++;
+    }
+    
+    if (debug_level >= 3 && count > 0) {
+        logger_log(LOG_DEBUG, "Skipped %d statement separators", count);
+    }
 }
 
 /* parseModuleDecl: Procesa declaraciones de módulos */
