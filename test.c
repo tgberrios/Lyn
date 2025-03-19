@@ -115,26 +115,26 @@ void Circle_scale(Circle* self, double factor) {
 
 int main() {
     // Initialize required variables
-    bool error_caught = false;
-    bool finally_executed = false;
-    double sum = 0.0;
-    double product = 0.0;
-    int int_val = 0;
-    float float_val = 0.0;
-    double sum_val = 0.0;
-    Point* p1 = NULL;
-    Point* p2 = NULL;
-    Vector3* v1 = NULL;
-    Circle* c1 = NULL;
-    int i = 0;
-    int j = 0;
-    int count = 0;
-    int do_while_count = 0;
-    int day = 0;
-    int* int_array = NULL;
-    float* float_array = NULL;
-    double* mixed_array = NULL;
-    const char* day_name = "";
+    bool error_caught __attribute__((unused)) = false;
+    bool finally_executed __attribute__((unused)) = false;
+    double sum __attribute__((unused)) = 0.0;
+    double product __attribute__((unused)) = 0.0;
+    int int_val __attribute__((unused)) = 0;
+    float float_val __attribute__((unused)) = 0.0;
+    double sum_val __attribute__((unused)) = 0.0;
+    Point* p1 __attribute__((unused)) = NULL;
+    Point* p2 __attribute__((unused)) = NULL;
+    Vector3* v1 __attribute__((unused)) = NULL;
+    Circle* c1 __attribute__((unused)) = NULL;
+    int i __attribute__((unused)) = 0;
+    int j __attribute__((unused)) = 0;
+    int count __attribute__((unused)) = 0;
+    int do_while_count __attribute__((unused)) = 0;
+    int day __attribute__((unused)) = 0;
+    int* int_array __attribute__((unused)) = NULL;
+    float* float_array __attribute__((unused)) = NULL;
+    double* mixed_array __attribute__((unused)) = NULL;
+    const char* day_name __attribute__((unused)) = "";
     int a =     5    ;
     int b =     3    ;
     double c =     (    a     +     b    )    ;

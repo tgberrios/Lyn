@@ -1,3 +1,28 @@
+#ifndef COMPILER_H
+#define COMPILER_H
+
+#include "ast.h"
+#include <stdbool.h>
+
+// Compila el AST proporcionado a código C
+bool compileToC(AstNode* ast, const char* outputPath);
+
+// Establece el nivel de depuración para el compilador
+void compiler_set_debug_level(int level);
+
+// Obtiene estadísticas de compilación
+typedef struct {
+    int nodes_processed;
+    int functions_compiled;
+    int variables_declared;
+    int errors_encountered;
+} CompilerStats;
+
+// Obtiene estadísticas de la última compilación
+CompilerStats compiler_get_stats(void);
+
+#endif /* COMPILER_H */
+
 // Añadir include para va_list
 #include <stdarg.h>
 
@@ -217,83 +242,83 @@ static void initializeGlobalVariables(void) {
     
     emitLine("// Initialize required variables");
     
-    emitLine("bool error_caught = false;");
+    emitLine("bool error_caught __attribute__((unused)) = false;");
     addVariable("error_caught", "bool");
     markVariableDeclared("error_caught");
     
-    emitLine("bool finally_executed = false;");
+    emitLine("bool finally_executed __attribute__((unused)) = false;");
     addVariable("finally_executed", "bool");
     markVariableDeclared("finally_executed");
     
-    emitLine("double sum = 0.0;");
+    emitLine("double sum __attribute__((unused)) = 0.0;");
     addVariable("sum", "double");
     markVariableDeclared("sum");
     
-    emitLine("double product = 0.0;");
+    emitLine("double product __attribute__((unused)) = 0.0;");
     addVariable("product", "double");
     markVariableDeclared("product");
     
-    emitLine("int int_val = 0;");
+    emitLine("int int_val __attribute__((unused)) = 0;");
     addVariable("int_val", "int");
     markVariableDeclared("int_val");
     
-    emitLine("float float_val = 0.0;");
+    emitLine("float float_val __attribute__((unused)) = 0.0;");
     addVariable("float_val", "float");
     markVariableDeclared("float_val");
     
-    emitLine("double sum_val = 0.0;");
+    emitLine("double sum_val __attribute__((unused)) = 0.0;");
     addVariable("sum_val", "double");
     markVariableDeclared("sum_val");
     
-    emitLine("Point* p1 = NULL;");
+    emitLine("Point* p1 __attribute__((unused)) = NULL;");
     addVariable("p1", "Point*");
     markVariableDeclared("p1");
     
-    emitLine("Point* p2 = NULL;");
+    emitLine("Point* p2 __attribute__((unused)) = NULL;");
     addVariable("p2", "Point*");
     markVariableDeclared("p2");
     
-    emitLine("Vector3* v1 = NULL;");
+    emitLine("Vector3* v1 __attribute__((unused)) = NULL;");
     addVariable("v1", "Vector3*");
     markVariableDeclared("v1");
     
-    emitLine("Circle* c1 = NULL;");
+    emitLine("Circle* c1 __attribute__((unused)) = NULL;");
     addVariable("c1", "Circle*");
     markVariableDeclared("c1");
     
-    emitLine("int i = 0;");
+    emitLine("int i __attribute__((unused)) = 0;");
     addVariable("i", "int");
     markVariableDeclared("i");
     
-    emitLine("int j = 0;");
+    emitLine("int j __attribute__((unused)) = 0;");
     addVariable("j", "int");
     markVariableDeclared("j");
     
-    emitLine("int count = 0;");
+    emitLine("int count __attribute__((unused)) = 0;");
     addVariable("count", "int");
     markVariableDeclared("count");
     
-    emitLine("int do_while_count = 0;");
+    emitLine("int do_while_count __attribute__((unused)) = 0;");
     addVariable("do_while_count", "int");
     markVariableDeclared("do_while_count");
     
-    emitLine("int day = 0;");
+    emitLine("int day __attribute__((unused)) = 0;");
     addVariable("day", "int");
     markVariableDeclared("day");
     
-    emitLine("int* int_array = NULL;");
+    emitLine("int* int_array __attribute__((unused)) = NULL;");
     addVariable("int_array", "int*");
     markVariableDeclared("int_array");
     
-    emitLine("float* float_array = NULL;");
+    emitLine("float* float_array __attribute__((unused)) = NULL;");
     addVariable("float_array", "float*");
     markVariableDeclared("float_array");
     
-    emitLine("double* mixed_array = NULL;");
+    emitLine("double* mixed_array __attribute__((unused)) = NULL;");
     addVariable("mixed_array", "double*");
     markVariableDeclared("mixed_array");
     
-    emitLine("const char* day_name = \"\";");
+    emitLine("const char* day_name __attribute__((unused)) = \"\";");
     addVariable("day_name", "const char*");
     markVariableDeclared("day_name");
 }
