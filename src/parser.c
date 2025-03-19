@@ -2,6 +2,7 @@
 #include "parser.h"
 #include "lexer.h"
 #include "memory.h"   // Usamos memory_realloc y memory_free para la gestión de memoria.
+#include "error.h"    // Para usar error_report() y error_print_current()
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -11,7 +12,7 @@ static Token currentToken;
 
 /* Prototipos internos */
 static void advanceToken(void);
-static void parserError(const char *message);
+static void parserError(const char *message, Token current);
 static int isLambdaLookahead(void);
 static AstNode *parsePostfix(AstNode *node);
 static AstNode *parseStatement(void);
@@ -42,14 +43,12 @@ static void advanceToken(void) {
 }
 
 /* Reporta un error de parseo y termina */
-static void parserError(const char *message) {
-    fprintf(stderr, "\n========== LYN PARSER ERROR ==========\n");
-    fprintf(stderr, "Ubicación: Línea %d, Columna %d\n", currentToken.line, currentToken.col);
-    fprintf(stderr, "Error: %s\n", message);
-    fprintf(stderr, "Token actual: '%s' (Tipo: %d)\n", currentToken.lexeme, currentToken.type);
-    fprintf(stderr, "========================================\n\n");
+static void parserError(const char *message, Token current) {
+    error_report("test.lyn", current.line, current.col, message, ERROR_SYNTAX);
+    error_print_current();
     exit(1);
 }
+
 
 /* isLambdaLookahead: Comprueba sin alterar el estado global
    si la secuencia actual corresponde a la sintaxis de una lambda:
@@ -125,7 +124,7 @@ static AstNode *parsePostfix(AstNode *node) {
         printf("parsePostfix: consumed '.', current type=%d, lexeme='%s'\n",
                currentToken.type, currentToken.lexeme);
         if (currentToken.type != TOKEN_IDENTIFIER)
-            parserError("Expected identifier after '.'");
+            parserError("Expected identifier after '.'", currentToken);
         AstNode *memberNode = createAstNode(AST_MEMBER_ACCESS);
         memberNode->memberAccess.object = node;
         strncpy(memberNode->memberAccess.member, currentToken.lexeme, sizeof(memberNode->memberAccess.member));
@@ -154,7 +153,7 @@ static AstNode *parsePostfix(AstNode *node) {
                 if (currentToken.type == TOKEN_COMMA)
                     advanceToken();
                 else if (currentToken.type != TOKEN_RPAREN)
-                    parserError("Expected ',' or ')' in argument list");
+                    parserError("Expected ',' or ')' in argument list", currentToken);
             }
             advanceToken(); // consume ')'
             printf("parsePostfix: consumed ')', current type=%d, lexeme='%s'\n",
@@ -184,7 +183,7 @@ static AstNode *parsePostfix(AstNode *node) {
             if (currentToken.type == TOKEN_COMMA)
                 advanceToken();
             else if (currentToken.type != TOKEN_RPAREN)
-                parserError("Expected ',' or ')' in function call argument list");
+                parserError("Expected ',' or ')' in function call argument list", currentToken);
         }
         advanceToken(); // consume ')'
         printf("parsePostfix: consumed ')', current type=%d, lexeme='%s'\n",
@@ -205,7 +204,7 @@ AstNode *parseProgram(void) {
     advanceToken();  // Obtener el primer token
 
     if (currentToken.type != TOKEN_IDENTIFIER || strcmp(currentToken.lexeme, "main") != 0)
-        parserError("Program must start with 'main'");
+        parserError("Program must start with 'main'", currentToken);
     advanceToken(); // consume "main"
     if (currentToken.type == TOKEN_SEMICOLON)
         advanceToken(); // consume separador
@@ -216,7 +215,6 @@ AstNode *parseProgram(void) {
         printf("Parsed statement, next token: type=%d, lexeme='%s'\n", currentToken.type, currentToken.lexeme);
         skipStatementSeparators();
         programNode->program.statementCount++;
-        /* Se corrige la llamada a memory_realloc para incluir el puntero actual */
         programNode->program.statements = memory_realloc(programNode->program.statements,
                                                           programNode->program.statementCount * sizeof(AstNode *));
         programNode->program.statements[programNode->program.statementCount - 1] = stmt;
@@ -235,11 +233,11 @@ static AstNode *parseStatement(void) {
     } else if (currentToken.type == TOKEN_PRINT) {
         advanceToken(); // consume "print"
         if (currentToken.type != TOKEN_LPAREN)
-            parserError("Expected '(' after 'print'");
+            parserError("Expected '(' after 'print'", currentToken);
         advanceToken(); // consume '('
         AstNode *expr = parseExpression();
         if (currentToken.type != TOKEN_RPAREN)
-            parserError("Expected ')' after print expression");
+            parserError("Expected ')' after print expression", currentToken);
         advanceToken(); // consume ')'
         AstNode *printNode = createAstNode(AST_PRINT_STMT);
         printNode->printStmt.expr = expr;
@@ -269,7 +267,7 @@ static AstNode *parseStatement(void) {
         strncpy(uiNode->importStmt.moduleType, "ui", sizeof(uiNode->importStmt.moduleType));
         advanceToken(); // consume "ui"
         if (currentToken.type != TOKEN_STRING)
-            parserError("Expected string after 'ui'");
+            parserError("Expected string after 'ui'", currentToken);
         strncpy(uiNode->importStmt.moduleName, currentToken.lexeme, sizeof(uiNode->importStmt.moduleName));
         advanceToken();
         return uiNode;
@@ -278,14 +276,14 @@ static AstNode *parseStatement(void) {
         strncpy(cssNode->importStmt.moduleType, "css", sizeof(cssNode->importStmt.moduleType));
         advanceToken(); // consume "css"
         if (currentToken.type != TOKEN_STRING)
-            parserError("Expected string after 'css'");
+            parserError("Expected string after 'css'", currentToken);
         strncpy(cssNode->importStmt.moduleName, currentToken.lexeme, sizeof(cssNode->importStmt.moduleName));
         advanceToken();
         return cssNode;
     } else if (currentToken.type == TOKEN_REGISTER_EVENT) {
         advanceToken(); // consume "register_event"
         if (currentToken.type != TOKEN_LPAREN)
-            parserError("Expected '(' after register_event");
+            parserError("Expected '(' after register_event", currentToken);
         advanceToken(); // consume '('
         AstNode *regCall = createAstNode(AST_FUNC_CALL);
         strncpy(regCall->funcCall.name, "register_event", sizeof(regCall->funcCall.name));
@@ -301,7 +299,7 @@ static AstNode *parseStatement(void) {
             if (currentToken.type == TOKEN_COMMA)
                 advanceToken();
             else if (currentToken.type != TOKEN_RPAREN)
-                parserError("Expected ',' or ')' in register_event argument list");
+                parserError("Expected ',' or ')' in register_event argument list", currentToken);
         }
         advanceToken(); // consume ')'
         return regCall;
@@ -322,16 +320,16 @@ static AstNode *parseStatement(void) {
                 if (!(currentToken.type == TOKEN_INT || currentToken.type == TOKEN_FLOAT ||
                       (currentToken.type == TOKEN_IDENTIFIER &&
                        (strcmp(currentToken.lexeme, "int") == 0 || strcmp(currentToken.lexeme, "float") == 0))))
-                    parserError("Expected type inside array declaration");
+                    parserError("Expected type inside array declaration", currentToken);
                 strncat(typeBuffer, currentToken.lexeme, sizeof(typeBuffer) - strlen(typeBuffer) - 1);
                 advanceToken(); // consume el tipo
                 if (currentToken.type != TOKEN_RBRACKET)
-                    parserError("Expected ']' after array type");
+                    parserError("Expected ']' after array type", currentToken);
                 strncat(typeBuffer, "]", sizeof(typeBuffer) - strlen(typeBuffer) - 1);
                 advanceToken(); // consume ']'
             } else {
                 if (currentToken.type != TOKEN_IDENTIFIER && currentToken.type != TOKEN_INT && currentToken.type != TOKEN_FLOAT)
-                    parserError("Expected type after ':' in variable declaration");
+                    parserError("Expected type after ':' in variable declaration", currentToken);
                 strncpy(typeBuffer, currentToken.lexeme, sizeof(typeBuffer));
                 advanceToken(); // consume tipo
             }
@@ -351,7 +349,7 @@ static AstNode *parseStatement(void) {
         if (currentToken.type == TOKEN_DOT) {
             advanceToken(); // consume '.'
             if (currentToken.type != TOKEN_IDENTIFIER)
-                parserError("Expected identifier after '.'");
+                parserError("Expected identifier after '.'", currentToken);
             AstNode *memberNode = createAstNode(AST_MEMBER_ACCESS);
             memberNode->memberAccess.object = createAstNode(AST_IDENTIFIER);
             strncpy(memberNode->memberAccess.object->identifier.name, temp.lexeme,
@@ -421,7 +419,7 @@ static AstNode *parseStatement(void) {
                 if (currentToken.type == TOKEN_COMMA)
                     advanceToken();
                 else if (currentToken.type != TOKEN_RPAREN)
-                    parserError("Expected ',' or ')' in function call argument list");
+                    parserError("Expected ',' or ')' in function call argument list", currentToken);
             }
             advanceToken(); // consume ')'
             AstNode *callNode = parsePostfix(funcCall);
@@ -508,12 +506,12 @@ static AstNode *parseFactor(void) {
         advanceToken();
         node = parseExpression();
         if (currentToken.type != TOKEN_RPAREN)
-            parserError("Expected ')' after expression");
+            parserError("Expected ')' after expression", currentToken);
         advanceToken();
     } else if (currentToken.type == TOKEN_LBRACKET) {
         node = parseArrayLiteral();
     } else {
-        parserError("Unexpected token in expression");
+        parserError("Unexpected token in expression", currentToken);
     }
     return node;
 }
@@ -522,18 +520,18 @@ static AstNode *parseFactor(void) {
 static AstNode *parseFuncDef(void) {
     advanceToken(); // consume 'func'
     if (currentToken.type != TOKEN_IDENTIFIER)
-        parserError("Expected function name after 'func'");
+        parserError("Expected function name after 'func'", currentToken);
     char funcName[256];
     strncpy(funcName, currentToken.lexeme, sizeof(funcName));
     advanceToken();
     if (currentToken.type != TOKEN_LPAREN)
-        parserError("Expected '(' after function name");
+        parserError("Expected '(' after function name", currentToken);
     advanceToken();
     AstNode **parameters = NULL;
     int paramCount = 0;
     while (currentToken.type != TOKEN_RPAREN) {
         if (currentToken.type != TOKEN_IDENTIFIER)
-            parserError("Expected parameter name in function definition");
+            parserError("Expected parameter name in function definition", currentToken);
         char paramName[256];
         strncpy(paramName, currentToken.lexeme, sizeof(paramName));
         AstNode *param = createAstNode(AST_IDENTIFIER);
@@ -542,22 +540,22 @@ static AstNode *parseFuncDef(void) {
         parameters[paramCount++] = param;
         advanceToken();
         if (currentToken.type != TOKEN_COLON)
-            parserError("Expected ':' after parameter name in function definition");
+            parserError("Expected ':' after parameter name in function definition", currentToken);
         advanceToken();
         if (currentToken.type != TOKEN_IDENTIFIER && currentToken.type != TOKEN_INT && currentToken.type != TOKEN_FLOAT)
-            parserError("Expected parameter type in function definition");
+            parserError("Expected parameter type in function definition", currentToken);
         advanceToken();
         if (currentToken.type == TOKEN_COMMA)
             advanceToken();
         else if (currentToken.type != TOKEN_RPAREN)
-            parserError("Expected ',' or ')' in parameter list");
+            parserError("Expected ',' or ')' in parameter list", currentToken);
     }
     advanceToken();
     char retType[64] = "";
     if (currentToken.type == TOKEN_ARROW) {
         advanceToken();
         if (currentToken.type != TOKEN_IDENTIFIER && currentToken.type != TOKEN_INT && currentToken.type != TOKEN_FLOAT)
-            parserError("Expected return type after '->'");
+            parserError("Expected return type after '->'", currentToken);
         strncpy(retType, currentToken.lexeme, sizeof(retType));
         advanceToken();
     }
@@ -623,7 +621,7 @@ static AstNode *parseIfStmt(void) {
         }
     }
     if (currentToken.type != TOKEN_END)
-        parserError("Expected 'end' after if statement");
+        parserError("Expected 'end' after if statement", currentToken);
     advanceToken();
     AstNode *ifNode = createAstNode(AST_IF_STMT);
     ifNode->ifStmt.condition = condition;
@@ -638,18 +636,18 @@ static AstNode *parseIfStmt(void) {
 static AstNode *parseForStmt(void) {
     advanceToken();
     if (currentToken.type != TOKEN_IDENTIFIER)
-        parserError("Expected iterator identifier in for loop");
+        parserError("Expected iterator identifier in for loop", currentToken);
     char iterator[256];
     strncpy(iterator, currentToken.lexeme, sizeof(iterator));
     advanceToken();
     if (currentToken.type != TOKEN_IN)
-        parserError("Expected 'in' in for loop");
+        parserError("Expected 'in' in for loop", currentToken);
     advanceToken();
     if (currentToken.type != TOKEN_RANGE)
-        parserError("Expected 'range' in for loop");
+        parserError("Expected 'range' in for loop", currentToken);
     advanceToken();
     if (currentToken.type != TOKEN_LPAREN)
-        parserError("Expected '(' after 'range'");
+        parserError("Expected '(' after 'range'", currentToken);
     advanceToken();
     AstNode *rangeStart = parseExpression();
     AstNode *rangeEnd = NULL;
@@ -663,7 +661,7 @@ static AstNode *parseForStmt(void) {
         rangeStart = zeroNode;
     }
     if (currentToken.type != TOKEN_RPAREN)
-        parserError("Expected ')' after range arguments");
+        parserError("Expected ')' after range arguments", currentToken);
     advanceToken();
     skipStatementSeparators();
     AstNode **body = NULL;
@@ -675,7 +673,7 @@ static AstNode *parseForStmt(void) {
         skipStatementSeparators();
     }
     if (currentToken.type != TOKEN_END)
-        parserError("Expected 'end' to close for loop");
+        parserError("Expected 'end' to close for loop", currentToken);
     advanceToken();
     AstNode *forNode = createAstNode(AST_FOR_STMT);
     strncpy(forNode->forStmt.iterator, iterator, sizeof(forNode->forStmt.iterator));
@@ -691,7 +689,7 @@ static AstNode *parseClassDef(void) {
     advanceToken();  // consume 'class'
     
     if (currentToken.type != TOKEN_IDENTIFIER)
-        parserError("Expected class name");
+        parserError("Expected class name", currentToken);
     
     AstNode *classNode = createAstNode(AST_CLASS_DEF);
     strncpy(classNode->classDef.name, currentToken.lexeme, sizeof(classNode->classDef.name));
@@ -701,9 +699,8 @@ static AstNode *parseClassDef(void) {
     if (currentToken.type == TOKEN_COLON) {
         advanceToken();
         if (currentToken.type != TOKEN_IDENTIFIER)
-            parserError("Expected base class name after ':'");
-        strncpy(classNode->classDef.baseClassName, currentToken.lexeme, 
-                sizeof(classNode->classDef.baseClassName));
+            parserError("Expected base class name after ':'", currentToken);
+        strncpy(classNode->classDef.baseClassName, currentToken.lexeme, sizeof(classNode->classDef.baseClassName));
         advanceToken();
     }
 
@@ -731,26 +728,26 @@ static AstNode *parseLambda(void) {
     int paramCount = 0;
     while (currentToken.type != TOKEN_RPAREN) {
         if (currentToken.type != TOKEN_IDENTIFIER)
-            parserError("Expected parameter name in lambda");
+            parserError("Expected parameter name in lambda", currentToken);
         AstNode *param = createAstNode(AST_IDENTIFIER);
         strncpy(param->identifier.name, currentToken.lexeme, sizeof(param->identifier.name));
+        parameters = memory_realloc(parameters, (paramCount + 1) * sizeof(AstNode *));
+        parameters[paramCount++] = param;
         advanceToken();
         if (currentToken.type != TOKEN_COLON)
-            parserError("Expected ':' after parameter name in lambda");
+            parserError("Expected ':' after parameter name in lambda", currentToken);
         advanceToken();
         if (currentToken.type != TOKEN_IDENTIFIER && currentToken.type != TOKEN_INT && currentToken.type != TOKEN_FLOAT)
-            parserError("Expected parameter type in lambda after ':'");
+            parserError("Expected parameter type in lambda after ':'", currentToken);
         advanceToken();
         if (currentToken.type == TOKEN_COMMA)
             advanceToken();
         else if (currentToken.type != TOKEN_RPAREN)
-            parserError("Expected ',' or ')' in lambda parameter list");
-        parameters = memory_realloc(parameters, (paramCount + 1) * sizeof(AstNode *));
-        parameters[paramCount++] = param;
+            parserError("Expected ',' or ')' in lambda parameter list", currentToken);
     }
     advanceToken();
     if (currentToken.type != TOKEN_ARROW)
-        parserError("Expected '->' after lambda parameters");
+        parserError("Expected '->' after lambda parameters", currentToken);
     advanceToken();
     char retType[64] = "";
     if (currentToken.type == TOKEN_IDENTIFIER || currentToken.type == TOKEN_INT || currentToken.type == TOKEN_FLOAT) {
@@ -758,7 +755,7 @@ static AstNode *parseLambda(void) {
         advanceToken();
     }
     if (currentToken.type != TOKEN_FAT_ARROW)
-        parserError("Expected '=>' in lambda");
+        parserError("Expected '=>' in lambda", currentToken);
     advanceToken();
     AstNode *body = parseExpression();
     AstNode *lambdaNode = createAstNode(AST_LAMBDA);
@@ -779,7 +776,7 @@ static AstNode *parseArrayLiteral(void) {
             AstNode *element = parseExpression();
             elements = memory_realloc(elements, (count + 1) * sizeof(AstNode *));
             if (!elements)
-                parserError("Error de asignación de memoria para array literal");
+                parserError("Error de asignación de memoria para array literal", currentToken);
             elements[count++] = element;
             if (currentToken.type == TOKEN_COMMA)
                 advanceToken();
@@ -788,7 +785,7 @@ static AstNode *parseArrayLiteral(void) {
         }
     }
     if (currentToken.type != TOKEN_RBRACKET)
-        parserError("Se esperaba ']' al finalizar el literal de arreglo");
+        parserError("Se esperaba ']' al finalizar el literal de arreglo", currentToken);
     advanceToken();
     AstNode *node = createAstNode(AST_ARRAY_LITERAL);
     node->arrayLiteral.elements = elements;
@@ -806,13 +803,11 @@ static void skipStatementSeparators(void) {
 static AstNode* parseModuleDecl(void) {
     advanceToken(); // consume 'module'
     
-    if (currentToken.type != TOKEN_IDENTIFIER) {
-        parserError("Expected module name");
-    }
+    if (currentToken.type != TOKEN_IDENTIFIER)
+        parserError("Expected module name", currentToken);
     
     AstNode* moduleNode = createAstNode(AST_MODULE_DECL);
-    strncpy(moduleNode->moduleDecl.name, currentToken.lexeme, 
-            sizeof(moduleNode->moduleDecl.name));
+    strncpy(moduleNode->moduleDecl.name, currentToken.lexeme, sizeof(moduleNode->moduleDecl.name));
     
     advanceToken(); // consume module name
     
@@ -838,9 +833,8 @@ static AstNode* parseModuleDecl(void) {
 static AstNode* parseImport(void) {
     advanceToken(); // consume 'import'
     
-    if (currentToken.type != TOKEN_STRING && currentToken.type != TOKEN_IDENTIFIER) {
-        parserError("Expected module name");
-    }
+    if (currentToken.type != TOKEN_STRING && currentToken.type != TOKEN_IDENTIFIER)
+        parserError("Expected module name", currentToken);
     
     AstNode* importNode = createAstNode(AST_IMPORT);
     strncpy(importNode->importStmt.moduleName, currentToken.lexeme, sizeof(importNode->importStmt.moduleName));
@@ -866,7 +860,7 @@ static AstNode *parseWhileStmt(void) {
     }
     
     if (currentToken.type != TOKEN_END)
-        parserError("Expected 'end' to close while loop");
+        parserError("Expected 'end' to close while loop", currentToken);
     advanceToken(); // consume 'end'
     
     AstNode *whileNode = createAstNode(AST_WHILE_STMT);
@@ -893,13 +887,13 @@ static AstNode *parseDoWhileStmt(void) {
     }
     
     if (currentToken.type != TOKEN_WHILE)
-        parserError("Expected 'while' after do block");
+        parserError("Expected 'while' after do block", currentToken);
     advanceToken(); // consume 'while'
     
     AstNode *condition = parseExpression();
     
     if (currentToken.type != TOKEN_END)
-        parserError("Expected 'end' to close do-while loop");
+        parserError("Expected 'end' to close do-while loop", currentToken);
     advanceToken(); // consume 'end'
     
     AstNode *doWhileNode = createAstNode(AST_DO_WHILE_STMT);
@@ -962,7 +956,7 @@ static AstNode *parseSwitchStmt(void) {
     }
     
     if (currentToken.type != TOKEN_END)
-        parserError("Expected 'end' to close switch statement");
+        parserError("Expected 'end' to close switch statement", currentToken);
     advanceToken(); // consume 'end'
     
     AstNode *switchNode = createAstNode(AST_SWITCH_STMT);
@@ -1040,7 +1034,7 @@ static AstNode *parseTryCatchStmt(void) {
     }
     
     if (currentToken.type != TOKEN_END)
-        parserError("Expected 'end' to close try-catch-finally block");
+        parserError("Expected 'end' to close try-catch-finally block", currentToken);
     advanceToken(); // consume 'end'
     
     AstNode *tryCatchNode = createAstNode(AST_TRY_CATCH_STMT);
@@ -1065,4 +1059,3 @@ static AstNode *parseThrowStmt(void) {
     
     return throwNode;
 }
-

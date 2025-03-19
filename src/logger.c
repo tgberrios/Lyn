@@ -41,6 +41,10 @@ void logger_set_level(LogLevel level) {
     currentLevel = level;
 }
 
+LogLevel logger_get_level(void) {
+    return currentLevel;
+}
+
 void logger_log(LogLevel level, const char* format, ...) {
     if (level < currentLevel || !logFile) return;
     
@@ -58,7 +62,7 @@ void logger_log(LogLevel level, const char* format, ...) {
     fprintf(logFile, "\n");
     fflush(logFile);
     
-    // Para errores, también mostrarlos en stderr
+    // Para mensajes de error, imprimir también en stderr
     if (level == LOG_ERROR) {
         fprintf(stderr, "[ERROR] ");
         va_start(args, format);

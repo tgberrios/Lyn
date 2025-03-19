@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-// Agregar la enumeración de tipos de error
+// Enumeración de tipos de error
 typedef enum {
     ERROR_NONE,
     ERROR_SYNTAX,
@@ -19,26 +19,27 @@ typedef struct {
     int line;
     int column;
     const char* file;
-    const char* message;
-    const char* context;     // Línea de código donde ocurrió el error
-    int contextLength;       // Longitud del contexto
-    int errorPosition;       // Posición del error en el contexto
+    char* message;
+    char* context;     // Línea de código donde ocurrió el error
+    int contextLength; // Longitud del contexto
+    int errorPosition; // Posición del error en el contexto
+    ErrorType type;
 } ErrorInfo;
 
-typedef enum {
-    WARNING_UNUSED_VAR,
-    WARNING_SHADOWING,
-    WARNING_IMPLICIT_CONVERSION
-    // ...etc
-} WarningType;
+// Reporta un error y almacena el mensaje actual, incluyendo detalles de ubicación y tipo.
+void error_report(const char* module, int line, int col, const char* message, ErrorType type);
 
-// Reporta un error y establece el mensaje de error actual.
-void error_report(const char* module, int line, int col, const char* message);
-
-// Establece el código fuente actual para el sistema de errores.
+// Establece el código fuente actual para que el sistema de errores pueda extraer el contexto.
 void error_set_source(const char* source);
 
-// Imprime el mensaje de error actual con contexto.
+// Imprime el error actual con contexto y stack trace.
 void error_print_current(void);
 
-#endif /* ERROR_H */
+// Funciones auxiliares para obtener información del error.
+int error_get_count(void);
+const ErrorInfo* error_get_last(void);
+
+// Obtiene un mensaje descriptivo según el tipo de error.
+const char* get_error_message(ErrorType type);
+
+#endif /* LYN_ERROR_H */

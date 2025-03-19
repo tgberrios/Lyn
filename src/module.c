@@ -6,14 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Agregar la declaración de lexerInit aquí
+// Declaración externa de lexerInit
 extern void lexerInit(const char* source);
 
 #define MAX_MODULES 256
 static Module* loadedModules[MAX_MODULES];
 static int moduleCount = 0;
-
-// ...existing code...
 
 void module_system_init(void) {
     moduleCount = 0;
@@ -66,12 +64,19 @@ Module* module_load(const char* name) {
     // Abrir y leer el archivo
     FILE* file = fopen(path, "r");
     if (!file) {
-        error_report("module", 0, 0, "No se pudo abrir el archivo del módulo");
+        error_report("module", 0, 0, "No se pudo abrir el archivo del módulo", ERROR_IO);
         return NULL;
     }
-
+    
     // Crear nuevo módulo
     Module* module = malloc(sizeof(Module));
+    if (!module) {
+        error_report("module", 0, 0, "Fallo al asignar memoria para el módulo", ERROR_MEMORY);
+        fclose(file);
+        return NULL;
+    }
+    memset(module->name, 0, sizeof(module->name));
+    memset(module->path, 0, sizeof(module->path));
     strncpy(module->name, name, sizeof(module->name) - 1);
     strncpy(module->path, path, sizeof(module->path) - 1);
     module->exports = NULL;
@@ -86,7 +91,20 @@ Module* module_load(const char* name) {
     fseek(file, 0, SEEK_SET);
 
     char* source = malloc(size + 1);
-    fread(source, 1, size, file);
+    if (!source) {
+        error_report("module", 0, 0, "Fallo al asignar memoria para el contenido del módulo", ERROR_MEMORY);
+        fclose(file);
+        free(module);
+        return NULL;
+    }
+    size_t read = fread(source, 1, size, file);
+    if (read != (size_t)size) {
+        error_report("module", 0, 0, "Fallo al leer el archivo del módulo", ERROR_IO);
+        fclose(file);
+        free(source);
+        free(module);
+        return NULL;
+    }
     source[size] = '\0';
     fclose(file);
 
@@ -96,7 +114,7 @@ Module* module_load(const char* name) {
     free(source);
 
     if (!module->ast) {
-        error_report("module", 0, 0, "Error al parsear el módulo");
+        error_report("module", 0, 0, "Error al parsear el módulo", ERROR_SYNTAX);
         free(module);
         return NULL;
     }
@@ -106,7 +124,7 @@ Module* module_load(const char* name) {
         loadedModules[moduleCount++] = module;
         logger_log(LOG_INFO, "Módulo '%s' cargado exitosamente", name);
     } else {
-        error_report("module", 0, 0, "Número máximo de módulos excedido");
+        error_report("module", 0, 0, "Número máximo de módulos excedido", ERROR_RUNTIME);
         free(module);
         return NULL;
     }
@@ -124,10 +142,14 @@ bool module_import(Module* target, const char* moduleName) {
     // Agregar a la lista de imports
     target->importCount++;
     target->imports = realloc(target->imports, target->importCount * sizeof(Module*));
+    if (!target->imports) {
+        error_report("module", 0, 0, "Fallo al asignar memoria para imports", ERROR_MEMORY);
+        return false;
+    }
     
-    // Usar un cast para asegurar que los tipos sean compatibles
-    target->imports[target->importCount - 1] = (struct Module*)imported;
-
+    // Se agrega el cast para corregir el error de tipos
+    target->imports[target->importCount - 1] = (struct Module*) imported;
+    
     logger_log(LOG_INFO, "Módulo '%s' importado en '%s'", moduleName, target->name);
     return true;
 }
@@ -137,7 +159,6 @@ AstNode* module_resolve_symbol(Module* module, const char* name) {
 
     // Buscar en exports
     for (int i = 0; i < module->exportCount; i++) {
-        // Comparar nombre del símbolo según su tipo
         const char* symbolName = NULL;
         switch (module->exports[i]->type) {
             case AST_FUNC_DEF:
@@ -152,14 +173,13 @@ AstNode* module_resolve_symbol(Module* module, const char* name) {
             default:
                 continue;
         }
-        if (strcmp(symbolName, name) == 0) {
+        if (symbolName && strcmp(symbolName, name) == 0) {
             return module->exports[i];
         }
     }
 
     // Buscar en módulos importados
     for (int i = 0; i < module->importCount; i++) {
-        // Usar un cast para resolver el problema de tipos incompatibles
         AstNode* symbol = module_resolve_symbol((Module*)module->imports[i], name);
         if (symbol) return symbol;
     }
@@ -172,6 +192,10 @@ void module_add_export(Module* module, const char* name, AstNode* node) {
 
     module->exportCount++;
     module->exports = realloc(module->exports, module->exportCount * sizeof(AstNode*));
+    if (!module->exports) {
+        error_report("module", 0, 0, "Fallo al asignar memoria para exports", ERROR_MEMORY);
+        return;
+    }
     module->exports[module->exportCount - 1] = node;
     
     logger_log(LOG_DEBUG, "Símbolo '%s' exportado en módulo '%s'", name, module->name);
@@ -204,7 +228,6 @@ void module_print_info(Module* module) {
     
     printf("\nImports:\n");
     for (int i = 0; i < module->importCount; i++) {
-        // Usar un cast para acceder a los campos del módulo importado
         printf("  - %s\n", ((Module*)module->imports[i])->name);
     }
     printf("==================\n");

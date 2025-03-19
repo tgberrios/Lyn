@@ -33,7 +33,7 @@ void lexerInit(const char *src) {
 }
 
 static void lexerError(const char* message) {
-    error_report("lexer", line, col, message);
+    error_report("lexer", line, col, message, ERROR_SYNTAX);
     error_print_current();
     exit(1);
 }
