@@ -506,6 +506,8 @@ end
 
 ### Definición de Módulos
 
+Un módulo en Lyn es una unidad de organización de código que puede contener funciones, clases, variables y otras definiciones. Los módulos permiten encapsular código y evitar colisiones de nombres.
+
 ```
 module Matematicas
     PI = 3.14159
