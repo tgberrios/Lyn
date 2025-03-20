@@ -8,7 +8,8 @@ NC='\033[0m'
 
 # Compilar el compilador Lyn con -rdynamic para exportar símbolos
 echo -e "${YELLOW}Compilando el compilador Lyn...${NC}"
-gcc -o lyn src/*.c -rdynamic -I./src
+CFLAGS="${CFLAGS} -Wno-unused-variable"
+gcc $CFLAGS -o lyn src/*.c -rdynamic -I./src
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error compilando el compilador${NC}"

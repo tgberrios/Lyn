@@ -353,8 +353,16 @@ AstNode *parseProgram(void) {
     programNode->program.statementCount = 0;
     advanceToken();  // Obtener el primer token
 
-    if (currentToken.type != TOKEN_IDENTIFIER || strcmp(currentToken.lexeme, "main") != 0)
+    // Parse zero or more top-level function definitions
+    while (currentToken.type == TOKEN_FUNC) {
+        parseFuncDef();
+        // ...existing code...
+    }
+
+    // Ensure main block follows
+    if (currentToken.type != TOKEN_IDENTIFIER || strcmp(currentToken.lexeme, "main") != 0) {
         parserError("Program must start with 'main'", currentToken);
+    }
     advanceToken(); // consume "main"
     if (currentToken.type == TOKEN_SEMICOLON)
         advanceToken(); // consume separador

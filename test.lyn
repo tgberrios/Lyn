@@ -2,6 +2,10 @@
 // * Basic Testing Script for Lyn Language
 // ************************************************************************
 
+func sayHello()
+    print("Hello from sayHello function!")
+end
+
 main
     // ===================================================================
     // Variables and Type Tests
@@ -143,6 +147,9 @@ main
 
     var myCar = new Car()
     print("Car instance created.")
+    print("My car brand is: " + myCar.brand)  // Use myCar to prevent unused warning
+    
+    sayHello()
     
     print("\n=== Test completed successfully! ===")
 end

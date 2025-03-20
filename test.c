@@ -135,9 +135,9 @@ int main() {
     float* float_array __attribute__((unused)) = NULL;
     double* mixed_array __attribute__((unused)) = NULL;
     const char* day_name __attribute__((unused)) = "";
-    int entero = 42;
-    double decimal = 3.14;
-    const char* texto =     "Hola, Lyn!"    ;
+    int entero __attribute__((unused)) = 42;
+    double decimal __attribute__((unused)) = 3.14;
+    const char* texto __attribute__((unused)) =     "Hola, Lyn!"    ;
     printf("%s\n", "\n=== Variables and their values ===");
     printf("%s\n", "entero = ");
     printf("%d\n", entero);
@@ -146,31 +146,31 @@ int main() {
     printf("%s\n", "texto = ");
     printf("%s\n", texto);
     printf("%s\n", "\n=== Arithmetic operations ===");
-    double suma;
+    double suma __attribute__((unused));
     suma =     (    5     +     3    )    ;
     printf("%s\n", "5 + 3 = ");
     printf("%g\n", suma);
-    double resta;
+    double resta __attribute__((unused));
     resta =     (    10     -     4    )    ;
     printf("%s\n", "10 - 4 = ");
     printf("%g\n", resta);
-    double producto;
+    double producto __attribute__((unused));
     producto =     (    3     *     7    )    ;
     printf("%s\n", "3 * 7 = ");
     printf("%g\n", producto);
-    double division;
+    double division __attribute__((unused));
     division =     (    20     /     4    )    ;
     printf("%s\n", "20 / 4 = ");
     printf("%g\n", division);
     printf("%s\n", "\n=== Control flow statements ===");
-    int valor = 42;
+    int valor __attribute__((unused)) = 42;
     if (    (    valor     >     10    )    ) {
         printf("%s\n", "valor is greater than 10");
     }
     else {
         printf("%s\n", "valor is less than or equal to 10");
     }
-    int edad = 25;
+    int edad __attribute__((unused)) = 25;
     if (    (    edad     >=     18    )    ) {
         printf("%s\n", "You are an adult");
     }
@@ -200,8 +200,13 @@ int main() {
     }
     printf("%s\n", "Calling advised function:");
     printf("%s\n", "\n=== Class and Object Test ===");
-    double myCar =     0    ;
+    double myCar __attribute__((unused)) =     0    ;
     printf("%s\n", "Car instance created.");
+    {
+        char _buffer[512];
+        sprintf(_buffer, "%s%s",         "My car brand is: "        ,         "Toyota"        );
+        printf("%s\n", _buffer);
+    }
     printf("%s\n", "\n=== Test completed successfully! ===");
     // Ensure test function is called
     test_function();

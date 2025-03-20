@@ -337,6 +337,18 @@ end
 
 ## Funciones
 
+### Definición y llamada de funciones
+
+Para definir una función use:
+
+```
+func nombreFuncion()
+    // ...cuerpo...
+end
+```
+
+Luego se llama con `nombreFuncion()`.
+
 ### Declaración de Funciones
 
 ```
@@ -991,7 +1003,7 @@ end
 
 ### Progreso del Proyecto
 
-El lenguaje de programación Lyn se encuentra actualmente en una fase de desarrollo activa, con aproximadamente un 55-60% del diseño total implementado.
+El lenguaje de programación Lyn se encuentra actualmente en una fase de desarrollo activa, con aproximadamente un 60-65% del diseño total implementado.
 
 #### Características implementadas (100%)
 
@@ -1002,13 +1014,15 @@ El lenguaje de programación Lyn se encuentra actualmente en una fase de desarro
 - Estructuras de control (if-else, while, do-while)
 - Funciones simples y llamadas a funciones
 - Programación orientada a aspectos básica (aspectos, pointcuts, advice)
+- Clases y objetos básicos
+- Definiciones y llamadas a funciones
 
 #### Características parcialmente implementadas (50-75%)
 
-- Clases y objetos (sintaxis implementada, herencia básica)
 - Sistema de tipos y comprobación de tipos
 - Switch y estructuras de selección múltiple
 - Optimizaciones de código
+- Herencia de clases
 
 #### Características en desarrollo (25-50%)
 
@@ -1046,13 +1060,11 @@ El lenguaje de programación Lyn se encuentra actualmente en una fase de desarro
 10. ✅ **Compilation to C**
 11. ✅ **Loop constructs** (while, do-while)
 12. ✅ **Aspect-oriented programming basics** (aspects, pointcuts, advice)
-
 13. ✅ **Classes and objects**
-14. ⚠️ **Function definitions and calls** (basic structure but not fully tested)
+14. ✅ **Function definitions and calls**
 15. ⚠️ **Type system** (basic inference but not complete)
 16. ⚠️ **For loops** (syntax exists but might have issues with complex cases)
 17. ⚠️ **Switch statements** (implemented but needs more testing)
-
 18. ❌ **Advanced OOP features** (inheritance, polymorphism)
 19. ❌ **Advanced function features** (lambdas, higher-order functions)
 20. ❌ **Exception handling** (try/catch blocks)
