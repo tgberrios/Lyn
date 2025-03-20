@@ -4,26 +4,26 @@
 #include "ast.h"
 #include <stdbool.h>
 
-// Estructura para almacenar información del weaving
+// Estadísticas del proceso de weaving
 typedef struct {
-    int joinpoints_found;     // Número de puntos de unión encontrados
-    int advice_applied;       // Número de advice aplicados
-    char error_msg[256];     // Mensaje de error si algo falla
+    int joinpoints_found;  // Número de puntos de unión encontrados
+    int advice_applied;    // Número total de advice aplicados
+    char error_msg[256];   // Mensaje de error si ocurre alguno
 } WeavingStats;
 
-// Inicializa el weaver
+// Inicializa el tejedor de aspectos
 void weaver_init(void);
 
 // Establece el nivel de depuración
 void weaver_set_debug_level(int level);
 
-// Realiza el proceso de weaving sobre el AST
+// Procesa un AST para aplicar aspectos
 bool weaver_process(AstNode* ast);
 
-// Obtiene estadísticas del último proceso de weaving
+// Obtiene estadísticas del proceso de weaving
 WeavingStats weaver_get_stats(void);
 
-// Limpia recursos del weaver
+// Limpia los recursos utilizados por el tejedor
 void weaver_cleanup(void);
 
 #endif /* ASPECT_WEAVER_H */

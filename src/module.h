@@ -4,6 +4,7 @@
 #include "ast.h"
 #include "error.h"
 #include "logger.h"
+#include "types.h"  // Añadido para tener acceso a la estructura Type
 #include <stdbool.h>
 
 // Estructura para representar un símbolo exportado

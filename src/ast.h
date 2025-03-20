@@ -1,351 +1,391 @@
 #ifndef AST_H
 #define AST_H
 
-#include <stdbool.h>
-#include "types.h"  // Para usar el tipo Type
+#include <stddef.h>  // Para size_t
+#include <stdbool.h> // Para bool - añadido para resolver el error
 
-// Enumerador de tipos de nodo AST adaptado a parser.c y compiler.c
+// Forward declarations
+struct Type;
+
+// Tipos de nodos AST
 typedef enum {
+    // Declaraciones de nivel superior
     AST_PROGRAM,
+    AST_FUNC_DEF,
+    AST_CLASS_DEF,
+    AST_VAR_DECL,
+    AST_IMPORT,
+    AST_MODULE_DECL,
+    AST_ASPECT_DEF,
+    
+    // Sentencias
+    AST_BLOCK,
+    AST_IF_STMT,
+    AST_FOR_STMT,
+    AST_WHILE_STMT,
+    AST_DO_WHILE_STMT,
+    AST_SWITCH_STMT,
+    AST_CASE_STMT,
+    AST_RETURN_STMT,
+    AST_VAR_ASSIGN,
+    AST_PRINT_STMT,
+    AST_BREAK_STMT,
+    AST_CONTINUE_STMT,
+    AST_TRY_CATCH_STMT,
+    AST_THROW_STMT,
+    
+    // Expresiones
+    AST_BINARY_OP,
+    AST_UNARY_OP,
     AST_NUMBER_LITERAL,
     AST_STRING_LITERAL,
+    AST_BOOLEAN_LITERAL,
+    AST_NULL_LITERAL,
     AST_IDENTIFIER,
-    AST_VAR_DECL,
-    AST_VAR_ASSIGN,
-    AST_FUNC_DEF,         // Definición de función
-    AST_EXPR_STMT,
-    AST_IF_STMT,
-    AST_WHILE_STMT,
-    AST_FOR_STMT,
-    AST_RETURN_STMT,
-    AST_BINARY_OP,        // Expresión binaria
-    AST_FUNC_CALL,
     AST_MEMBER_ACCESS,
-    AST_PRINT_STMT,
-    AST_CLASS_DEF,        // Definición de clase
-    AST_LAMBDA,
+    AST_ARRAY_ACCESS,
     AST_ARRAY_LITERAL,
-    AST_MODULE_DECL,
-    AST_IMPORT,           // Nodo para importaciones
-    // New AST node types for control structures
-    AST_DO_WHILE_STMT,    // Do-while statement
-    AST_SWITCH_STMT,      // Switch statement
-    AST_CASE_STMT,        // Case statement
-    AST_TRY_CATCH_STMT,   // Try-catch statement
-    AST_THROW_STMT,       // Throw statement
-    AST_BREAK_STMT,       // Break statement
-    AST_CURRY_EXPR,       // Curried function expression
-    AST_PATTERN_MATCH,    // Pattern matching expression
-    AST_PATTERN_CASE,     // Individual case in pattern matching
-    AST_FUNC_COMPOSE,     // Function composition (f >> g)
-    AST_MACRO_DEF,        // Macro definition
-    AST_MACRO_EXPAND,     // Macro expansion
-    AST_MACRO_PARAM,      // Macro parameter reference
-    AST_ASPECT_DEF,       // Aspect definition
-    AST_POINTCUT,         // Pointcut declaration
-    AST_ADVICE,           // Advice declaration
-    AST_BEFORE,           // Add if not exists
-    AST_AFTER,            // Add if not exists
-    AST_AROUND,           // Add if not exists
-    AST_ARRAY_ACCESS,     // Nodo para acceso a arreglos
-    AST_BOOLEAN_LITERAL,  // Nodo para literal booleano
-    AST_UNARY_OP          // Nodo para operación unaria
+    AST_FUNC_CALL,
+    AST_LAMBDA,
+    AST_FUNC_COMPOSE,
+    AST_CURRY_EXPR,
+    
+    // Para programación orientada a aspectos
+    AST_POINTCUT,
+    AST_ADVICE,
+    
+    // Para pattern matching
+    AST_PATTERN_MATCH,
+    AST_PATTERN_CASE
 } AstNodeType;
 
-// Enumerador para operadores binarios (usando el carácter)
+// Tipos de advice para programación orientada a aspectos
 typedef enum {
-    OP_PLUS = '+',
-    OP_MINUS = '-',
-    OP_MULTIPLY = '*',
-    OP_DIVIDE = '/'
-} BinaryOperator;
+    ADVICE_BEFORE = 0,
+    ADVICE_AFTER  = 1,
+    ADVICE_AROUND = 2
+} AdviceType;
 
-// Definición de la estructura AST usando una unión para cada variante
+// Estructura base para todos los nodos AST
 typedef struct AstNode {
     AstNodeType type;
-    int line;
-    Type* inferredType; // Opcional
+    int line;  // Línea donde inicia el nodo
+    int col;   // Columna donde inicia el nodo
+    struct Type* inferredType;  // Para anotaciones de tipo inferido
+    
     union {
-        // Nodo programa: lista de sentencias o declaraciones
+        // AST_PROGRAM
         struct {
             struct AstNode** statements;
             int statementCount;
         } program;
         
-        // Número literal
-        struct {
-            double value;
-        } numberLiteral;
-        
-        // Cadena literal
-        struct {
-            char value[256];
-        } stringLiteral;
-        
-        // Identificador
+        // AST_FUNC_DEF
         struct {
             char name[256];
-        } identifier;
-        
-        // Declaración de variable
-        struct {
-            char name[256];
-            char type[128];  // Tipo en forma de cadena
-            struct AstNode* initializer;
-        } varDecl;
-        
-        // Asignación de variable
-        struct {
-            char name[256];
-            struct AstNode* initializer;
-        } varAssign;
-        
-        // Definición de función
-        struct {
-            char name[256];
-            struct AstNode** parameters;  // Lista de identificadores (AST_IDENTIFIER)
-            int paramCount;
             char returnType[64];
-            struct AstNode** body;        // Lista de sentencias
+            struct AstNode** parameters;
+            int paramCount;
+            struct AstNode** body;
             int bodyCount;
         } funcDef;
         
-        // Sentencia de expresión
-        struct {
-            struct AstNode* expr;
-        } exprStmt;
-        
-        // Sentencia if
-        struct {
-            struct AstNode* condition;
-            struct AstNode** thenBranch;  // Lista de sentencias en la rama then
-            int thenCount;
-            struct AstNode** elseBranch;  // Lista de sentencias en la rama else (opcional)
-            int elseCount;
-        } ifStmt;
-        
-        // Sentencia while
-        struct {
-            struct AstNode* condition;
-            struct AstNode** body;  // Change from single body to array of statements
-            int bodyCount;          // Add bodyCount field to match other statement types
-        } whileStmt;
-        
-        // Sentencia for
-        struct {
-            char iterator[256];
-            struct AstNode* rangeStart;
-            struct AstNode* rangeEnd;
-            struct AstNode** body;  // Lista de sentencias dentro del for
-            int bodyCount;
-        } forStmt;
-        
-        // Sentencia return
-        struct {
-            struct AstNode* expr;
-        } returnStmt;
-        
-        // Expresión binaria
-        struct {
-            struct AstNode* left;
-            char op; // Operador (por ejemplo, '+', '-', etc.)
-            struct AstNode* right;
-        } binaryOp;
-        
-        // Llamada a función
+        // AST_CLASS_DEF
         struct {
             char name[256];
-            struct AstNode** arguments;
-            int argCount;
-        } funcCall;
-        
-        // Acceso a miembro
-        struct {
-            struct AstNode* object;
-            char member[256];
-        } memberAccess;
-        
-        // Sentencia print
-        struct {
-            struct AstNode* expr;
-        } printStmt;
-        
-        // Definición de clase
-        struct {
-            char name[256];
-            char baseClassName[256];  // Nombre de la clase base (si existe)
-            struct AstNode** members; // Lista de miembros (variables, funciones, etc.)
+            char baseClassName[256];
+            struct AstNode** members;
             int memberCount;
         } classDef;
         
-        // Expresión lambda
+        // AST_VAR_DECL
         struct {
-            struct AstNode** parameters;  // Lista de identificadores
-            int paramCount;
-            char returnType[64];
-            struct AstNode* body;
-        } lambda;
+            char name[256];
+            char type[64];
+            struct AstNode* initializer;
+        } varDecl;
         
-        // Literal de arreglo
+        // AST_IMPORT
         struct {
-            struct AstNode** elements;
-            int elementCount;
-        } arrayLiteral;
+            char moduleType[64];
+            char moduleName[256];
+        } importStmt;
         
-        // Declaración de módulo
+        // AST_MODULE_DECL
         struct {
             char name[256];
             struct AstNode** declarations;
             int declarationCount;
         } moduleDecl;
         
-        // Importación de módulo
+        // AST_BLOCK
         struct {
-            char moduleType[64];   // Por ejemplo: "ui" o "css"
-            char moduleName[256];
-        } importStmt;
+            struct AstNode** statements;
+            int statementCount;
+        } block;
         
-        // Do-while statement
+        // AST_IF_STMT
         struct {
             struct AstNode* condition;
-            struct AstNode** body;  // List of statements in the do-while body
+            struct AstNode** thenBranch;
+            int thenCount;
+            struct AstNode** elseBranch;
+            int elseCount;
+        } ifStmt;
+        
+        // AST_FOR_STMT
+        struct {
+            char iterator[256];
+            struct AstNode* rangeStart;
+            struct AstNode* rangeEnd;
+            struct AstNode** body;
+            int bodyCount;
+        } forStmt;
+        
+        // AST_WHILE_STMT
+        struct {
+            struct AstNode* condition;
+            struct AstNode** body;
+            int bodyCount;
+        } whileStmt;
+        
+        // AST_DO_WHILE_STMT
+        struct {
+            struct AstNode* condition;
+            struct AstNode** body;
             int bodyCount;
         } doWhileStmt;
         
-        // Switch statement
+        // AST_SWITCH_STMT
         struct {
-            struct AstNode* expr;  // Expression to switch on
-            struct AstNode** cases;  // List of case statements
+            struct AstNode* expr;
+            struct AstNode** cases;
             int caseCount;
-            struct AstNode** defaultCase;  // Default case statements
+            struct AstNode** defaultCase;
             int defaultCaseCount;
         } switchStmt;
         
-        // Case statement
+        // AST_CASE_STMT
         struct {
-            struct AstNode* expr;  // Case value expression
-            struct AstNode** body;  // List of statements in the case
+            struct AstNode* expr;
+            struct AstNode** body;
             int bodyCount;
         } caseStmt;
         
-        // Try-catch statement
+        // AST_RETURN_STMT
         struct {
-            struct AstNode** tryBody;  // List of statements in the try block
+            struct AstNode* expr;
+        } returnStmt;
+        
+        // AST_VAR_ASSIGN
+        struct {
+            char name[256];
+            struct AstNode* initializer;
+        } varAssign;
+        
+        // AST_PRINT_STMT
+        struct {
+            struct AstNode* expr;
+        } printStmt;
+        
+        // AST_BREAK_STMT
+        struct {
+            int dummy;  // C no permite struct vacía
+        } breakStmt;
+        
+        // AST_CONTINUE_STMT
+        struct {
+            int dummy;  // C no permite struct vacía
+        } continueStmt;
+        
+        // AST_TRY_CATCH_STMT
+        struct {
+            struct AstNode** tryBody;
             int tryCount;
-            struct AstNode** catchBody;  // List of statements in the catch block
+            struct AstNode** catchBody;
             int catchCount;
-            char errorVarName[256];  // Name of the error variable
-            struct AstNode** finallyBody;  // List of statements in the finally block
+            char errorVarName[256];
+            struct AstNode** finallyBody;
             int finallyCount;
         } tryCatchStmt;
         
-        // Throw statement
+        // AST_THROW_STMT
         struct {
-            struct AstNode* expr;  // Expression to throw
+            struct AstNode* expr;
         } throwStmt;
         
-        // Break statement
+        // AST_BINARY_OP
         struct {
-            // No additional fields needed
-        } breakStmt;
+            struct AstNode* left;
+            char op;
+            struct AstNode* right;
+        } binaryOp;
         
-        // Curried function expression
+        // AST_UNARY_OP
         struct {
-            struct AstNode* baseFunc;     // Base function to curry
-            struct AstNode** appliedArgs; // Arguments already applied
-            int appliedCount;             // Number of applied arguments
-            int totalArgCount;            // Total arguments expected
-        } curryExpr;
+            char op;
+            struct AstNode* expr;
+        } unaryOp;
         
-        // Pattern matching expression
+        // AST_NUMBER_LITERAL
         struct {
-            struct AstNode* expr;       // Expression to match against
-            struct AstNode** cases;     // List of pattern cases
-            int caseCount;
-            struct AstNode* otherwise;  // Default case (optional)
-        } patternMatch;
+            double value;
+        } numberLiteral;
         
-        // Pattern case
+        // AST_STRING_LITERAL
         struct {
-            struct AstNode* pattern;    // Pattern to match
-            struct AstNode** body;      // Body to execute if pattern matches
-            int bodyCount;
-        } patternCase;
+            char value[1024];
+        } stringLiteral;
         
-        // Function composition
+        // AST_BOOLEAN_LITERAL
         struct {
-            struct AstNode* left;      // Left function (executed first)
-            struct AstNode* right;     // Right function (executed second)
+            bool value;
+        } boolLiteral;
+        
+        // AST_NULL_LITERAL
+        struct {
+            int dummy;  // C no permite struct vacía
+        } nullLiteral;
+        
+        // AST_IDENTIFIER
+        struct {
+            char name[256];
+        } identifier;
+        
+        // AST_MEMBER_ACCESS
+        struct {
+            struct AstNode* object;
+            char member[256];
+        } memberAccess;
+        
+        // AST_ARRAY_ACCESS
+        struct {
+            struct AstNode* array;
+            struct AstNode* index;
+        } arrayAccess;
+        
+        // AST_ARRAY_LITERAL
+        struct {
+            struct AstNode** elements;
+            int elementCount;
+        } arrayLiteral;
+        
+        // AST_FUNC_CALL
+        struct {
+            char name[256];
+            struct AstNode** arguments;
+            int argCount;
+        } funcCall;
+        
+        // AST_LAMBDA
+        struct {
+            struct AstNode** parameters;
+            int paramCount;
+            char returnType[64];
+            struct AstNode* body;
+        } lambda;
+
+        // AST_FUNC_COMPOSE
+        struct {
+            struct AstNode* left;
+            struct AstNode* right;
         } funcCompose;
         
-        // Macro definition
+        // AST_CURRY_EXPR
         struct {
-            char name[256];
-            char** params;         // Parameter names
-            int paramCount;
-            struct AstNode** body; // Macro body statements
-            int bodyCount;
-        } macroDef;
+            struct AstNode* baseFunc;
+            struct AstNode** appliedArgs;
+            int appliedCount;
+            int totalArgCount;
+        } curryExpr;
         
-        // Macro expansion
+        // AST_ASPECT_DEF
         struct {
             char name[256];
-            struct AstNode** args; // Arguments for expansion
-            int argCount;
-        } macroExpand;
-        
-        // Macro parameter reference
-        struct {
-            char name[256];
-            int index;  // Parameter index in macro definition
-        } macroParam;
-        
-        // Aspect definition
-        struct {
-            char name[256];
-            struct AstNode** pointcuts;  // Lista de pointcuts
+            struct AstNode** pointcuts;
             int pointcutCount;
-            struct AstNode** advice;     // Lista de advice
+            struct AstNode** advice;
             int adviceCount;
         } aspectDef;
         
-        // Pointcut declaration
+        // AST_POINTCUT
         struct {
             char name[256];
-            char pattern[512];           // Patrón de coincidencia (e.g., "*.onCreate()")
-            int type;                    // Tipo de pointcut (método, constructor, etc.)
+            char pattern[1024];
         } pointcut;
         
-        // Advice declaration
+        // AST_ADVICE
         struct {
-            int type;                    // BEFORE, AFTER, o AROUND
-            char pointcutName[256];      // Nombre del pointcut al que se aplica
-            struct AstNode** body;       // Código del advice
+            AdviceType type;  // Cambiado de int a AdviceType
+            char pointcutName[256];
+            struct AstNode** body;
             int bodyCount;
         } advice;
         
-        // Nodo para acceso a arreglos: array[index]
+        // AST_PATTERN_MATCH
         struct {
-            struct AstNode *array;  // Expresión del arreglo
-            struct AstNode *index;  // Expresión del índice
-        } arrayAccess;
+            struct AstNode* expr;
+            struct AstNode** cases;
+            int caseCount;
+            struct AstNode* otherwise;
+        } patternMatch;
         
-        // Nodo para literal booleano
+        // AST_PATTERN_CASE
         struct {
-            bool value;  // true o false
-        } boolLiteral;
-        
-        // Nodo para operación unaria
-        struct {
-            char op;             // Operador ('N' para not)
-            struct AstNode *expr;  // Expresión
-        } unaryOp;
-        
+            struct AstNode* pattern;
+            struct AstNode** body;
+            int bodyCount;
+        } patternCase;
     };
 } AstNode;
 
-AstNode* createAstNode(AstNodeType type);
-void freeAstNode(AstNode* node);
-void freeAst(AstNode* root);
+/* Funciones para trabajar con el AST */
 
-#endif
+// Inicializa el sistema AST
+void ast_init(void);
+
+// Limpia y libera recursos del sistema AST
+void ast_cleanup(void);
+
+// Establece el nivel de depuración para el sistema AST
+void ast_set_debug_level(int level);
+
+// Obtiene el nivel de depuración actual
+int ast_get_debug_level(void);
+
+// Crea un nuevo nodo AST del tipo especificado
+AstNode* createAstNode(AstNodeType type);
+
+// Libera un nodo AST y todos sus hijos
+void freeAstNode(AstNode* node);
+
+// Libera un programa AST completo
+void freeAstProgram(AstNode* program);
+
+// Imprime un AST para depuración
+void printAst(AstNode* node, int indent);
+
+// Copia un nodo AST (y todos sus hijos)
+AstNode* copyAstNode(AstNode* node);
+
+// Devuelve un string con el tipo de nodo AST
+const char* astNodeTypeToString(AstNodeType type);
+
+// Devuelve el número de hijos que tiene un nodo
+int astNodeChildCount(AstNode* node);
+
+// Devuelve el nº hijo de un nodo (0-based)
+AstNode* astNodeGetChild(AstNode* node, int index);
+
+// Estadísticas de uso de AST
+typedef struct {
+    int nodes_created;
+    int nodes_freed;
+    int max_depth;
+    size_t memory_used;
+} AstStats;
+
+// Obtiene estadísticas de uso de nodos AST
+AstStats ast_get_stats(void);
+
+#endif /* AST_H */

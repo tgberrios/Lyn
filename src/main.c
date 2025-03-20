@@ -9,6 +9,7 @@
 #include "error.h"
 #include "memory.h"  // Para usar funciones de memoria manejadas
 #include "types.h"   // Para la integración del sistema de tipos
+#include "aspect_weaver.h"  // Incluir el header del aspect weaver
 #include <unistd.h>
 #include <getopt.h>  // Incluir explícitamente para optarg y optind
 
@@ -246,6 +247,22 @@ int main(int argc, char* argv[]) {
     logger_log(LOG_DEBUG, "Source code read: %d bytes", (int)strlen(source));
     logger_log(LOG_INFO, "Source parsed successfully");
 
+    // Inicializar y ejecutar el tejedor de aspectos
+    logger_log(LOG_INFO, "Initializing aspect weaver...");
+    weaver_init();
+    weaver_set_debug_level(debug_opt); // Usar el nivel de depuración de línea de comandos
+
+    // Procesar el AST con el tejedor de aspectos
+    if (!weaver_process(ast)) {
+        WeavingStats weaving_stats = weaver_get_stats();
+        logger_log(LOG_WARNING, "Aspect weaving encountered issues: %s", weaving_stats.error_msg);
+        logger_log(LOG_WARNING, "Continuing with compilation anyway");
+    } else {
+        WeavingStats weaving_stats = weaver_get_stats();
+        logger_log(LOG_INFO, "Aspect weaving complete: %d join points found, %d advice applied",
+                 weaving_stats.joinpoints_found, weaving_stats.advice_applied);
+    }
+
     // Perform type checking
     logger_log(LOG_INFO, "Performing type checking...");
     Type* programType = infer_type(ast);
@@ -323,6 +340,9 @@ int main(int argc, char* argv[]) {
     
     free(source);
     free(baseName);
+
+    // Clean up aspect weaver
+    weaver_cleanup();
 
     logger_log(LOG_INFO, "Compilation completed successfully");
     logger_close();

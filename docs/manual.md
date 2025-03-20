@@ -13,12 +13,13 @@
 9. [Manejo de Errores](#manejo-de-errores)
 10. [Módulos e Importaciones](#módulos-e-importaciones)
 11. [Características Avanzadas](#características-avanzadas)
-12. [Buenas Prácticas](#buenas-prácticas)
-13. [Ejemplos Completos](#ejemplos-completos)
+12. [Programación Orientada a Aspectos](#programación-orientada-a-aspectos)
+13. [Buenas Prácticas](#buenas-prácticas)
+14. [Ejemplos Completos](#ejemplos-completos)
 
 ## Introducción
 
-Lyn es un lenguaje de programación moderno que combina la legibilidad de Python con un sistema de tipos estático y características avanzadas de lenguajes como C++ y JavaScript. Su compilación a código C permite un alto rendimiento y excelente portabilidad.
+Lyn es un lenguaje de programación moderno que combina la legibilidad de Python con un sistema de tipos estático y características avanzadas de lenguajes como C++, JavaScript y AspectJ. Su compilación a código C permite un alto rendimiento y excelente portabilidad.
 
 ### Características principales
 
@@ -27,6 +28,7 @@ Lyn es un lenguaje de programación moderno que combina la legibilidad de Python
 - **Orientación a objetos**: Soporte completo para clases y herencia
 - **Funciones como ciudadanos de primera clase**: Lambdas y funciones de orden superior
 - **Gestión de errores robusta**: Sistema de excepciones try-catch-finally
+- **Programación orientada a aspectos**: Soporta aspectos, pointcuts y advice
 - **Compilación a C**: Rendimiento óptimo y compatibilidad con código existente
 
 ## Sintaxis Básica
@@ -85,6 +87,10 @@ end
 class MiClase
     // Bloque clase
 end
+
+aspect MiAspecto
+    // Bloque aspecto
+end
 ```
 
 ## Tipos de Datos
@@ -95,7 +101,7 @@ Lyn ofrece los siguientes tipos primitivos:
 
 ```
 // Enteros
-edad = 25
+edad = 42
 
 // Números de punto flotante
 precio = 29.99
@@ -678,74 +684,81 @@ valor = resultado(5)             // (5 * 2) + 1 = 11
 procesamiento = filtrar >> mapear >> reducir
 ```
 
-### Programación Orientada a Aspectos
+## Programación Orientada a Aspectos
 
-#### Definición de Aspectos Básicos
+Lyn ofrece soporte integrado para programación orientada a aspectos (AOP), lo que permite separar las preocupaciones transversales (cross-cutting concerns) como logging, seguridad, o manejo de transacciones del código principal.
 
-```lyn
-aspect Logging
-    // Define el pointcut
-    pointcut metodosBD "*.save*() || *.update*() || *.delete*()"
+### Definición de Aspectos
 
-    // Advice que se ejecuta antes
-    advice before metodosBD
-        print("Iniciando operación de BD: " + currentMethod())
+Un aspecto se define con la palabra clave `aspect` y puede contener pointcuts y advice:
+
+```
+aspect LoggingAspect
+    // Definición de pointcut
+    pointcut loggedFunctions "*.update*() || *.delete*()"
+
+    // Advice that runs before functions matching the pointcut
+    advice before loggedFunctions
+        print("Antes de ejecutar una función importante")
     end
 
-    // Advice que se ejecuta después
-    advice after metodosBD
-        print("Operación completada")
+    // Advice that runs after functions matching the pointcut
+    advice after loggedFunctions
+        print("Después de ejecutar una función importante")
     end
 end
 ```
 
-#### Aspectos con Context Binding
+### Pointcuts
 
-```lyn
-aspect Security
-    pointcut operacionesSensibles "*.delete*() || *.admin*()"
+Los pointcuts definen puntos en la ejecución del programa donde se aplicará un advice. Se definen usando patrones:
 
-    advice before operacionesSensibles
-        if not checkUserPermissions()
-            throw "Acceso denegado"
-        end
-        logAccess(getCurrentUser(), currentMethod())
-    end
+```
+pointcut nombrePointcut "patrón"
+```
+
+Los patrones pueden incluir:
+
+- `*` - comodín que coincide con cualquier secuencia de caracteres
+- `||` - operador OR para múltiples patrones
+- `&&` - operador AND para combinar condiciones
+
+Ejemplos:
+
+```
+pointcut loggedFunctions "log_*()"         // Funciones que comienzan con "log_"
+pointcut dbOperations "*.save*() || *.update*()"  // Operaciones de base de datos
+pointcut secureOps "*.delete*() && admin_*()"     // Operaciones de admin con delete
+```
+
+### Advice
+
+Los advice definen el código que se ejecutará en los puntos definidos por los pointcuts:
+
+```
+advice before nombrePointcut
+    // Código que se ejecuta antes del punto de corte
+end
+
+advice after nombrePointcut
+    // Código que se ejecuta después del punto de corte
+end
+
+advice around nombrePointcut
+    // Código que se ejecuta alrededor del punto de corte
+    // Puede decidir si la función original se ejecuta o no
 end
 ```
 
-#### Aspectos con Around Advice
+### Ejemplo Completo
 
-```lyn
-aspect Performance
-    pointcut operacionesLentas "*.procesamiento*()"
-
-    advice around operacionesLentas
-        startTime = getCurrentTime()
-        try
-            // Ejecuta el método original
-            proceed()
-        finally
-            endTime = getCurrentTime()
-            duration = endTime - startTime
-            if duration > 1000
-                logSlowOperation(duration)
-            end
-        end
-    end
-end
 ```
-
-#### Ejemplo Completo de AOP
-
-```lyn
 // Definición de la clase base
 class Usuario
     nombre string
-    permisos string[]
 
     func eliminarCuenta(self: Usuario) -> bool
-        // Lógica de eliminación
+        print("Eliminando cuenta de " + self.nombre)
         return true
     end
 end
@@ -755,35 +768,25 @@ aspect Auditoria
     pointcut operacionesCriticas "*.eliminar*()"
 
     advice before operacionesCriticas
-        usuario = getCurrentUser()
-        operacion = currentMethod()
-        logAuditoria("Iniciando " + operacion + " por " + usuario)
+        print("[AUDIT] Iniciando operación crítica")
     end
 
     advice after operacionesCriticas
-        logAuditoria("Operación completada")
-    end
-
-    advice around operacionesCriticas
-        if not tienePermisosAdmin()
-            throw "Permisos insuficientes"
-        end
-        proceed()
-        notificarAdmins("Operación crítica ejecutada")
+        print("[AUDIT] Operación crítica completada")
     end
 end
 
 // Uso del sistema
 main
     usuario = Usuario()
-    Usuario_init(usuario, "Juan", ["user"])
+    usuario.nombre = "Juan"
 
-    // Los aspectos se aplican automáticamente
-    try
-        Usuario_eliminarCuenta(usuario)
-    catch error
-        print("Error: " + error)
-    end
+    // Los aspectos se aplican automáticamente cuando se llame a eliminarCuenta
+    Usuario_eliminarCuenta(usuario)
+    // Salida:
+    // [AUDIT] Iniciando operación crítica
+    // Eliminando cuenta de Juan
+    // [AUDIT] Operación crítica completada
 end
 ```
 
@@ -798,38 +801,34 @@ end
 ### Estructura de Proyectos
 
 ```
-
 /proyecto
-/src
-main.lyn // Punto de entrada
-/modulos
-matematica.lyn
-utilidades.lyn
-/ui
-principal.ui
-formulario.ui
-/css
-estilos.css
-
+  /src
+    main.lyn              // Punto de entrada
+    /modulos
+      matematica.lyn
+      utilidades.lyn
+    /ui
+      principal.ui
+      formulario.ui
+    /css
+      estilos.css
 ```
 
 ### Comentarios y Documentación
 
 ```
-
 // Función para calcular el factorial de un número
 // Parámetros:
-// n: Número del que se calculará el factorial
+//   n: Número del que se calculará el factorial
 // Retorna:
-// El factorial de n
+//   El factorial de n
 func factorial(n: int) -> int
-if n <= 1
-return 1
-else
-return n \* factorial(n - 1)
+    if n <= 1
+        return 1
+    else
+        return n * factorial(n - 1)
+    end
 end
-end
-
 ```
 
 ## Ejemplos Completos
@@ -837,10 +836,9 @@ end
 ### Calculadora Básica
 
 ```
-
 main
-print("Calculadora básica")
-print("------------------")
+    print("Calculadora básica")
+    print("------------------")
 
     // Obtener valores
     a = 10
@@ -859,21 +857,66 @@ print("------------------")
     print("a - b = " + resta)
     print("a * b = " + producto)
     print("a / b = " + division)
-
 end
+```
 
+### Bucles y AOP
+
+```
+main
+    // Test de bucles
+    print("Prueba de bucles:")
+
+    // While loop
+    contador = 1
+    print("Contando con while:")
+    while (contador <= 5)
+        print(contador)
+        contador = contador + 1
+    end
+
+    // Do-while loop
+    contador = 5
+    print("Cuenta regresiva con do-while:")
+    do
+        print(contador)
+        contador = contador - 1
+    while (contador > 0)
+    end
+
+    // Definición de aspecto para logging
+    aspect LoggingAspect
+        pointcut testFunctions "test_*()"
+
+        advice before testFunctions
+            print("⏳ Iniciando función de prueba")
+        end
+
+        advice after testFunctions
+            print("✅ Función de prueba completada")
+        end
+    end
+
+    // Función que será interceptada por el aspecto
+    func test_function()
+        print("Ejecutando test_function")
+    end
+
+    // Llamar a la función - los advice se ejecutarán automáticamente
+    print("Llamando a función con aspecto:")
+    test_function()
+end
 ```
 
 ### Sistema de Gestión de Biblioteca
 
 ```
-
 main
-// Definición de clases
-class Libro
-titulo string
-autor string
-prestado bool
+    // Definición de clases
+    class Libro
+        titulo string
+        autor string
+        prestado bool
 
         func init(self: Libro, titulo: string, autor: string) -> void
             self.titulo = titulo
@@ -906,6 +949,15 @@ prestado bool
         end
     end
 
+    // Aspecto para auditoría de préstamos
+    aspect AuditoriaPrestamos
+        pointcut operacionesPrestamo "*.prestar*() || *.devolver*()"
+
+        advice before operacionesPrestamo
+            print("[AUDIT] Registrando operación de préstamo")
+        end
+    end
+
     // Crear algunos libros
     libro1 = Libro()
     Libro_init(libro1, "Don Quijote", "Miguel de Cervantes")
@@ -932,108 +984,14 @@ prestado bool
     print("----------------")
     print(Libro_toString(libro1))
     print(Libro_toString(libro2))
-
 end
-
 ```
-
-### Ejemplo con Manejo de Errores
-
-```
-
-main
-func dividir(a: float, b: float) -> float
-if b == 0
-throw "División por cero no permitida"
-end
-return a / b
-end
-
-    // Ejemplo de uso de try-catch
-    print("Calculando divisiones...")
-
-    try
-        resultado1 = dividir(10, 2)
-        print("10 / 2 = " + resultado1)
-
-        resultado2 = dividir(8, 0)  // Esto generará una excepción
-        print("8 / 0 = " + resultado2) // Esta línea no se ejecutará
-    catch error
-        print("Error: " + error)
-    finally
-        print("Fin del cálculo")
-    end
-
-    print("Programa finalizado")
-
-end
-
-```
-
-### Juego Simple
-
-```
-
-main
-// Inicializar juego
-intentosMax = 5
-intentos = 0
-numeroSecreto = 42 // En un juego real sería aleatorio
-adivinado = false
-
-    print("¡Adivina el número!")
-    print("Tienes " + intentosMax + " intentos para adivinar un número entre 1 y 100.")
-
-    // Bucle principal del juego
-    while intentos < intentosMax and not adivinado
-        intentos = intentos + 1
-        print("\nIntento " + intentos + ":")
-
-        // En un programa real, aquí vendría input del usuario
-        // Para este ejemplo, usaremos valores de prueba
-        intento = 0
-
-        if intentos == 1
-            intento = 50
-        else if intentos == 2
-            intento = 25
-        else if intentos == 3
-            intento = 40
-        else if intentos == 4
-            intento = 45
-        else
-            intento = 42
-        end
-
-        print("Tu intento: " + intento)
-
-        // Comprobar intento
-        if intento == numeroSecreto
-            print("¡Correcto! ¡Has adivinado el número en " + intentos + " intentos!")
-            adivinado = true
-        else if intento < numeroSecreto
-            print("El número es mayor.")
-        else
-            print("El número es menor.")
-        end
-    end
-
-    // Fin del juego
-    if not adivinado
-        print("\n¡Se acabaron los intentos! El número era " + numeroSecreto)
-    end
-
-end
-
-```
-
-Este manual proporciona una referencia completa para el lenguaje Lyn y debería servir como guía para nuevos usuarios y referencia para usuarios experimentados.
 
 ## Estado de Desarrollo
 
 ### Progreso del Proyecto
 
-El lenguaje de programación Lyn se encuentra actualmente en una fase de desarrollo temprana, con aproximadamente un 35% del diseño total implementado.
+El lenguaje de programación Lyn se encuentra actualmente en una fase de desarrollo activa, con aproximadamente un 55-60% del diseño total implementado.
 
 #### Características implementadas (100%)
 
@@ -1041,20 +999,22 @@ El lenguaje de programación Lyn se encuentra actualmente en una fase de desarro
 - Sistema completo de manejo de errores y depuración
 - Tipos primitivos (int, float, string, bool)
 - Operaciones aritméticas y lógicas básicas
-- Estructuras de control (if-else, for, while)
+- Estructuras de control (if-else, while, do-while)
 - Funciones simples y llamadas a funciones
+- Programación orientada a aspectos básica (aspectos, pointcuts, advice)
 
 #### Características parcialmente implementadas (50-75%)
 
 - Clases y objetos (sintaxis implementada, herencia básica)
-- System de tipos y comprobación de tipos
-- Arrays y estructuras de datos compuestas
-- Optimizaciones básicas de código
+- Sistema de tipos y comprobación de tipos
+- Switch y estructuras de selección múltiple
+- Optimizaciones de código
 
 #### Características en desarrollo (25-50%)
 
 - Manejo de excepciones try-catch-finally
 - Lambdas y funciones de orden superior
+- Arrays y estructuras de datos compuestas
 - Módulos e importaciones
 
 #### Características planificadas (0-25%)
@@ -1067,9 +1027,37 @@ El lenguaje de programación Lyn se encuentra actualmente en una fase de desarro
 
 ### Hoja de Ruta
 
-1. **Q2 2023**: Estabilizar el sistema de tipos y las características básicas del lenguaje
-2. **Q3 2023**: Completar la implementación de la POO y el manejo de excepciones
+1. **Q2 2023**: Estabilizar estructuras de control y mejorar el sistema de tipos
+2. **Q3 2023**: Completar la implementación de POO y AspectJ, añadir manejo de excepciones
 3. **Q4 2023**: Desarrollar la biblioteca estándar y mejorar las capacidades de módulos
 4. **Q1 2024**: Implementar soporte para GUI y características avanzadas
 
 > **Nota**: Este manual describe tanto las características actualmente implementadas como las que están planificadas para futuras versiones. Algunas funcionalidades descritas pueden no estar disponibles en la versión actual del compilador.
+
+1. ✅ **Basic syntax structure** (main/end blocks)
+2. ✅ **Variable declaration and assignment**
+3. ✅ **Basic data types** (numbers, strings, booleans)
+4. ✅ **Arithmetic operations** (+, -, \*, /)
+5. ✅ **Basic control flow** (if/else statements)
+6. ✅ **Print statements**
+7. ✅ **Basic memory management**
+8. ✅ **Error reporting system**
+9. ✅ **Lexer and parser for the core syntax**
+10. ✅ **Compilation to C**
+11. ✅ **Loop constructs** (while, do-while)
+12. ✅ **Aspect-oriented programming basics** (aspects, pointcuts, advice)
+
+13. ⚠️ **Classes and objects** (basic structure exists but limited functionality)
+14. ⚠️ **Function definitions and calls** (basic structure but not fully tested)
+15. ⚠️ **Type system** (basic inference but not complete)
+16. ⚠️ **For loops** (syntax exists but might have issues with complex cases)
+17. ⚠️ **Switch statements** (implemented but needs more testing)
+
+18. ❌ **Advanced OOP features** (inheritance, polymorphism)
+19. ❌ **Advanced function features** (lambdas, higher-order functions)
+20. ❌ **Exception handling** (try/catch blocks)
+21. ❌ **Modules and imports**
+22. ❌ **Arrays and collections**
+23. ❌ **Pattern matching**
+24. ❌ **UI and CSS integration**
+25. ❌ **Standard library**

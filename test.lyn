@@ -70,5 +70,65 @@ main
         print("You are not yet an adult")
     end
     
+    // ===================================================================
+    // While Loop Test
+    // ===================================================================
+    
+    print("\n=== While loop test ===")
+    
+    count = 1
+    print("Counting from 1 to 5 using while:")
+    
+    while (count <= 5)
+        print(count)
+        count = count + 1
+    end
+    
+    // ===================================================================
+    // Do-While Loop Test
+    // ===================================================================
+    
+    print("\n=== Do-While loop test ===")
+    
+    do_while_count = 1
+    print("Counting from 1 to 5 using do-while:")
+    
+    do
+        print(do_while_count)
+        do_while_count = do_while_count + 1
+    while (do_while_count <= 5)
+    end
+    
+    // ===================================================================
+    // Aspect-Oriented Programming Test
+    // ===================================================================
+    
+    print("\n=== Simple aspect test ===")
+    
+    // Define a simple aspect
+    aspect LoggingAspect
+        // Define a pointcut for functions to log
+        pointcut loggedFunctions "test_*"
+        
+        // Before advice to print message before function execution
+        advice before loggedFunctions
+            print("Before executing function")
+        end
+        
+        // After advice to print message after function execution
+        advice after loggedFunctions
+            print("After executing function")
+        end
+    end
+    
+    // Define a function that will be advised by the aspect
+    func test_function()
+        print("Inside test_function")
+    end
+    
+    // Explicitly call the function to activate the aspect
+    print("Calling advised function:")
+    test_function()  // Make sure this is actually calling the function
+    
     print("\n=== Test completed successfully! ===")
 end

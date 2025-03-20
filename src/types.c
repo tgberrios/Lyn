@@ -318,14 +318,19 @@ void typeToC(Type* type, char* buffer, int bufferSize) {
             typeToC(type->functionType.returnType, returnType, sizeof(returnType));
             snprintf(buffer, bufferSize, "%s (*)(", returnType);
             for (int i = 0; i < type->functionType.paramCount; i++) {
-                if (i > 0) {
-                    strncat(buffer, ", ", bufferSize - strlen(buffer) - 1);
-                }
+                if (i > 0) strncat(buffer, ", ", bufferSize - strlen(buffer) - 1);
                 char paramType[128];
                 typeToC(type->functionType.paramTypes[i], paramType, sizeof(paramType));
                 strncat(buffer, paramType, bufferSize - strlen(buffer) - 1);
             }
             strncat(buffer, ")", bufferSize - strlen(buffer) - 1);
+            break;
+        }
+        case TYPE_CURRIED: {
+            // Handle curried type similar to function type but with applied arguments
+            char baseTypeStr[128];
+            typeToC(type->curriedType.baseType, baseTypeStr, sizeof(baseTypeStr));
+            snprintf(buffer, bufferSize, "%s", baseTypeStr);
             break;
         }
     }
@@ -362,9 +367,7 @@ void freeType(Type* type) {
             }
             if (type->functionType.paramTypes) {
                 for (int i = 0; i < type->functionType.paramCount; i++) {
-                    if (type->functionType.paramTypes[i]) {
-                        freeType(type->functionType.paramTypes[i]);
-                    }
+                    freeType(type->functionType.paramTypes[i]);
                 }
                 free(type->functionType.paramTypes);
             }
@@ -418,8 +421,7 @@ Type* clone_type(Type* type) {
             if (type->functionType.paramCount > 0 && type->functionType.paramTypes) {
                 paramTypes = malloc(type->functionType.paramCount * sizeof(Type*));
                 if (!paramTypes) {
-                    logger_log(LOG_ERROR, "Memory allocation failed for function parameter types");
-                    error_report("TypeSystem", __LINE__, 0, "Failed to allocate memory for function parameter types", ERROR_MEMORY);
+                    error_report("TypeSystem", __LINE__, 0, "Failed to allocate memory for cloned function params", ERROR_MEMORY);
                     return NULL;
                 }
                 for (int i = 0; i < type->functionType.paramCount; i++) {
@@ -478,6 +480,7 @@ const char* type_kind_to_string(TypeKind kind) {
         case TYPE_CLASS:   return "class";
         case TYPE_FUNCTION:return "function";
         case TYPE_LAMBDA:  return "lambda";
+        case TYPE_CURRIED: return "curried_function";
         default:           
             logger_log(LOG_WARNING, "Invalid type kind: %d", kind);
             return "invalid_type";
@@ -535,7 +538,7 @@ bool are_types_equal(Type* type1, Type* type2) {
             // Each parameter type must match
             for (int i = 0; i < type1->functionType.paramCount; i++) {
                 if (!are_types_equal(type1->functionType.paramTypes[i], 
-                                     type2->functionType.paramTypes[i]))
+                                   type2->functionType.paramTypes[i]))
                     return false;
             }
             return true;

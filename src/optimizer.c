@@ -818,12 +818,6 @@ static AstNode* constant_propagation(AstNode* node) {
                 }
             }
             break;
-            
-        case AST_EXPR_STMT:
-            if (node->exprStmt.expr) {
-                node->exprStmt.expr = constant_propagation(node->exprStmt.expr);
-            }
-            break;
     }
     
     return node;
@@ -941,12 +935,6 @@ static AstNode* constant_folding(AstNode* node) {
                 if (node->switchStmt.cases[i]) {
                     node->switchStmt.cases[i] = constant_folding(node->switchStmt.cases[i]);
                 }
-            }
-            break;
-            
-        case AST_EXPR_STMT:
-            if (node->exprStmt.expr) {
-                node->exprStmt.expr = constant_folding(node->exprStmt.expr);
             }
             break;
     }

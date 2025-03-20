@@ -6,33 +6,154 @@
 #include <string.h>
 #include <stdio.h>    // Para fprintf, stderr
 #include <stdint.h>   // For uintptr_t
+#include <stdbool.h>
+
+// Nivel de depuración: 0=mínimo, 3=máximo
+static int debug_level = 1;
+
+// Estadísticas de uso del AST
+static AstStats stats = {0};
+
+// Inicializa el sistema AST
+void ast_init(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)ast_init);
+    
+    // Reiniciar estadísticas
+    stats.nodes_created = 0;
+    stats.nodes_freed = 0;
+    stats.max_depth = 0;
+    stats.memory_used = 0;
+    
+    if (debug_level >= 1) {
+        logger_log(LOG_INFO, "AST system initialized");
+    }
+}
+
+// Limpia y libera recursos del sistema AST
+void ast_cleanup(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)ast_cleanup);
+    
+    if (debug_level >= 1) {
+        logger_log(LOG_INFO, "AST system cleanup completed. Stats: created=%d, freed=%d, max_depth=%d", 
+                  stats.nodes_created, stats.nodes_freed, stats.max_depth);
+    }
+}
+
+// Establece el nivel de depuración para el sistema AST
+void ast_set_debug_level(int level) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)ast_set_debug_level);
+    
+    debug_level = level;
+    logger_log(LOG_INFO, "AST debug level set to %d", level);
+}
+
+// Obtiene el nivel de depuración actual
+int ast_get_debug_level(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)ast_get_debug_level);
+    
+    return debug_level;
+}
+
+// Obtiene estadísticas de uso de nodos AST
+AstStats ast_get_stats(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)ast_get_stats);
+    
+    return stats;
+}
 
 // Eliminamos el stub para report_error ya que usaremos error_report directamente
 
 AstNode* createAstNode(AstNodeType type) {
-    AstNode* node = malloc(sizeof(AstNode));
-    if (!node) return NULL;
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)createAstNode);
     
-    memset(node, 0, sizeof(AstNode));
+    AstNode* node = (AstNode*)calloc(1, sizeof(AstNode));
+    if (!node) {
+        error_report("AST", __LINE__, 0, "Failed to allocate memory for AST node", ERROR_MEMORY);
+        logger_log(LOG_ERROR, "Memory allocation failed for AST node of type %d", type);
+        return NULL;
+    }
+    
     node->type = type;
+    node->inferredType = NULL;  // No tipo inferido inicialmente
     
-    // Initialize any fields that need specific initialization
-    switch (type) {
-        case AST_ARRAY_ACCESS:
-            node->arrayAccess.array = NULL;
-            node->arrayAccess.index = NULL;
-            break;
-        case AST_BOOLEAN_LITERAL:
-            node->boolLiteral.value = false;
-            break;
-        case AST_UNARY_OP:
-            node->unaryOp.op = 0;
-            node->unaryOp.expr = NULL;
-            break;
-        // ...handle other node types...
+    stats.nodes_created++;
+    stats.memory_used += sizeof(AstNode);
+    
+    if (debug_level >= 3) {
+        logger_log(LOG_DEBUG, "Created AST node of type %d (%s)", type, astNodeTypeToString(type));
     }
     
     return node;
+}
+
+// Función auxiliar que determina si un nodo tiene memoria asignada dinámicamente
+static bool hasAllocatedMemory(AstNode* node) {
+    if (!node) return false;
+    
+    switch (node->type) {
+        case AST_PROGRAM:
+            return node->program.statements != NULL;
+            
+        case AST_FUNC_DEF:
+            return node->funcDef.parameters != NULL || node->funcDef.body != NULL;
+            
+        case AST_CLASS_DEF:
+            return node->classDef.members != NULL;
+            
+        case AST_MODULE_DECL:
+            return node->moduleDecl.declarations != NULL;
+            
+        case AST_BLOCK:
+            return node->block.statements != NULL;
+            
+        case AST_IF_STMT:
+            return node->ifStmt.thenBranch != NULL || node->ifStmt.elseBranch != NULL;
+            
+        case AST_FOR_STMT:
+            return node->forStmt.body != NULL;
+            
+        case AST_WHILE_STMT:
+        case AST_DO_WHILE_STMT:
+            return node->whileStmt.body != NULL;
+            
+        case AST_SWITCH_STMT:
+            return node->switchStmt.cases != NULL || node->switchStmt.defaultCase != NULL;
+            
+        case AST_CASE_STMT:
+            return node->caseStmt.body != NULL;
+            
+        case AST_TRY_CATCH_STMT:
+            return node->tryCatchStmt.tryBody != NULL || 
+                   node->tryCatchStmt.catchBody != NULL || 
+                   node->tryCatchStmt.finallyBody != NULL;
+            
+        case AST_ARRAY_LITERAL:
+            return node->arrayLiteral.elements != NULL;
+            
+        case AST_FUNC_CALL:
+            return node->funcCall.arguments != NULL;
+            
+        case AST_LAMBDA:
+            return node->lambda.parameters != NULL;
+            
+        case AST_CURRY_EXPR:
+            return node->curryExpr.appliedArgs != NULL;
+            
+        case AST_ASPECT_DEF:
+            return node->aspectDef.pointcuts != NULL || node->aspectDef.advice != NULL;
+            
+        case AST_ADVICE:
+            return node->advice.body != NULL;
+            
+        case AST_PATTERN_MATCH:
+            return node->patternMatch.cases != NULL;
+            
+        case AST_PATTERN_CASE:
+            return node->patternCase.body != NULL;
+            
+        default:
+            return false;
+    }
 }
 
 // Fix the bug in freeAstNode function to handle null pointers properly
@@ -98,9 +219,6 @@ void freeAstNode(AstNode* node) {
                 }
                 free(node->funcDef.body);
             }
-            break;
-        case AST_EXPR_STMT:
-            freeAstNode(node->exprStmt.expr);
             break;
         case AST_IF_STMT:
             freeAstNode(node->ifStmt.condition);
@@ -303,12 +421,292 @@ void freeAstNode(AstNode* node) {
             break;
     }
     free(node);
+    stats.nodes_freed++;
     
-    logger_log(LOG_DEBUG, "Freed AST node of type %d", type);
+    if (debug_level >= 3) {
+        logger_log(LOG_DEBUG, "Freed AST node of type %d", node->type);
+    }
 }
 
 void freeAst(AstNode* root) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)freeAst);
     logger_log(LOG_DEBUG, "Starting to free AST tree");
     freeAstNode(root);
+}
+
+// Libera un programa AST completo
+void freeAstProgram(AstNode* program) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)freeAstProgram);
+    
+    if (!program || program->type != AST_PROGRAM) {
+        logger_log(LOG_WARNING, "Attempted to free non-program node as program");
+        return;
+    }
+    
+    freeAstNode(program);
+    
+    if (debug_level >= 1) {
+        logger_log(LOG_INFO, "Freed AST program. Stats: created=%d, freed=%d", 
+                 stats.nodes_created, stats.nodes_freed);
+    }
+}
+
+// Imprime un nodo AST de forma recursiva con sangría para depuración
+void printAst(AstNode* node, int indent) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)printAst);
+    
+    if (!node) return;
+    
+    // Calcular la profundidad máxima (para estadísticas)
+    if (indent > stats.max_depth) {
+        stats.max_depth = indent;
+    }
+    
+    // Imprimir sangría
+    for (int i = 0; i < indent; i++) {
+        printf("  ");
+    }
+    
+    // Imprimir información del nodo según su tipo
+    const char* typeStr = astNodeTypeToString(node->type);
+    
+    switch (node->type) {
+        case AST_PROGRAM:
+            printf("Program (%d statements)\n", node->program.statementCount);
+            for (int i = 0; i < node->program.statementCount; i++) {
+                printAst(node->program.statements[i], indent + 1);
+            }
+            break;
+            
+        case AST_FUNC_DEF:
+            printf("FuncDef: '%s' (%d params, %d statements)\n", 
+                  node->funcDef.name, node->funcDef.paramCount, node->funcDef.bodyCount);
+            // Imprimir parámetros
+            for (int i = 0; i < node->funcDef.paramCount; i++) {
+                printAst(node->funcDef.parameters[i], indent + 1);
+            }
+            // Imprimir cuerpo
+            for (int i = 0; i < node->funcDef.bodyCount; i++) {
+                printAst(node->funcDef.body[i], indent + 1);
+            }
+            break;
+            
+        case AST_CLASS_DEF:
+            if (strlen(node->classDef.baseClassName) > 0) {
+                printf("ClassDef: '%s' extends '%s' (%d members)\n", 
+                      node->classDef.name, node->classDef.baseClassName, node->classDef.memberCount);
+            } else {
+                printf("ClassDef: '%s' (%d members)\n", 
+                      node->classDef.name, node->classDef.memberCount);
+            }
+            // Imprimir miembros
+            for (int i = 0; i < node->classDef.memberCount; i++) {
+                printAst(node->classDef.members[i], indent + 1);
+            }
+            break;
+            
+        case AST_VAR_DECL:
+            printf("VarDecl: '%s' type:'%s'\n", node->varDecl.name, node->varDecl.type);
+            if (node->varDecl.initializer) {
+                printAst(node->varDecl.initializer, indent + 1);
+            }
+            break;
+            
+        case AST_VAR_ASSIGN:
+            printf("VarAssign: '%s'\n", node->varAssign.name);
+            if (node->varAssign.initializer) {
+                printAst(node->varAssign.initializer, indent + 1);
+            }
+            break;
+            
+        case AST_PRINT_STMT:
+            printf("PrintStmt:\n");
+            if (node->printStmt.expr) {
+                printAst(node->printStmt.expr, indent + 1);
+            }
+            break;
+            
+        case AST_RETURN_STMT:
+            printf("ReturnStmt:\n");
+            if (node->returnStmt.expr) {
+                printAst(node->returnStmt.expr, indent + 1);
+            }
+            break;
+            
+        case AST_BREAK_STMT:
+            printf("BreakStmt\n");
+            break;
+            
+        case AST_CONTINUE_STMT:
+            printf("ContinueStmt\n");
+            break;
+            
+        case AST_NUMBER_LITERAL:
+            printf("NumberLiteral: %g\n", node->numberLiteral.value);
+            break;
+            
+        case AST_STRING_LITERAL:
+            printf("StringLiteral: \"%s\"\n", node->stringLiteral.value);
+            break;
+            
+        case AST_BOOLEAN_LITERAL:
+            printf("BooleanLiteral: %s\n", node->boolLiteral.value ? "true" : "false");
+            break;
+            
+        case AST_NULL_LITERAL:
+            printf("NullLiteral\n");
+            break;
+            
+        case AST_IDENTIFIER:
+            printf("Identifier: %s\n", node->identifier.name);
+            break;
+            
+        case AST_BINARY_OP:
+            printf("BinaryOp: '%c'\n", node->binaryOp.op);
+            printAst(node->binaryOp.left, indent + 1);
+            printAst(node->binaryOp.right, indent + 1);
+            break;
+            
+        case AST_UNARY_OP:
+            printf("UnaryOp: '%c'\n", node->unaryOp.op);
+            printAst(node->unaryOp.expr, indent + 1);
+            break;
+            
+        case AST_FUNC_CALL:
+            printf("FuncCall: '%s' (%d args)\n", node->funcCall.name, node->funcCall.argCount);
+            for (int i = 0; i < node->funcCall.argCount; i++) {
+                printAst(node->funcCall.arguments[i], indent + 1);
+            }
+            break;
+            
+        case AST_MEMBER_ACCESS:
+            printf("MemberAccess: .%s\n", node->memberAccess.member);
+            printAst(node->memberAccess.object, indent + 1);
+            break;
+            
+        default:
+            printf("Node of type %d (%s)\n", node->type, typeStr);
+            break;
+    }
+}
+
+// Crea una copia superficial de un nodo AST
+AstNode* copyAstNode(AstNode* node) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)copyAstNode);
+    
+    if (!node) return NULL;
+    
+    AstNode* copy = malloc(sizeof(AstNode));
+    if (!copy) {
+        error_report("AST", __LINE__, 0, "Failed to allocate memory for AST node copy", ERROR_MEMORY);
+        return NULL;
+    }
+    
+    // Copiar todos los campos del nodo original
+    memcpy(copy, node, sizeof(AstNode));
+    
+    // Para tipos específicos, debemos hacer un manejo especial para evitar problemas con punteros
+    
+    switch (node->type) {
+        case AST_STRING_LITERAL:
+            // Duplicar la cadena para evitar que ambos nodos apunten a la misma memoria
+            if (node->stringLiteral.value) {
+                // Corregido: No podemos asignar a un array, debemos usar strcpy
+                char* temp = strdup(node->stringLiteral.value);
+                if (!temp) {
+                    error_report("AST", __LINE__, 0, "Failed to allocate memory for string copy", ERROR_MEMORY);
+                    free(copy);
+                    return NULL;
+                }
+                strncpy(copy->stringLiteral.value, temp, sizeof(copy->stringLiteral.value) - 1);
+                copy->stringLiteral.value[sizeof(copy->stringLiteral.value) - 1] = '\0';
+                free(temp); // Liberamos la memoria temporal
+            }
+            break;
+            
+        case AST_IDENTIFIER:
+            // Duplicar el nombre del identificador
+            if (node->identifier.name) {
+                // Corregido: No podemos asignar a un array, debemos usar strcpy
+                char* temp = strdup(node->identifier.name);
+                if (!temp) {
+                    error_report("AST", __LINE__, 0, "Failed to allocate memory for identifier name", ERROR_MEMORY);
+                    free(copy);
+                    return NULL;
+                }
+                strncpy(copy->identifier.name, temp, sizeof(copy->identifier.name) - 1);
+                copy->identifier.name[sizeof(copy->identifier.name) - 1] = '\0';
+                free(temp); // Liberamos la memoria temporal
+            }
+            break;
+            
+        // Algunos casos particulares que requieren duplicación de memoria
+        // En una implementación completa, se duplicarían todos los punteros relevantes
+        
+        case AST_PROGRAM:
+        case AST_FUNC_DEF:
+        case AST_IF_STMT:
+        case AST_WHILE_STMT:
+        case AST_DO_WHILE_STMT:
+        case AST_FOR_STMT:
+            // Estos tipos contienen arrays de nodos que deberían ser copiados profundamente
+            // Para una copia superficial, simplemente usamos los mismos punteros
+            // NOTA: Esto puede llevar a problemas si se modifican los nodos hijo
+            // En una implementación completa, se haría una copia profunda recursiva
+            break;
+    }
+    
+    // Nota: No estamos copiando profundamente todos los hijos,
+    // solo estamos creando una copia superficial que comparte punteros
+    // con el nodo original
+    
+    return copy;
+}
+
+// Convierte un tipo de nodo a su representación en string para debug
+const char* astNodeTypeToString(AstNodeType type) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)astNodeTypeToString);
+    
+    switch (type) {
+        case AST_PROGRAM: return "PROGRAM";
+        case AST_FUNC_DEF: return "FUNC_DEF";
+        case AST_CLASS_DEF: return "CLASS_DEF";
+        case AST_VAR_DECL: return "VAR_DECL";
+        case AST_IMPORT: return "IMPORT";
+        case AST_MODULE_DECL: return "MODULE_DECL";
+        case AST_ASPECT_DEF: return "ASPECT_DEF";
+        case AST_BLOCK: return "BLOCK";
+        case AST_IF_STMT: return "IF_STMT";
+        case AST_FOR_STMT: return "FOR_STMT";
+        case AST_WHILE_STMT: return "WHILE_STMT";
+        case AST_DO_WHILE_STMT: return "DO_WHILE_STMT";
+        case AST_SWITCH_STMT: return "SWITCH_STMT";
+        case AST_CASE_STMT: return "CASE_STMT";
+        case AST_RETURN_STMT: return "RETURN_STMT";
+        case AST_VAR_ASSIGN: return "VAR_ASSIGN";
+        case AST_PRINT_STMT: return "PRINT_STMT";
+        case AST_BREAK_STMT: return "BREAK_STMT";
+        case AST_CONTINUE_STMT: return "CONTINUE_STMT";
+        case AST_TRY_CATCH_STMT: return "TRY_CATCH_STMT";
+        case AST_THROW_STMT: return "THROW_STMT";
+        case AST_BINARY_OP: return "BINARY_OP";
+        case AST_UNARY_OP: return "UNARY_OP";
+        case AST_NUMBER_LITERAL: return "NUMBER_LITERAL";
+        case AST_STRING_LITERAL: return "STRING_LITERAL";
+        case AST_BOOLEAN_LITERAL: return "BOOLEAN_LITERAL";
+        case AST_NULL_LITERAL: return "NULL_LITERAL";
+        case AST_IDENTIFIER: return "IDENTIFIER";
+        case AST_MEMBER_ACCESS: return "MEMBER_ACCESS";
+        case AST_ARRAY_ACCESS: return "ARRAY_ACCESS";
+        case AST_ARRAY_LITERAL: return "ARRAY_LITERAL";
+        case AST_FUNC_CALL: return "FUNC_CALL";
+        case AST_LAMBDA: return "LAMBDA";
+        case AST_FUNC_COMPOSE: return "FUNC_COMPOSE";
+        case AST_CURRY_EXPR: return "CURRY_EXPR";
+        case AST_POINTCUT: return "POINTCUT";
+        case AST_ADVICE: return "ADVICE";
+        case AST_PATTERN_MATCH: return "PATTERN_MATCH";
+        case AST_PATTERN_CASE: return "PATTERN_CASE";
+        default: return "UNKNOWN";
+    }
 }

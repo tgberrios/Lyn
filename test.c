@@ -177,6 +177,30 @@ int main() {
     else {
         printf("%s\n", "You are not yet an adult");
     }
+    printf("%s\n", "\n=== While loop test ===");
+    count =     1    ;
+    printf("%s\n", "Counting from 1 to 5 using while:");
+    while (    (    count     <=     5    )    ) {
+        printf("%d\n", count);
+        count =         (        count         +         1        )        ;
+    }
+    printf("%s\n", "\n=== Do-While loop test ===");
+    do_while_count =     1    ;
+    printf("%s\n", "Counting from 1 to 5 using do-while:");
+    do {
+        printf("%d\n", do_while_count);
+        do_while_count =         (        do_while_count         +         1        )        ;
+    } while (    (    do_while_count     <=     5    )    );
+    printf("%s\n", "\n=== Simple aspect test ===");
+    void test_function(    ) {
+        // Local variables
+        printf("%s\n", "Before executing function");
+        printf("%s\n", "Inside test_function");
+        printf("%s\n", "After executing function");
+    }
+    printf("%s\n", "Calling advised function:");
     printf("%s\n", "\n=== Test completed successfully! ===");
+    // Ensure test function is called
+    test_function();
     return 0;
 }

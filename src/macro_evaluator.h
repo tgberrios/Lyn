@@ -2,18 +2,30 @@
 #define MACRO_EVALUATOR_H
 
 #include "ast.h"
+#include <stdbool.h>
 
-// Evaluates macros in an AST at compile time
-AstNode* evaluate_macros(AstNode* node);
+// Inicializa el sistema de macros
+void macro_init(void);
 
-// Stores a macro definition for later use
-bool register_macro(AstNode* macroDef);
+// Establece el nivel de depuración
+void macro_set_debug_level(int level);
 
-// Expands a macro with given arguments
+// Registra una macro (función convertida en macro)
+bool register_macro(AstNode* node);
+
+// Expande una llamada a macro
 AstNode* expand_macro(const char* name, AstNode** args, int argCount);
 
-// String operations for macros
+// Convierte un nodo AST a su representación en cadena para operador #
 char* macro_stringify(AstNode* node);
+
+// Concatena dos cadenas para operador ##
 char* macro_concat(const char* s1, const char* s2);
 
-#endif
+// Procesa el AST completo para evaluar todas las macros
+AstNode* evaluate_macros(AstNode* node);
+
+// Limpia recursos del sistema de macros
+void macro_cleanup(void);
+
+#endif /* MACRO_EVALUATOR_H */

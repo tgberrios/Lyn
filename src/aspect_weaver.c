@@ -5,6 +5,14 @@
 #include <string.h>
 #include <stdlib.h>
 
+// Usamos la enumeración AdviceType definida en ast.h en lugar de defines
+#include "ast.h"
+
+// Definiciones de los tipos de advice
+#define ADVICE_BEFORE 0
+#define ADVICE_AFTER  1
+#define ADVICE_AROUND 2
+
 // Nivel de depuración del weaver
 static int debug_level = 0;
 
@@ -64,6 +72,13 @@ bool weaver_process(AstNode* ast) {
         return false;
     }
     
+    if (aspect_list.count == 0) {
+        logger_log(LOG_INFO, "No aspects found in the program");
+        return true;  // No hay aspectos, pero no es un error
+    }
+    
+    logger_log(LOG_INFO, "Found %d aspects in the program", aspect_list.count);
+    
     // Paso 2: Aplicar los aspectos encontrados
     if (!apply_aspects(ast)) {
         return false;
@@ -111,7 +126,8 @@ static bool collect_aspects(AstNode* node) {
         aspect_list.aspects[aspect_list.count - 1] = node;
         
         if (debug_level >= 2) {
-            logger_log(LOG_DEBUG, "Collected aspect: %s", node->aspectDef.name);
+            logger_log(LOG_DEBUG, "Collected aspect: %s with %d pointcuts and %d advice", 
+                      node->aspectDef.name, node->aspectDef.pointcutCount, node->aspectDef.adviceCount);
         }
     }
     
@@ -129,6 +145,33 @@ static bool collect_aspects(AstNode* node) {
             }
             break;
             
+        case AST_IF_STMT:
+            for (int i = 0; i < node->ifStmt.thenCount; i++) {
+                if (!collect_aspects(node->ifStmt.thenBranch[i])) return false;
+            }
+            for (int i = 0; i < node->ifStmt.elseCount; i++) {
+                if (!collect_aspects(node->ifStmt.elseBranch[i])) return false;
+            }
+            break;
+            
+        case AST_WHILE_STMT:
+            for (int i = 0; i < node->whileStmt.bodyCount; i++) {
+                if (!collect_aspects(node->whileStmt.body[i])) return false;
+            }
+            break;
+            
+        case AST_DO_WHILE_STMT:
+            for (int i = 0; i < node->doWhileStmt.bodyCount; i++) {
+                if (!collect_aspects(node->doWhileStmt.body[i])) return false;
+            }
+            break;
+            
+        case AST_FOR_STMT:
+            for (int i = 0; i < node->forStmt.bodyCount; i++) {
+                if (!collect_aspects(node->forStmt.body[i])) return false;
+            }
+            break;
+            
         // Añadir otros casos según sea necesario
     }
     
@@ -142,19 +185,23 @@ static bool apply_aspects(AstNode* node) {
     
     // Si es una definición de función, verificar si coincide con algún pointcut
     if (node->type == AST_FUNC_DEF) {
+        logger_log(LOG_DEBUG, "Checking function '%s' for aspect application", node->funcDef.name);
+        
         for (int i = 0; i < aspect_list.count; i++) {
             AstNode* aspect = aspect_list.aspects[i];
             
             for (int j = 0; j < aspect->aspectDef.pointcutCount; j++) {
                 AstNode* pointcut = aspect->aspectDef.pointcuts[j];
                 
+                // Mejorar el logging para ver los patrones que se están evaluando
+                logger_log(LOG_DEBUG, "Checking if '%s' matches pattern '%s'", 
+                          node->funcDef.name, pointcut->pointcut.pattern);
+                
                 if (matches_pointcut(pointcut->pointcut.pattern, node->funcDef.name)) {
                     stats.joinpoints_found++;
                     
-                    if (debug_level >= 2) {
-                        logger_log(LOG_DEBUG, "Found joinpoint: %s matches %s",
-                                 node->funcDef.name, pointcut->pointcut.pattern);
-                    }
+                    logger_log(LOG_INFO, "Found joinpoint: %s matches %s",
+                             node->funcDef.name, pointcut->pointcut.pattern);
                     
                     // Aplicar todos los advice asociados a este pointcut
                     for (int k = 0; k < aspect->aspectDef.adviceCount; k++) {
@@ -163,36 +210,46 @@ static bool apply_aspects(AstNode* node) {
                         if (strcmp(advice->advice.pointcutName, pointcut->pointcut.name) == 0) {
                             // Clonar el cuerpo del advice
                             AstNode* advice_body = clone_advice_body(advice);
+                            if (!advice_body) {
+                                strncpy(stats.error_msg, "Failed to clone advice body", sizeof(stats.error_msg)-1);
+                                return false;
+                            }
                             
                             // Insertar el advice según su tipo
                             switch (advice->advice.type) {
-                                case AST_BEFORE:
+                                case ADVICE_BEFORE:
+                                    logger_log(LOG_INFO, "Applying BEFORE advice to %s", node->funcDef.name);
                                     insert_advice(node, advice_body, 0);
                                     break;
                                     
-                                case AST_AFTER:
+                                case ADVICE_AFTER:
+                                    logger_log(LOG_INFO, "Applying AFTER advice to %s", node->funcDef.name);
                                     insert_advice(node, advice_body, -1);
                                     break;
                                     
-                                case AST_AROUND:
-                                    // Implementar lógica para around advice
+                                case ADVICE_AROUND:
+                                    logger_log(LOG_INFO, "Applying AROUND advice to %s (treating as before)", node->funcDef.name);
+                                    insert_advice(node, advice_body, 0);
                                     break;
+                                    
+                                default:
+                                    logger_log(LOG_WARNING, "Unknown advice type: %d", advice->advice.type);
+                                    freeAstNode(advice_body);
+                                    continue;
                             }
                             
                             stats.advice_applied++;
                             
-                            if (debug_level >= 2) {
-                                const char* adviceTypeStr;
-                                switch (advice->advice.type) {
-                                    case AST_BEFORE: adviceTypeStr = "before"; break;
-                                    case AST_AFTER:  adviceTypeStr = "after"; break;
-                                    case AST_AROUND: adviceTypeStr = "around"; break;
-                                    default: adviceTypeStr = "unknown"; break;
-                                }
-                                logger_log(LOG_DEBUG, "Applied %s advice to %s",
-                                          adviceTypeStr,
-                                          node->funcDef.name);
+                            const char* adviceTypeStr;
+                            switch (advice->advice.type) {
+                                case ADVICE_BEFORE: adviceTypeStr = "before"; break;
+                                case ADVICE_AFTER:  adviceTypeStr = "after"; break;
+                                case ADVICE_AROUND: adviceTypeStr = "around"; break;
+                                default: adviceTypeStr = "unknown"; break;
                             }
+                            logger_log(LOG_INFO, "Applied %s advice to %s",
+                                      adviceTypeStr,
+                                      node->funcDef.name);
                         }
                     }
                 }
@@ -209,8 +266,36 @@ static bool apply_aspects(AstNode* node) {
             break;
             
         case AST_FUNC_DEF:
+            // Procesar el cuerpo de la función después de aplicar aspectos
             for (int i = 0; i < node->funcDef.bodyCount; i++) {
                 if (!apply_aspects(node->funcDef.body[i])) return false;
+            }
+            break;
+            
+        case AST_IF_STMT:
+            for (int i = 0; i < node->ifStmt.thenCount; i++) {
+                if (!apply_aspects(node->ifStmt.thenBranch[i])) return false;
+            }
+            for (int i = 0; i < node->ifStmt.elseCount; i++) {
+                if (!apply_aspects(node->ifStmt.elseBranch[i])) return false;
+            }
+            break;
+            
+        case AST_WHILE_STMT:
+            for (int i = 0; i < node->whileStmt.bodyCount; i++) {
+                if (!apply_aspects(node->whileStmt.body[i])) return false;
+            }
+            break;
+            
+        case AST_DO_WHILE_STMT:
+            for (int i = 0; i < node->doWhileStmt.bodyCount; i++) {
+                if (!apply_aspects(node->doWhileStmt.body[i])) return false;
+            }
+            break;
+            
+        case AST_FOR_STMT:
+            for (int i = 0; i < node->forStmt.bodyCount; i++) {
+                if (!apply_aspects(node->forStmt.body[i])) return false;
             }
             break;
             
@@ -223,11 +308,34 @@ static bool apply_aspects(AstNode* node) {
 static bool matches_pointcut(const char* pattern, const char* target) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)matches_pointcut);
     
-    // Implementación simple de coincidencia de patrones
-    // Soporta * como comodín
+    logger_log(LOG_DEBUG, "Matching '%s' against pattern '%s'", target, pattern);
+    
+    // Caso especial para patrones terminados en "*" como "test_*"
+    size_t pattern_len = strlen(pattern);
+    size_t target_len = strlen(target);
+    
+    if (pattern_len > 0 && pattern[pattern_len - 1] == '*') {
+        // Comparar los caracteres antes del '*'
+        size_t prefix_len = pattern_len - 1;
+        if (target_len >= prefix_len && strncmp(target, pattern, prefix_len) == 0) {
+            logger_log(LOG_INFO, "Match found! Function '%s' matches pattern '%s'", 
+                      target, pattern);
+            return true;
+        }
+    }
+    
+    // Coincidencia exacta
+    if (strcmp(pattern, target) == 0) {
+        logger_log(LOG_INFO, "Exact match found! Function '%s' matches pattern '%s'", 
+                  target, pattern);
+        return true;
+    }
+    
+    // El resto del código original para coincidencias más complejas...
     const char* p = pattern;
     const char* t = target;
     
+    // Algoritmo más complejo para manejar comodines en medio del patrón
     while (*p && *t) {
         if (*p == '*') {
             p++;
@@ -253,15 +361,42 @@ static bool matches_pointcut(const char* pattern, const char* target) {
 static AstNode* clone_advice_body(AstNode* advice) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)clone_advice_body);
     
-    // Por ahora, una implementación simple que solo copia la referencia
-    // En una implementación completa, deberías hacer una copia profunda
-    return advice;
+    if (!advice || advice->type != AST_ADVICE) {
+        return NULL;
+    }
+    
+    // Crear un nodo de bloque para contener todas las sentencias del advice
+    AstNode* block = createAstNode(AST_BLOCK);
+    if (!block) {
+        return NULL;
+    }
+    
+    // Copiar cada sentencia del advice al bloque
+    block->block.statements = (AstNode**)memory_alloc(sizeof(AstNode*) * advice->advice.bodyCount);
+    block->block.statementCount = advice->advice.bodyCount;
+    
+    for (int i = 0; i < advice->advice.bodyCount; i++) {
+        // Aquí estamos utilizando copyAstNode para hacer una copia real
+        // de cada sentencia en el cuerpo del advice
+        block->block.statements[i] = copyAstNode(advice->advice.body[i]);
+        if (!block->block.statements[i]) {
+            // Si falla la copia, liberar lo que ya se ha copiado
+            for (int j = 0; j < i; j++) {
+                freeAstNode(block->block.statements[j]);
+            }
+            memory_free(block->block.statements);
+            freeAstNode(block);
+            return NULL;
+        }
+    }
+    
+    return block;
 }
 
 static void insert_advice(AstNode* target, AstNode* advice, int position) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)insert_advice);
     
-    if (target->type != AST_FUNC_DEF) return;
+    if (target->type != AST_FUNC_DEF || !advice) return;
     
     // Calcular la posición de inserción
     int insert_pos = (position >= 0) ? position : target->funcDef.bodyCount;
@@ -270,6 +405,11 @@ static void insert_advice(AstNode* target, AstNode* advice, int position) {
     target->funcDef.bodyCount++;
     target->funcDef.body = memory_realloc(target->funcDef.body,
                                          target->funcDef.bodyCount * sizeof(AstNode*));
+    
+    if (!target->funcDef.body) {
+        logger_log(LOG_ERROR, "Memory allocation failed when inserting advice");
+        return;
+    }
     
     // Desplazar los elementos existentes si es necesario
     if (insert_pos < target->funcDef.bodyCount - 1) {

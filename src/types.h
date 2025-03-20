@@ -45,8 +45,8 @@ typedef struct Type {
         } functionType;
         // Tipo curried function: tipo base y argumentos ya aplicados
         struct {
-            struct Type* baseType;      // Base function type
-            int appliedArgCount;        // Number of arguments already applied
+            struct Type* baseType;
+            int appliedArgCount;
         } curriedType;
     };
 } Type;
