@@ -13,17 +13,14 @@
     #define DBG_PRINT(...) /* No hace nada */
 #endif
 
-#define TOKEN_INVALID -1  // Add this at the top of the file with the other token definitions
+#define TOKEN_INVALID -1  // Token inválido
 
 static const char *source;
 static int position;
 static int line = 1;
 static int col = 1;
-
-// Nivel de depuración (0=mínimo, 3=máximo)
 static int debug_level = 1;
 
-// Hash table for keywords
 #define KEYWORD_TABLE_SIZE 101
 static struct {
     char* keyword;
@@ -31,152 +28,145 @@ static struct {
 } keyword_table[KEYWORD_TABLE_SIZE];
 static int keyword_count = 0;
 
-// Function to insert a keyword into the hash table
 static void insertKeyword(const char* word, TokenType type) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)insertKeyword);
-    
     if (keyword_count >= KEYWORD_TABLE_SIZE) {
         logger_log(LOG_ERROR, "Keyword table is full, cannot add more keywords");
         return;
     }
-    
     keyword_table[keyword_count].keyword = memory_strdup(word);
     keyword_table[keyword_count].type = type;
     keyword_count++;
-    
     if (debug_level >= 3) {
         logger_log(LOG_DEBUG, "Added keyword '%s' with token type %d", word, type);
     }
 }
 
-// Function to look up a keyword in the hash table
 static TokenType lookupKeyword(const char* word) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)lookupKeyword);
-    
     for (int i = 0; i < keyword_count; i++) {
         if (strcmp(keyword_table[i].keyword, word) == 0) {
             return keyword_table[i].type;
         }
     }
-    
-    return TOKEN_IDENTIFIER; // Not found, treat as identifier
+    return TOKEN_IDENTIFIER;
 }
 
-// Forward declaration of the initializeKeywords function
-static void initializeKeywords(void);
+static void initializeKeywords(void) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)initializeKeywords);
+    // Agregar palabras clave
+    insertKeyword("func", TOKEN_FUNC);
+    insertKeyword("return", TOKEN_RETURN);
+    insertKeyword("print", TOKEN_PRINT);
+    insertKeyword("class", TOKEN_CLASS);
+    insertKeyword("if", TOKEN_IF);
+    insertKeyword("else", TOKEN_ELSE);
+    insertKeyword("for", TOKEN_FOR);
+    insertKeyword("in", TOKEN_IN);
+    insertKeyword("end", TOKEN_END);
+    insertKeyword("import", TOKEN_IMPORT);
+    insertKeyword("ui", TOKEN_UI);
+    insertKeyword("css", TOKEN_CSS);
+    insertKeyword("register_event", TOKEN_REGISTER_EVENT);
+    insertKeyword("range", TOKEN_RANGE);
+    insertKeyword("int", TOKEN_INT);
+    insertKeyword("float", TOKEN_FLOAT);
+    insertKeyword("module", TOKEN_MODULE);
+    insertKeyword("export", TOKEN_EXPORT);
+    insertKeyword("while", TOKEN_WHILE);
+    insertKeyword("do", TOKEN_DO);
+    insertKeyword("switch", TOKEN_SWITCH);
+    insertKeyword("case", TOKEN_CASE);
+    insertKeyword("default", TOKEN_DEFAULT);
+    insertKeyword("break", TOKEN_BREAK);
+    insertKeyword("try", TOKEN_TRY);
+    insertKeyword("catch", TOKEN_CATCH);
+    insertKeyword("finally", TOKEN_FINALLY);
+    insertKeyword("throw", TOKEN_THROW);
+    insertKeyword("match", TOKEN_MATCH);
+    insertKeyword("when", TOKEN_WHEN);
+    insertKeyword("otherwise", TOKEN_OTHERWISE);
+    insertKeyword("aspect", TOKEN_ASPECT);
+    insertKeyword("pointcut", TOKEN_POINTCUT);
+    insertKeyword("advice", TOKEN_ADVICE);
+    insertKeyword("before", TOKEN_BEFORE);
+    insertKeyword("after", TOKEN_AFTER);
+    insertKeyword("around", TOKEN_AROUND);
+    insertKeyword("true", TOKEN_TRUE);
+    insertKeyword("false", TOKEN_FALSE);
+    insertKeyword("and", TOKEN_AND);
+    insertKeyword("or", TOKEN_OR);
+    insertKeyword("new", TOKEN_NEW);
+    // Si se requieren keywords para new y this, opcionalmente se pueden registrar (o se detectan como identificador)
+    if (debug_level >= 2) {
+        logger_log(LOG_DEBUG, "Initialized %d keywords", keyword_count);
+    }
+}
 
-// Initialize the lexer by setting up keywords
-void lexerInitialize() {
+void lexerInitialize(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)lexerInitialize);
-    
-    // Reset keyword table
     for (int i = 0; i < keyword_count; i++) {
         memory_free(keyword_table[i].keyword);
     }
     keyword_count = 0;
-    
-    // Add keywords
     initializeKeywords();
-    
     logger_log(LOG_INFO, "Lexer initialized with %d keywords", keyword_count);
 }
 
-/**
- * @brief Inicializa el lexer con la fuente de entrada.
- *
- * @param src Puntero a la cadena de entrada.
- */
 void lexerInit(const char *src) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)lexerInit);
     logger_log(LOG_INFO, "Initializing lexer");
-    
     source = src;
     position = 0;
     line = 1;
     col = 1;
-    error_set_source(src);  // Configura el código fuente para el sistema de errores
+    error_set_source(src);
 }
 
 static void lexerError(const char* message) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)lexerError);
     logger_log(LOG_ERROR, "Lexer error: %s at line %d, col %d", message, line, col);
-    
     error_report("lexer", line, col, message, ERROR_SYNTAX);
     error_print_current();
     exit(1);
 }
 
-/**
- * @brief Guarda el estado actual del lexer.
- *
- * @return LexerState Estado actual del lexer.
- */
 LexerState lexSaveState(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)lexSaveState);
     if (debug_level >= 3) {
         logger_log(LOG_DEBUG, "Saving lexer state at line %d, col %d, pos %d", line, col, position);
     }
-    
     LexerState state = { source, position, line, col };
     return state;
 }
 
-/**
- * @brief Restaura el estado del lexer.
- *
- * @param state Estado a restaurar.
- */
 void lexRestoreState(LexerState state) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)lexRestoreState);
     if (debug_level >= 3) {
         logger_log(LOG_DEBUG, "Restoring lexer state to line %d, col %d, pos %d", 
                   state.line, state.col, state.position);
     }
-    
     source = state.source;
     position = state.position;
     line = state.line;
     col = state.col;
 }
 
-/**
- * @brief Avanza un carácter en la fuente.
- *
- * Incrementa la posición y la columna, y retorna el carácter leído.
- *
- * @return char Carácter avanzado.
- */
 static char advance(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)advance);
     col++;
     return source[position++];
 }
 
-/**
- * @brief Retorna el carácter actual sin avanzar la posición.
- *
- * @return char Carácter actual.
- */
 static char peek(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)peek);
     return source[position];
 }
 
-/**
- * @brief Omite espacios en blanco, saltos de línea y comentarios.
- *
- * Salta todos los espacios, saltos de línea y comentarios (línea y bloque)
- * para posicionar el lexer en el siguiente token relevante.
- */
 static void skipWhitespaceAndComments(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)skipWhitespaceAndComments);
-    
-    int oldLine = line;
-    int oldCol = col;
-    int oldPos = position;
-    
+    int oldLine = line, oldCol = col, oldPos = position;
     while (1) {
-        /* Saltar espacios y saltos de línea. */
         while (isspace(source[position])) {
             if (source[position] == '\n') {
                 line++;
@@ -184,51 +174,30 @@ static void skipWhitespaceAndComments(void) {
             }
             advance();
         }
-        /* Comentario de línea: // */
         if (source[position] == '/' && source[position + 1] == '/') {
             while (source[position] != '\n' && source[position] != '\0')
                 advance();
             continue;
         }
-        /* Comentario de bloque: /* ... *\/ */
         if (source[position] == '/' && source[position + 1] == '*') {
-            advance(); // Consume '/'
-            advance(); // Consume '*'
+            advance(); advance();
             while (!(source[position] == '*' && source[position + 1] == '/') && source[position] != '\0') {
-                if (source[position] == '\n') {
-                    line++;
-                    col = 0;
-                }
+                if (source[position] == '\n') { line++; col = 0; }
                 advance();
             }
-            if (source[position] != '\0') {
-                advance(); // Consume '*'
-                advance(); // Consume '/'
-            }
+            if (source[position] != '\0') { advance(); advance(); }
             continue;
         }
         break;
     }
-    
-    // Registramos los saltos de línea encontrados para depuración avanzada
     if (debug_level >= 3 && oldLine != line) {
-        logger_log(LOG_DEBUG, "Skipped from line %d, col %d to line %d, col %d", 
-                  oldLine, oldCol, line, col);
+        logger_log(LOG_DEBUG, "Skipped from line %d, col %d to line %d, col %d", oldLine, oldCol, line, col);
     }
 }
 
-/**
- * @brief Obtiene el siguiente token de la fuente.
- *
- * Analiza la entrada y retorna el siguiente token.
- *
- * @return Token Estructura Token con tipo, lexema, línea y columna.
- */
 Token getNextToken(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)getNextToken);
-    
     skipWhitespaceAndComments();
-
     if (source[position] == '\0') {
         Token token = { TOKEN_EOF, "EOF", line, col };
         if (debug_level >= 2) {
@@ -236,11 +205,8 @@ Token getNextToken(void) {
         }
         return token;
     }
-
     char c = advance();
     Token token = { 0, "", line, col - 1 };
-
-    /* Manejo de identificadores y palabras clave. */
     if (isalpha(c) || c == '_') {
         int start = position - 1;
         while (isalnum(source[position]) || source[position] == '_')
@@ -248,19 +214,13 @@ Token getNextToken(void) {
         int length = position - start;
         strncpy(token.lexeme, source + start, length);
         token.lexeme[length] = '\0';
-
-        // Use the lookup function to determine if it's a keyword
         token.type = lookupKeyword(token.lexeme);
-        
-        // Log del token reconocido
         if (debug_level >= 2) {
             logger_log(LOG_DEBUG, "Lexer produced token: %s '%s' at line %d, col %d", 
                       tokenTypeToString(token.type), token.lexeme, token.line, token.col);
         }
         return token;
     }
-
-    /* Manejo de números. */
     if (isdigit(c) || (c == '.' && isdigit(peek()))) {
         int start = position - 1;
         while (isdigit(source[position]) || source[position] == '.')
@@ -269,67 +229,46 @@ Token getNextToken(void) {
         strncpy(token.lexeme, source + start, length);
         token.lexeme[length] = '\0';
         token.type = TOKEN_NUMBER;
-        
-        // Validar formato de número para detectar errores comunes como '1.2.3'
         int dotCount = 0;
         for (int i = 0; i < length; i++) {
             if (token.lexeme[i] == '.') dotCount++;
         }
-        
         if (dotCount > 1) {
             lexerError("Invalid number format - multiple decimal points");
         }
-        
         if (debug_level >= 2) {
             logger_log(LOG_DEBUG, "Lexer produced token: %s '%s' at line %d, col %d", 
                       tokenTypeToString(token.type), token.lexeme, token.line, token.col);
         }
         return token;
     }
-
-    /* Manejo de cadenas. */
     if (c == '"') {
         int start = position;
         while (source[position] != '"' && source[position] != '\0') {
-            if (source[position] == '\n') {
+            if (source[position] == '\n')
                 lexerError("Unterminated string literal");
-            }
             advance();
         }
-        if (source[position] == '\0') {
+        if (source[position] == '\0')
             lexerError("Unterminated string literal");
-        }
         int length = position - start;
         strncpy(token.lexeme, source + start, length);
         token.lexeme[length] = '\0';
-        advance(); // Consume la comilla de cierre.
+        advance(); // Consume closing quote.
         token.type = TOKEN_STRING;
-        
         if (debug_level >= 2) {
             logger_log(LOG_DEBUG, "Lexer produced token: %s \"%s\" at line %d, col %d", 
                       tokenTypeToString(token.type), token.lexeme, token.line, token.col);
         }
         return token;
     }
-
-    /* Manejo de operadores y símbolos. */
     switch (c) {
         case '=':
-            if (peek() == '=') {
-                advance();
-                token.type = TOKEN_EQ;
-                strcpy(token.lexeme, "==");
-            } else if (peek() == '>') {
-                advance();
-                token.type = TOKEN_FAT_ARROW;
-                strcpy(token.lexeme, "=>");
-            } else {
-                token.type = TOKEN_ASSIGN;
-                token.lexeme[0] = '=';
-                token.lexeme[1] = '\0';
-            }
+            if (peek() == '=') { advance(); token.type = TOKEN_EQ; strcpy(token.lexeme, "=="); }
+            else if (peek() == '>') { advance(); token.type = TOKEN_FAT_ARROW; strcpy(token.lexeme, "=>"); }
+            else { token.type = TOKEN_ASSIGN; token.lexeme[0] = '='; token.lexeme[1] = '\0'; }
             break;
-        case ':':   // <-- NUEVO
+        case ':':
             token.type = TOKEN_COLON;
             token.lexeme[0] = ':';
             token.lexeme[1] = '\0';
@@ -340,15 +279,8 @@ Token getNextToken(void) {
             token.lexeme[1] = '\0';
             break;
         case '-':
-            if (peek() == '>') {
-                advance();
-                token.type = TOKEN_ARROW;
-                strcpy(token.lexeme, "->");
-            } else {
-                token.type = TOKEN_MINUS;
-                token.lexeme[0] = '-';
-                token.lexeme[1] = '\0';
-            }
+            if (peek() == '>') { advance(); token.type = TOKEN_ARROW; strcpy(token.lexeme, "->"); }
+            else { token.type = TOKEN_MINUS; token.lexeme[0] = '-'; token.lexeme[1] = '\0'; }
             break;
         case '*':
             token.type = TOKEN_ASTERISK;
@@ -386,40 +318,17 @@ Token getNextToken(void) {
             token.lexeme[1] = '\0';
             break;
         case '>':
-            if (peek() == '=') {
-                advance();
-                token.type = TOKEN_GTE;
-                strcpy(token.lexeme, ">=");
-            } else if (peek() == '>') {
-                advance();
-                token.type = TOKEN_COMPOSE;
-                strcpy(token.lexeme, ">>");
-            } else {
-                token.type = TOKEN_GT;
-                token.lexeme[0] = '>';
-                token.lexeme[1] = '\0';
-            }
+            if (peek() == '=') { advance(); token.type = TOKEN_GTE; strcpy(token.lexeme, ">="); }
+            else if (peek() == '>') { advance(); token.type = TOKEN_COMPOSE; strcpy(token.lexeme, ">>"); }
+            else { token.type = TOKEN_GT; token.lexeme[0] = '>'; token.lexeme[1] = '\0'; }
             break;
         case '<':
-            if (peek() == '=') {
-                advance();
-                token.type = TOKEN_LTE;
-                strcpy(token.lexeme, "<=");
-            } else {
-                token.type = TOKEN_LT;
-                token.lexeme[0] = '<';
-                token.lexeme[1] = '\0';
-            }
+            if (peek() == '=') { advance(); token.type = TOKEN_LTE; strcpy(token.lexeme, "<="); }
+            else { token.type = TOKEN_LT; token.lexeme[0] = '<'; token.lexeme[1] = '\0'; }
             break;
         case '!':
-            if (peek() == '=') {
-                advance();
-                token.type = TOKEN_NEQ;
-                strcpy(token.lexeme, "!=");
-            } else {
-                token.type = TOKEN_UNKNOWN;
-                snprintf(token.lexeme, sizeof(token.lexeme), "Unknown character");
-            }
+            if (peek() == '=') { advance(); token.type = TOKEN_NEQ; strcpy(token.lexeme, "!="); }
+            else { token.type = TOKEN_UNKNOWN; snprintf(token.lexeme, sizeof(token.lexeme), "Unknown character"); }
             break;
         case '[':
             token.type = TOKEN_LBRACKET;
@@ -431,19 +340,18 @@ Token getNextToken(void) {
             token.lexeme[0] = ']';
             token.lexeme[1] = '\0';
             break;
-        case '{':   // Add this case
+        case '{':
             token.type = TOKEN_LBRACE;
             strcpy(token.lexeme, "{");
             break;
-        case '}':   // Add this case
+        case '}':
             token.type = TOKEN_RBRACE;
             strcpy(token.lexeme, "}");
             break;
         default:
             token.type = TOKEN_UNKNOWN;
             snprintf(token.lexeme, sizeof(token.lexeme), "Unknown character '%c'", c);
-            logger_log(LOG_WARNING, "Unknown character '%c' (%d) at line %d, col %d", 
-                      c, (int)c, line, col-1);
+            logger_log(LOG_WARNING, "Unknown character '%c' (%d) at line %d, col %d", c, (int)c, line, col-1);
             break;
     }
     
@@ -454,125 +362,16 @@ Token getNextToken(void) {
     return token;
 }
 
-// Add TOKEN_LBRACE and TOKEN_RBRACE if they don't exist
-static TokenType charToToken(char c) {
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)charToToken);
-    
-    switch (c) {
-        case '(': return TOKEN_LPAREN;
-        case ')': return TOKEN_RPAREN;
-        case '[': return TOKEN_LBRACKET;
-        case ']': return TOKEN_RBRACKET;
-        case '{': return TOKEN_LBRACE;   // Add this if missing
-        case '}': return TOKEN_RBRACE;   // Add this if missing
-        case '.': return TOKEN_DOT;
-        case ',': return TOKEN_COMMA;
-        case ';': return TOKEN_SEMICOLON;
-        case ':': return TOKEN_COLON;
-        case '+': return TOKEN_PLUS;
-        case '-': return TOKEN_MINUS;
-        case '*': return TOKEN_ASTERISK;
-        case '/': return TOKEN_SLASH;
-        case '=': return TOKEN_ASSIGN;
-        case '<': return TOKEN_LT;
-        case '>': return TOKEN_GT;
-        default: return TOKEN_INVALID;  // Then fix the charToToken function to use TOKEN_INVALID
-    }
-}
-
-// Convertir tipo de token a cadena para depuración
 const char* tokenTypeToString(TokenType type) {
-    static const char* tokenNames[] = {
-        "TOKEN_EOF", "TOKEN_IDENTIFIER", "TOKEN_NUMBER", "TOKEN_STRING",
-        "TOKEN_ASSIGN", "TOKEN_PLUS", "TOKEN_MINUS", "TOKEN_ASTERISK", 
-        "TOKEN_SLASH", "TOKEN_LPAREN", "TOKEN_RPAREN", "TOKEN_COMMA", 
-        "TOKEN_ARROW", "TOKEN_FAT_ARROW", "TOKEN_FUNC", "TOKEN_RETURN",
-        "TOKEN_PRINT", "TOKEN_CLASS", "TOKEN_IF", "TOKEN_ELSE",
-        "TOKEN_FOR", "TOKEN_IN", "TOKEN_END", "TOKEN_IMPORT",
-        "TOKEN_UI", "TOKEN_CSS", "TOKEN_REGISTER_EVENT", "TOKEN_RANGE",
-        "TOKEN_INT", "TOKEN_FLOAT", "TOKEN_DOT", "TOKEN_SEMICOLON",
-        "TOKEN_GT", "TOKEN_LT", "TOKEN_GTE", "TOKEN_LTE",
-        "TOKEN_EQ", "TOKEN_NEQ", "TOKEN_UNKNOWN", "TOKEN_LBRACKET",
-        "TOKEN_RBRACKET", "TOKEN_COLON", "TOKEN_MODULE", "TOKEN_EXPORT",
-        "TOKEN_LBRACE", "TOKEN_RBRACE", "TOKEN_INVALID", "TOKEN_WHILE",
-        "TOKEN_DO", "TOKEN_SWITCH", "TOKEN_CASE", "TOKEN_DEFAULT",
-        "TOKEN_BREAK", "TOKEN_TRY", "TOKEN_CATCH", "TOKEN_FINALLY",
-        "TOKEN_THROW", "TOKEN_MATCH", "TOKEN_WHEN", "TOKEN_OTHERWISE",
-        "TOKEN_COMPOSE", "TOKEN_STRINGIFY", "TOKEN_ASPECT",
-        "TOKEN_POINTCUT", "TOKEN_ADVICE", "TOKEN_BEFORE",
-        "TOKEN_AFTER", "TOKEN_AROUND", "TOKEN_TRUE", "TOKEN_FALSE",
-        "TOKEN_AND", "TOKEN_OR"
-    };
-    
-    if (type >= 0 && type <= TOKEN_OR) {
-        return tokenNames[type];
+    switch (type) {
+        case TOKEN_EOF: return "TOKEN_EOF";
+        case TOKEN_IDENTIFIER: return "TOKEN_IDENTIFIER";
+        case TOKEN_THIS: return "TOKEN_THIS";
+        default: return "TOKEN_UNKNOWN";
     }
-    return "UNKNOWN_TOKEN_TYPE";
 }
 
 void lexer_set_debug_level(int level) {
     debug_level = level;
     logger_log(LOG_INFO, "Lexer debug level set to %d", level);
-}
-
-/* initializeKeywords: Inicializa la tabla hash de palabras clave */
-static void initializeKeywords(void) {
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)initializeKeywords);
-    
-    // Basic keywords
-    insertKeyword("func", TOKEN_FUNC);
-    insertKeyword("return", TOKEN_RETURN);
-    insertKeyword("print", TOKEN_PRINT);
-    insertKeyword("class", TOKEN_CLASS);
-    insertKeyword("if", TOKEN_IF);
-    insertKeyword("else", TOKEN_ELSE);
-    insertKeyword("for", TOKEN_FOR);
-    insertKeyword("in", TOKEN_IN);
-    insertKeyword("end", TOKEN_END);
-    insertKeyword("import", TOKEN_IMPORT);
-    insertKeyword("ui", TOKEN_UI);
-    insertKeyword("css", TOKEN_CSS);
-    insertKeyword("register_event", TOKEN_REGISTER_EVENT);
-    insertKeyword("range", TOKEN_RANGE);
-    insertKeyword("int", TOKEN_INT);
-    insertKeyword("float", TOKEN_FLOAT);
-    insertKeyword("module", TOKEN_MODULE);
-    insertKeyword("export", TOKEN_EXPORT);
-    
-    // Control flow keywords
-    insertKeyword("while", TOKEN_WHILE);
-    insertKeyword("do", TOKEN_DO);
-    insertKeyword("switch", TOKEN_SWITCH);
-    insertKeyword("case", TOKEN_CASE);
-    insertKeyword("default", TOKEN_DEFAULT);
-    insertKeyword("break", TOKEN_BREAK);
-    
-    // Exception handling
-    insertKeyword("try", TOKEN_TRY);
-    insertKeyword("catch", TOKEN_CATCH);
-    insertKeyword("finally", TOKEN_FINALLY);
-    insertKeyword("throw", TOKEN_THROW);
-    
-    // Pattern matching
-    insertKeyword("match", TOKEN_MATCH);
-    insertKeyword("when", TOKEN_WHEN);
-    insertKeyword("otherwise", TOKEN_OTHERWISE);
-    
-    // AOP keywords
-    insertKeyword("aspect", TOKEN_ASPECT);
-    insertKeyword("pointcut", TOKEN_POINTCUT);
-    insertKeyword("advice", TOKEN_ADVICE);
-    insertKeyword("before", TOKEN_BEFORE);
-    insertKeyword("after", TOKEN_AFTER);
-    insertKeyword("around", TOKEN_AROUND);
-    
-    // Boolean literals and operators
-    insertKeyword("true", TOKEN_TRUE);
-    insertKeyword("false", TOKEN_FALSE);
-    insertKeyword("and", TOKEN_AND);
-    insertKeyword("or", TOKEN_OR);
-    
-    if (debug_level >= 2) {
-        logger_log(LOG_DEBUG, "Initialized %d keywords", keyword_count);
-    }
 }

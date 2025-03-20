@@ -1,9 +1,8 @@
 #ifndef LYN_LEXER_H
 #define LYN_LEXER_H
 
-// Añadir la inclusión del sistema de errores
 #include "error.h"
-#include "logger.h"  // Añadimos el logger
+#include "logger.h"
 
 /**
  * Enumeración de los tipos de tokens.
@@ -85,7 +84,9 @@ typedef enum {
     TOKEN_ADVICE,          // 72: advice
     TOKEN_BEFORE,          // 73: before
     TOKEN_AFTER,           // 74: after
-    TOKEN_AROUND           // 75: around
+    TOKEN_AROUND,          // 75: around
+    TOKEN_NEW,             // 76: new
+    TOKEN_THIS             // 77: this
 } TokenType;
 
 /**
@@ -97,8 +98,8 @@ typedef struct {
     int line;               ///< Línea donde aparece.
     int col;                ///< Columna donde aparece.
     union {
-        char string[256];  // Para valores string
-        double number;     // Para valores numéricos
+        char string[256];   // Para valores string
+        double number;      // Para valores numéricos
     } value;
 } Token;
 
@@ -114,13 +115,11 @@ typedef struct {
 
 /* Funciones públicas del lexer */
 void lexerInit(const char *source);
-void lexerInitialize(void);  // Add this new function
+void lexerInitialize(void);
 Token getNextToken(void);
 LexerState lexSaveState(void);
 void lexRestoreState(LexerState state);
+void lexer_set_debug_level(int level);
+const char* tokenTypeToString(TokenType type);
 
-// Nuevas funciones para depuración
-void lexer_set_debug_level(int level);  // Configura nivel de detalle de logs
-const char* tokenTypeToString(TokenType type);  // Convierte tipo de token a string
-
-#endif /* LEXER_H */
+#endif /* LYN_LEXER_H */

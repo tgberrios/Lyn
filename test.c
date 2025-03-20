@@ -199,6 +199,9 @@ int main() {
         printf("%s\n", "After executing function");
     }
     printf("%s\n", "Calling advised function:");
+    printf("%s\n", "\n=== Class and Object Test ===");
+    double myCar =     0    ;
+    printf("%s\n", "Car instance created.");
     printf("%s\n", "\n=== Test completed successfully! ===");
     // Ensure test function is called
     test_function();

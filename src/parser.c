@@ -1,4 +1,3 @@
-/* parser.c */
 #include "parser.h"
 #include "lexer.h"
 #include "memory.h"   // Usamos memory_realloc y memory_free para la gestión de memoria.
@@ -19,24 +18,6 @@ static int debug_level = 1;
 
 /* Variable global para el token actual */
 static Token currentToken;
-
-void parser_set_debug_level(int level) {
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)parser_set_debug_level);
-    debug_level = level;
-    logger_log(LOG_INFO, "Parser debug level set to %d", level);
-}
-
-int parser_get_debug_level(void) {
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)parser_get_debug_level);
-    return debug_level;
-}
-
-void parser_get_stats(int* nodes_created, int* errors_found) {
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)parser_get_stats);
-    
-    if (nodes_created) *nodes_created = parser_stats.nodes_created;
-    if (errors_found) *errors_found = parser_stats.errors_found;
-}
 
 /* Prototipos internos */
 static void advanceToken(void);
@@ -67,10 +48,52 @@ static AstNode* parseCurryExpression(AstNode* baseFunc);
 static AstNode* parsePatternMatch(void);
 static AstNode* parseFunctionComposition(void);
 
-// Añadir nuevos prototipos
+// Nuevos prototipos para AspectJ (sin cambios respecto a lo anterior)
 static AstNode* parseAspect(void);
 static AstNode* parsePointcut(void);
 static AstNode* parseAdvice(void);
+
+// --- NUEVAS FUNCIONES PARA INSTANCIACIÓN Y THIS ---
+
+// Función para parsear una expresión 'new Clase(arg1, arg2, ...)'
+static AstNode* parseNewExpr(void) {
+    // Se asume que el token 'new' ya está presente
+    advanceToken(); // consume 'new'
+    
+    if (currentToken.type != TOKEN_IDENTIFIER)
+        parserError("Expected class name after 'new'", currentToken);
+    
+    AstNode *newNode = createAstNode(AST_NEW_EXPR);
+    strncpy(newNode->newExpr.className, currentToken.lexeme, sizeof(newNode->newExpr.className));
+    advanceToken(); // consume el nombre de la clase
+    
+    if (currentToken.type != TOKEN_LPAREN)
+        parserError("Expected '(' after class name in new expression", currentToken);
+    advanceToken(); // consume '('
+    
+    newNode->newExpr.arguments = NULL;
+    newNode->newExpr.argCount = 0;
+    
+    if (currentToken.type != TOKEN_RPAREN) {
+        do {
+            AstNode *arg = parseExpression();
+            newNode->newExpr.argCount++;
+            newNode->newExpr.arguments = memory_realloc(newNode->newExpr.arguments,
+                                                         newNode->newExpr.argCount * sizeof(AstNode*));
+            newNode->newExpr.arguments[newNode->newExpr.argCount - 1] = arg;
+            if (currentToken.type == TOKEN_COMMA)
+                advanceToken();
+        } while (currentToken.type != TOKEN_RPAREN && currentToken.type != TOKEN_EOF);
+    }
+    
+    if (currentToken.type != TOKEN_RPAREN)
+        parserError("Expected ')' after new expression arguments", currentToken);
+    
+    advanceToken(); // consume ')'
+    return newNode;
+}
+
+// --- FIN DE NUEVAS FUNCIONES ---
 
 /* Avanza al siguiente token */
 static void advanceToken(void) {
@@ -90,15 +113,11 @@ static void parserError(const char *message, Token current) {
     
     parser_stats.errors_found++;
     
-    // Crear un mensaje de error detallado
     char detailed_msg[512];
     snprintf(detailed_msg, sizeof(detailed_msg), "%s (got '%s')", 
             message, current.lexeme);
     
-    // Reportar el error usando el sistema centralizado
     error_report("parser", current.line, current.col, detailed_msg, ERROR_SYNTAX);
-    
-    // Imprimir el error con contexto
     error_print_current();
     
     logger_log(LOG_ERROR, "Syntax error at line %d, col %d: %s", 
@@ -107,17 +126,13 @@ static void parserError(const char *message, Token current) {
     exit(1);
 }
 
-
-/* isLambdaLookahead: Comprueba sin alterar el estado global
-   si la secuencia actual corresponde a la sintaxis de una lambda:
-   ( [paramName : paramType {, paramName : paramType}] ) -> returnType => ... */
+/* isLambdaLookahead: Verifica si la secuencia corresponde a una lambda */
 static int isLambdaLookahead(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)isLambdaLookahead);
     
     LexerState saved = lexSaveState();
-    Token tok1 = getNextToken(); // Primer token dentro del paréntesis.
+    Token tok1 = getNextToken();
     
-    // Estado para recordar si detectamos una lambda
     int result = 0;
     
     if (tok1.type == TOKEN_RPAREN) {
@@ -125,14 +140,12 @@ static int isLambdaLookahead(void) {
         if (tok2.type != TOKEN_ARROW) { lexRestoreState(saved); return 0; }
         Token tok3 = getNextToken();
         if (tok3.type != TOKEN_IDENTIFIER && tok3.type != TOKEN_INT && tok3.type != TOKEN_FLOAT) {
-            // Si no es un tipo reconocido, todavía podría ser una lambda sin tipo de retorno
             if (tok3.type != TOKEN_FAT_ARROW && tok3.type != TOKEN_LBRACE) {
                 lexRestoreState(saved);
                 return 0;
             }
         }
         Token tok4 = getNextToken();
-        // Allow either fat arrow (=>) or opening brace ({) for block lambda
         if (tok4.type != TOKEN_FAT_ARROW && tok4.type != TOKEN_LBRACE) {
             lexRestoreState(saved);
             return 0;
@@ -171,7 +184,6 @@ static int isLambdaLookahead(void) {
             }
         }
         Token tokFatArrow = getNextToken();
-        // Allow either fat arrow (=>) or opening brace ({) for block lambda
         if (tokFatArrow.type != TOKEN_FAT_ARROW && tokFatArrow.type != TOKEN_LBRACE) {
             lexRestoreState(saved);
             return 0;
@@ -215,39 +227,32 @@ static AstNode *parsePostfix(AstNode *node) {
         advanceToken(); // consume identifier
 
         if (currentToken.type == TOKEN_LPAREN) {
-            // Caso especial: obj.método(...) se convierte en Clase_método(obj, ...)
-            // Primero obtenemos el tipo del objeto (necesitaríamos un sistema de símbolos real)
+            // Caso especial: obj.método(...) se transforma en una llamada a método
             advanceToken(); // consume '('
             
             AstNode *funcCall = createAstNode(AST_FUNC_CALL);
             parser_stats.nodes_created++;
             
-            // Combine object name and method in the format "ClassName.methodName"
-            // This will be transformed into ClassName_methodName in the compiler
             char fullMethodName[512] = "";
-            
-            // In a real implementation, we'd determine the class from the object's type
-            if (memberNode->memberAccess.object->type == AST_IDENTIFIER) {
-                // For now, just use "someClass" as placeholder
-                const char* className = "someClass";
-                snprintf(fullMethodName, sizeof(fullMethodName), 
-                        "%s.%s", className, memberNode->memberAccess.member);
-            } else {
-                // Default case when we can't determine class
-                snprintf(fullMethodName, sizeof(fullMethodName), "Object.%s", 
-                        memberNode->memberAccess.member);
+            const char* className = "Object";
+            // Si el objeto es una instancia creada con new, usamos su nombre de clase
+            if (memberNode->memberAccess.object->type == AST_NEW_EXPR) {
+                className = memberNode->memberAccess.object->newExpr.className;
+            } else if (memberNode->memberAccess.object->type == AST_IDENTIFIER) {
+                // Opcional: si se hubiera inferido el tipo, se podría usar aquí
+                className = memberNode->memberAccess.object->identifier.name;
             }
+            snprintf(fullMethodName, sizeof(fullMethodName), "%s.%s", className, memberNode->memberAccess.member);
             
             strncpy(funcCall->funcCall.name, fullMethodName, sizeof(funcCall->funcCall.name) - 1);
             
-            // Add the object as the first argument (this/self)
+            // Agrega el objeto como el primer argumento (this/self)
+            funcCall->funcCall.argCount = 1;
             funcCall->funcCall.arguments = malloc(sizeof(AstNode*));
             funcCall->funcCall.arguments[0] = memberNode->memberAccess.object;
-            funcCall->funcCall.argCount = 1;
             
-            // Parse additional arguments
+            // Parsear argumentos adicionales
             if (currentToken.type != TOKEN_RPAREN) {
-                // Parse arguments
                 do {
                     if (currentToken.type == TOKEN_COMMA) advanceToken();
                     
@@ -255,7 +260,7 @@ static AstNode *parsePostfix(AstNode *node) {
                     
                     funcCall->funcCall.argCount++;
                     funcCall->funcCall.arguments = realloc(funcCall->funcCall.arguments, 
-                                                     funcCall->funcCall.argCount * sizeof(AstNode*));
+                                               funcCall->funcCall.argCount * sizeof(AstNode*));
                     funcCall->funcCall.arguments[funcCall->funcCall.argCount - 1] = arg;
                 } while (currentToken.type == TOKEN_COMMA);
             }
@@ -265,8 +270,7 @@ static AstNode *parsePostfix(AstNode *node) {
             
             advanceToken(); // consume ')'
             
-            // Free the member access node since we've transformed it
-            free(memberNode);
+            freeAstNode(memberNode);
             
             node = funcCall;
         } else {
@@ -289,17 +293,17 @@ static AstNode *parsePostfix(AstNode *node) {
         
         freeAstNode(node);
         
-        // Parse arguments until we hit the closing parenthesis
         if (currentToken.type != TOKEN_RPAREN) {
             do {
-                if (currentToken.type == TOKEN_COMMA) advanceToken();
-                
                 AstNode *arg = parseExpression();
-                
                 funcCall->funcCall.argCount++;
-                funcCall->funcCall.arguments = realloc(funcCall->funcCall.arguments, 
-                                               funcCall->funcCall.argCount * sizeof(AstNode*));
+                funcCall->funcCall.arguments = memory_realloc(funcCall->funcCall.arguments,
+                                                              funcCall->funcCall.argCount * sizeof(AstNode *));
                 funcCall->funcCall.arguments[funcCall->funcCall.argCount - 1] = arg;
+                if (currentToken.type == TOKEN_COMMA)
+                    advanceToken();
+                else if (currentToken.type != TOKEN_RPAREN)
+                    parserError("Expected ',' or ')' in function call argument list", currentToken);
             } while (currentToken.type == TOKEN_COMMA);
         }
         
@@ -310,7 +314,6 @@ static AstNode *parsePostfix(AstNode *node) {
         node = funcCall;
         return parsePostfix(node);
     } else if (currentToken.type == TOKEN_LBRACKET) {
-        // Handle array access: expr[index]
         advanceToken(); // consume '['
         
         AstNode *arrayAccess = createAstNode(AST_ARRAY_ACCESS);
@@ -328,7 +331,6 @@ static AstNode *parsePostfix(AstNode *node) {
             logger_log(LOG_DEBUG, "Created array access node");
         }
         
-        // Allow chained indexing like array[i][j]
         return parsePostfix(arrayAccess);
     }
     
@@ -483,9 +485,7 @@ static AstNode *parseStatement(void) {
         LexerState saved = lexSaveState();
         advanceToken();
         
-        /* Rama para declaraciones explícitas con ":" */
         if (currentToken.type == TOKEN_COLON) {
-            // Variable declaration with explicit type
             advanceToken(); // consume ':'
             
             if (currentToken.type != TOKEN_IDENTIFIER &&
@@ -510,7 +510,6 @@ static AstNode *parseStatement(void) {
             
             result = declNode;
         } else {
-            // Si no se encontró ':', se trata de asignación, miembro o llamada a función
             if (currentToken.type == TOKEN_DOT) {
                 advanceToken(); // consume '.'
                 if (currentToken.type != TOKEN_IDENTIFIER)
@@ -605,7 +604,7 @@ static AstNode *parseStatement(void) {
     return result;
 }
 
-/* parseExpression: Maneja operadores de adición y comparación, pero también permitirá concatenaciones */
+/* parseExpression: Maneja operadores de adición, comparación y concatenación */
 static AstNode *parseExpression(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)parseExpression);
     
@@ -615,7 +614,6 @@ static AstNode *parseExpression(void) {
         logger_log(LOG_DEBUG, "Parsed initial term for expression");
     }
     
-    // Check for function composition operator
     if (currentToken.type == TOKEN_COMPOSE) {
         advanceToken(); // consume '>>'
         AstNode* rightFunc = parseTerm();
@@ -632,7 +630,6 @@ static AstNode *parseExpression(void) {
         
         node = composeNode;
         
-        // Support chaining multiple compositions: f >> g >> h
         while (currentToken.type == TOKEN_COMPOSE) {
             advanceToken(); // consume '>>'
             rightFunc = parseTerm();
@@ -717,11 +714,23 @@ static AstNode *parseTerm(void) {
     return left;
 }
 
-/* parseFactor: Números, cadenas, identificadores, agrupación */
+/* parseFactor: Maneja números, cadenas, identificadores, agrupación, new y this */
 static AstNode *parseFactor(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)parseFactor);
     
     AstNode *node = NULL;
+    
+    // Soporte para instanciación de objetos con 'new'
+    if (currentToken.type == TOKEN_NEW) {
+        node = parseNewExpr();
+        return node;
+    }
+    // Soporte para 'this'
+    if (currentToken.type == TOKEN_THIS) {
+        AstNode *thisNode = createAstNode(AST_THIS_EXPR);
+        advanceToken();
+        return thisNode;
+    }
     
     if (currentToken.type == TOKEN_LPAREN && isLambdaLookahead()) {
         return parseLambda();
@@ -757,22 +766,17 @@ static AstNode *parseFactor(void) {
         
         advanceToken();
         
-        // Handle special keywords for logical operators
         if (strcmp(node->identifier.name, "not") == 0) {
             AstNode* notExpr = createAstNode(AST_UNARY_OP);
             parser_stats.nodes_created++;
-            
-            notExpr->unaryOp.op = 'N'; // 'N' for NOT
+            notExpr->unaryOp.op = 'N';
             notExpr->unaryOp.expr = parseFactor();
-            
             return notExpr;
         }
         
-        // Look ahead for currying pattern: function(arg1)(arg2)...
         if (currentToken.type == TOKEN_LPAREN) {
-            // This could be a regular function call or the start of a curry
             LexerState saved = lexSaveState();
-            advanceToken(); // consume '('
+            advanceToken();
             
             AstNode *funcCall = createAstNode(AST_FUNC_CALL);
             parser_stats.nodes_created++;
@@ -784,7 +788,7 @@ static AstNode *parseFactor(void) {
                 AstNode *arg = parseExpression();
                 funcCall->funcCall.argCount++;
                 funcCall->funcCall.arguments = memory_realloc(funcCall->funcCall.arguments,
-                                                            funcCall->funcCall.argCount * sizeof(AstNode *));
+                                                              funcCall->funcCall.argCount * sizeof(AstNode *));
                 funcCall->funcCall.arguments[funcCall->funcCall.argCount - 1] = arg;
                 
                 if (currentToken.type == TOKEN_COMMA)
@@ -795,13 +799,10 @@ static AstNode *parseFactor(void) {
             
             advanceToken(); // consume ')'
             
-            // Check if this is a curry sequence by looking for another '('
             if (currentToken.type == TOKEN_LPAREN) {
-                // Yes, this is a curry pattern
                 return parseCurryExpression(funcCall);
             } else {
-                // Nope, just a regular function call
-                freeAstNode(node); // Free the identifier node
+                freeAstNode(node);
                 return funcCall;
             }
         } else {
@@ -818,14 +819,10 @@ static AstNode *parseFactor(void) {
     } else if (currentToken.type == TOKEN_TRUE || currentToken.type == TOKEN_FALSE) {
         node = createAstNode(AST_BOOLEAN_LITERAL);
         parser_stats.nodes_created++;
-        
         node->boolLiteral.value = (currentToken.type == TOKEN_TRUE);
-        
         if (debug_level >= 3) {
-            logger_log(LOG_DEBUG, "Created boolean literal: %s", 
-                      node->boolLiteral.value ? "true" : "false");
+            logger_log(LOG_DEBUG, "Created boolean literal: %s", node->boolLiteral.value ? "true" : "false");
         }
-        
         advanceToken();
     } else {
         parserError("Unexpected token in expression", currentToken);
@@ -844,36 +841,27 @@ static AstNode* parseCurryExpression(AstNode* baseFunc) {
         logger_log(LOG_DEBUG, "Parsing curried function call");
     }
     
-    // Create curry node with the base function
     AstNode* curryNode = createAstNode(AST_CURRY_EXPR);
     parser_stats.nodes_created++;
     
     curryNode->curryExpr.baseFunc = baseFunc;
     
-    // Function to determine total argument count expected by base function
     int expectedArgCount = 0;
     if (baseFunc->type == AST_FUNC_CALL) {
-        // For now we'll use a placeholder value - in a real implementation
-        // we'd look up the function's signature in the symbol table
-        expectedArgCount = 2; // Just an example
+        expectedArgCount = 2;
     }
     
     curryNode->curryExpr.totalArgCount = expectedArgCount;
-    
-    // Parse the applied argument lists for currying
     curryNode->curryExpr.appliedArgs = NULL;
     curryNode->curryExpr.appliedCount = 0;
     
-    // We start by considering the arguments already applied in the base function
     if (baseFunc->type == AST_FUNC_CALL) {
         curryNode->curryExpr.appliedCount = baseFunc->funcCall.argCount;
     }
     
-    // Parse additional argument applications (the curry part)
     while (currentToken.type == TOKEN_LPAREN) {
         advanceToken(); // consume '('
         
-        // Parse arguments in this parenthesis group
         AstNode** newArgs = NULL;
         int newArgCount = 0;
         
@@ -891,7 +879,6 @@ static AstNode* parseCurryExpression(AstNode* baseFunc) {
         
         advanceToken(); // consume ')'
         
-        // Add these arguments to the curry node's applied arguments
         int oldCount = curryNode->curryExpr.appliedCount;
         curryNode->curryExpr.appliedCount += newArgCount;
         curryNode->curryExpr.appliedArgs = memory_realloc(curryNode->curryExpr.appliedArgs,
@@ -901,7 +888,7 @@ static AstNode* parseCurryExpression(AstNode* baseFunc) {
             curryNode->curryExpr.appliedArgs[oldCount + i] = newArgs[i];
         }
         
-        free(newArgs); // Free the temporary array
+        free(newArgs);
     }
     
     if (debug_level >= 2) {
@@ -997,7 +984,6 @@ static AstNode *parseClassDef(void) {
     strncpy(classNode->classDef.name, currentToken.lexeme, sizeof(classNode->classDef.name));
     advanceToken();
     
-    // Handle inheritance
     if (currentToken.type == TOKEN_COLON) {
         advanceToken();
         if (currentToken.type != TOKEN_IDENTIFIER)
@@ -1023,7 +1009,7 @@ static AstNode *parseClassDef(void) {
     return classNode;
 }
 
-/* parseLambda: ( <paramName> : <paramType> [, <paramName> : <paramType> ... ] ) -> <returnType> => <bodyExpr> */
+/* parseLambda: ( paramName : paramType, ... ) -> returnType => bodyExpr */
 static AstNode *parseLambda(void) {
     advanceToken();
     AstNode **parameters = NULL;
@@ -1122,17 +1108,14 @@ static AstNode* parseModuleDecl(void) {
     
     advanceToken(); // consume module name
     
-    // Parse module body
     moduleNode->moduleDecl.declarations = NULL;
     moduleNode->moduleDecl.declarationCount = 0;
     
     while (currentToken.type != TOKEN_END) {
         AstNode* decl = parseStatement();
         moduleNode->moduleDecl.declarationCount++;
-        moduleNode->moduleDecl.declarations = memory_realloc(
-            moduleNode->moduleDecl.declarations,
-            moduleNode->moduleDecl.declarationCount * sizeof(AstNode*)
-        );
+        moduleNode->moduleDecl.declarations = memory_realloc(moduleNode->moduleDecl.declarations,
+            moduleNode->moduleDecl.declarationCount * sizeof(AstNode*));
         moduleNode->moduleDecl.declarations[moduleNode->moduleDecl.declarationCount - 1] = decl;
     }
     
@@ -1166,11 +1149,9 @@ static AstNode *parseWhileStmt(void) {
     
     while (currentToken.type != TOKEN_END && currentToken.type != TOKEN_EOF) {
         AstNode *stmt = parseStatement();
-        
         bodyCount++;
         body = realloc(body, bodyCount * sizeof(AstNode*));
         body[bodyCount - 1] = stmt;
-        
         skipStatementSeparators();
     }
     
@@ -1196,11 +1177,9 @@ static AstNode *parseDoWhileStmt(void) {
     
     while (currentToken.type != TOKEN_WHILE && currentToken.type != TOKEN_EOF) {
         AstNode *stmt = parseStatement();
-        
         bodyCount++;
         body = realloc(body, bodyCount * sizeof(AstNode*));
         body[bodyCount - 1] = stmt;
-        
         skipStatementSeparators();
     }
     
@@ -1222,7 +1201,7 @@ static AstNode *parseDoWhileStmt(void) {
     return doWhileNode;
 }
 
-/* parseSwitchStmt: switch expression case expr ... case expr ... [default ...] end */
+/* parseSwitchStmt: switch expression case expr ... [default ...] end */
 static AstNode *parseSwitchStmt(void) {
     advanceToken(); // consume 'switch'
     AstNode *expr = parseExpression();
@@ -1237,55 +1216,41 @@ static AstNode *parseSwitchStmt(void) {
     while (currentToken.type == TOKEN_CASE || currentToken.type == TOKEN_DEFAULT) {
         if (currentToken.type == TOKEN_CASE) {
             advanceToken(); // consume 'case'
-            
             AstNode *caseExpr = parseExpression();
-            
             if (currentToken.type == TOKEN_COLON)
-                advanceToken(); // optional colon
-                
+                advanceToken();
             skipStatementSeparators();
-            
             AstNode **caseBody = NULL;
             int caseBodyCount = 0;
-            
             while (currentToken.type != TOKEN_CASE && 
                    currentToken.type != TOKEN_DEFAULT && 
                    currentToken.type != TOKEN_END && 
                    currentToken.type != TOKEN_EOF) {
                 AstNode *stmt = parseStatement();
-                
                 caseBodyCount++;
                 caseBody = realloc(caseBody, caseBodyCount * sizeof(AstNode*));
                 caseBody[caseBodyCount - 1] = stmt;
-                
                 skipStatementSeparators();
             }
-            
             AstNode *caseNode = createAstNode(AST_CASE_STMT);
             caseNode->caseStmt.expr = caseExpr;
             caseNode->caseStmt.body = caseBody;
             caseNode->caseStmt.bodyCount = caseBodyCount;
-            
             caseCount++;
             cases = realloc(cases, caseCount * sizeof(AstNode*));
             cases[caseCount - 1] = caseNode;
-        } else { // default case
+        } else {
             advanceToken(); // consume 'default'
-            
             if (currentToken.type == TOKEN_COLON)
-                advanceToken(); // optional colon
-                
+                advanceToken();
             skipStatementSeparators();
-            
             while (currentToken.type != TOKEN_CASE && 
                    currentToken.type != TOKEN_END && 
                    currentToken.type != TOKEN_EOF) {
                 AstNode *stmt = parseStatement();
-                
                 defaultCaseCount++;
                 defaultCase = realloc(defaultCase, defaultCaseCount * sizeof(AstNode*));
                 defaultCase[defaultCaseCount - 1] = stmt;
-                
                 skipStatementSeparators();
             }
         }
@@ -1324,11 +1289,9 @@ static AstNode *parseTryCatchStmt(void) {
            currentToken.type != TOKEN_END && 
            currentToken.type != TOKEN_EOF) {
         AstNode *stmt = parseStatement();
-        
         tryCount++;
         tryBody = realloc(tryBody, tryCount * sizeof(AstNode*));
         tryBody[tryCount - 1] = stmt;
-        
         skipStatementSeparators();
     }
     
@@ -1338,24 +1301,18 @@ static AstNode *parseTryCatchStmt(void) {
     
     if (currentToken.type == TOKEN_CATCH) {
         advanceToken(); // consume 'catch'
-        
-        // Check if there's an error variable name provided
         if (currentToken.type == TOKEN_IDENTIFIER) {
             strncpy(errorVarName, currentToken.lexeme, sizeof(errorVarName) - 1);
-            advanceToken(); // consume error variable name
+            advanceToken();
         }
-        
         skipStatementSeparators();
-        
         while (currentToken.type != TOKEN_FINALLY && 
                currentToken.type != TOKEN_END && 
                currentToken.type != TOKEN_EOF) {
             AstNode *stmt = parseStatement();
-            
             catchCount++;
             catchBody = realloc(catchBody, catchCount * sizeof(AstNode*));
             catchBody[catchCount - 1] = stmt;
-            
             skipStatementSeparators();
         }
     }
@@ -1366,14 +1323,11 @@ static AstNode *parseTryCatchStmt(void) {
     if (currentToken.type == TOKEN_FINALLY) {
         advanceToken(); // consume 'finally'
         skipStatementSeparators();
-        
         while (currentToken.type != TOKEN_END && currentToken.type != TOKEN_EOF) {
             AstNode *stmt = parseStatement();
-            
             finallyCount++;
             finallyBody = realloc(finallyBody, finallyCount * sizeof(AstNode*));
             finallyBody[finallyCount - 1] = stmt;
-            
             skipStatementSeparators();
         }
     }
@@ -1405,7 +1359,7 @@ static AstNode *parseThrowStmt(void) {
     return throwNode;
 }
 
-/* parsePatternMatch: match expr when pattern => body [when pattern => body]* [otherwise => body] end */
+/* parsePatternMatch: match expr when pattern => body ... [otherwise => body] end */
 static AstNode* parsePatternMatch(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)parsePatternMatch);
     
@@ -1418,20 +1372,16 @@ static AstNode* parsePatternMatch(void) {
     AstNode* matchNode = createAstNode(AST_PATTERN_MATCH);
     parser_stats.nodes_created++;
     
-    // Parse the expression to match against
     matchNode->patternMatch.expr = parseExpression();
     skipStatementSeparators();
     
-    // Initialize case array
     matchNode->patternMatch.cases = NULL;
     matchNode->patternMatch.caseCount = 0;
     matchNode->patternMatch.otherwise = NULL;
     
-    // Parse when patterns
     while (currentToken.type == TOKEN_WHEN) {
         advanceToken(); // consume 'when'
         
-        // Parse pattern
         AstNode* pattern = parseExpression();
         
         if (currentToken.type != TOKEN_FAT_ARROW) {
@@ -1439,7 +1389,6 @@ static AstNode* parsePatternMatch(void) {
         }
         advanceToken(); // consume '=>'
         
-        // Parse body statements until next 'when', 'otherwise', or 'end'
         AstNode** body = NULL;
         int bodyCount = 0;
         
@@ -1453,7 +1402,6 @@ static AstNode* parsePatternMatch(void) {
             skipStatementSeparators();
         }
         
-        // Create pattern case node
         AstNode* caseNode = createAstNode(AST_PATTERN_CASE);
         parser_stats.nodes_created++;
         
@@ -1461,7 +1409,6 @@ static AstNode* parsePatternMatch(void) {
         caseNode->patternCase.body = body;
         caseNode->patternCase.bodyCount = bodyCount;
         
-        // Add to cases array
         matchNode->patternMatch.caseCount++;
         matchNode->patternMatch.cases = memory_realloc(matchNode->patternMatch.cases, 
                                                      matchNode->patternMatch.caseCount * sizeof(AstNode*));
@@ -1472,7 +1419,6 @@ static AstNode* parsePatternMatch(void) {
         }
     }
     
-    // Parse otherwise case if present
     if (currentToken.type == TOKEN_OTHERWISE) {
         advanceToken(); // consume 'otherwise'
         
@@ -1481,7 +1427,6 @@ static AstNode* parsePatternMatch(void) {
         }
         advanceToken(); // consume '=>'
         
-        // Parse body statements until 'end'
         AstNode** body = NULL;
         int bodyCount = 0;
         
@@ -1492,11 +1437,9 @@ static AstNode* parsePatternMatch(void) {
             skipStatementSeparators();
         }
         
-        // Create otherwise case node
         AstNode* otherwiseNode = createAstNode(AST_PATTERN_CASE);
         parser_stats.nodes_created++;
         
-        // Create a wildcard pattern (represented as NULL for now)
         otherwiseNode->patternCase.pattern = NULL;
         otherwiseNode->patternCase.body = body;
         otherwiseNode->patternCase.bodyCount = bodyCount;
@@ -1644,10 +1587,8 @@ static AstNode *parseReturn(void) {
     AstNode *node = createAstNode(AST_RETURN_STMT);
     if (!node) return NULL;
 
-    // Skip 'return' keyword
-    nextToken();
+    nextToken(); // Skip 'return'
     
-    // Parse return expression if exists
     if (currentToken.type != TOKEN_SEMICOLON) {
         node->returnStmt.expr = parseExpression();
     } else {
@@ -1662,16 +1603,14 @@ static AstNode *parseReturn(void) {
 static AstNode *parseIfStmt(void) {
     advanceToken(); // consume 'if'
     
-    // We'll make parentheses optional instead of required
     AstNode *condition;
     if (currentToken.type == TOKEN_LPAREN) {
-        advanceToken(); // consume '('
+        advanceToken();
         condition = parseExpression();
         if (currentToken.type != TOKEN_RPAREN)
             parserError("Expected ')' after if condition", currentToken);
-        advanceToken(); // consume ')'
+        advanceToken();
     } else {
-        // Allow for condition without parentheses
         condition = parseExpression();
     }
     
@@ -1693,9 +1632,8 @@ static AstNode *parseIfStmt(void) {
     int elseCount = 0;
     
     if (currentToken.type == TOKEN_ELSE) {
-        advanceToken(); // consume 'else'
+        advanceToken();
         skipStatementSeparators();
-        
         while (currentToken.type != TOKEN_END && currentToken.type != TOKEN_EOF) {
             AstNode *stmt = parseStatement();
             elseBranch = memory_realloc(elseBranch, (elseCount + 1) * sizeof(AstNode *));
@@ -1706,7 +1644,7 @@ static AstNode *parseIfStmt(void) {
     
     if (currentToken.type != TOKEN_END)
         parserError("Expected 'end' to close if statement", currentToken);
-    advanceToken(); // consume 'end'
+    advanceToken();
     
     AstNode *ifNode = createAstNode(AST_IF_STMT);
     ifNode->ifStmt.condition = condition;
@@ -1748,7 +1686,6 @@ static AstNode *parseForStmt(void) {
         advanceToken();
         rangeEnd = parseExpression();
     } else {
-        // If only one argument, treat it as end value and use 0 as start
         AstNode *zeroNode = createAstNode(AST_NUMBER_LITERAL);
         zeroNode->numberLiteral.value = 0;
         rangeEnd = rangeStart;
@@ -1766,11 +1703,9 @@ static AstNode *parseForStmt(void) {
     
     while (currentToken.type != TOKEN_END && currentToken.type != TOKEN_EOF) {
         AstNode *stmt = parseStatement();
-        
         bodyCount++;
         body = realloc(body, bodyCount * sizeof(AstNode*));
         body[bodyCount - 1] = stmt;
-        
         skipStatementSeparators();
     }
     
@@ -1788,7 +1723,7 @@ static AstNode *parseForStmt(void) {
     return forNode;
 }
 
-// Implementar las funciones auxiliares que faltan
+// Funciones auxiliares: nextToken, expectToken, parseBlock
 void nextToken(void) {
     currentToken = getNextToken();
 }
@@ -1817,3 +1752,9 @@ AstNode** parseBlock(int* count) {
     
     return statements;
 }
+
+void parser_set_debug_level(int level) {
+    debug_level = level;
+}
+
+// Fin del parser.c

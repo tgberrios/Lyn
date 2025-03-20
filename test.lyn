@@ -130,5 +130,19 @@ main
     print("Calling advised function:")
     test_function()  // Make sure this is actually calling the function
     
+    // ===================================================================
+    // Class and Object Test
+    // ===================================================================
+    
+    print("\n=== Class and Object Test ===")
+    
+    class Car;
+        brand = "Toyota"
+        print("Creating a Car with brand = " + brand)
+    end
+
+    var myCar = new Car()
+    print("Car instance created.")
+    
     print("\n=== Test completed successfully! ===")
 end

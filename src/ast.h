@@ -2,7 +2,7 @@
 #define AST_H
 
 #include <stddef.h>  // Para size_t
-#include <stdbool.h> // Para bool - añadido para resolver el error
+#include <stdbool.h> // Para bool
 
 // Forward declarations
 struct Type;
@@ -16,7 +16,7 @@ typedef enum {
     AST_VAR_DECL,
     AST_IMPORT,
     AST_MODULE_DECL,
-    AST_ASPECT_DEF,
+    AST_ASPECT_DEF,    // Se agregó para definir aspectos
     
     // Sentencias
     AST_BLOCK,
@@ -49,6 +49,8 @@ typedef enum {
     AST_LAMBDA,
     AST_FUNC_COMPOSE,
     AST_CURRY_EXPR,
+    AST_NEW_EXPR,     // Nodo para instanciación de objetos (new)
+    AST_THIS_EXPR,    // Nodo para la palabra clave "this"
     
     // Para programación orientada a aspectos
     AST_POINTCUT,
@@ -117,6 +119,15 @@ typedef struct AstNode {
             struct AstNode** declarations;
             int declarationCount;
         } moduleDecl;
+        
+        // AST_ASPECT_DEF
+        struct {
+            char name[256];
+            struct AstNode** pointcuts;
+            int pointcutCount;
+            struct AstNode** advice;
+            int adviceCount;
+        } aspectDef;
         
         // AST_BLOCK
         struct {
@@ -284,7 +295,7 @@ typedef struct AstNode {
             char returnType[64];
             struct AstNode* body;
         } lambda;
-
+        
         // AST_FUNC_COMPOSE
         struct {
             struct AstNode* left;
@@ -299,14 +310,17 @@ typedef struct AstNode {
             int totalArgCount;
         } curryExpr;
         
-        // AST_ASPECT_DEF
+        // AST_NEW_EXPR (nueva: instanciación de objetos)
         struct {
-            char name[256];
-            struct AstNode** pointcuts;
-            int pointcutCount;
-            struct AstNode** advice;
-            int adviceCount;
-        } aspectDef;
+            char className[256];
+            struct AstNode** arguments;
+            int argCount;
+        } newExpr;
+        
+        // AST_THIS_EXPR (nueva: referencia a la instancia actual)
+        struct {
+            // No se requieren campos adicionales para 'this'
+        } thisExpr;
         
         // AST_POINTCUT
         struct {
@@ -316,7 +330,7 @@ typedef struct AstNode {
         
         // AST_ADVICE
         struct {
-            AdviceType type;  // Cambiado de int a AdviceType
+            AdviceType type;
             char pointcutName[256];
             struct AstNode** body;
             int bodyCount;

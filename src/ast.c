@@ -61,8 +61,6 @@ AstStats ast_get_stats(void) {
     return stats;
 }
 
-// Eliminamos el stub para report_error ya que usaremos error_report directamente
-
 AstNode* createAstNode(AstNodeType type) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)createAstNode);
     
@@ -93,100 +91,74 @@ static bool hasAllocatedMemory(AstNode* node) {
     switch (node->type) {
         case AST_PROGRAM:
             return node->program.statements != NULL;
-            
         case AST_FUNC_DEF:
             return node->funcDef.parameters != NULL || node->funcDef.body != NULL;
-            
         case AST_CLASS_DEF:
             return node->classDef.members != NULL;
-            
         case AST_MODULE_DECL:
             return node->moduleDecl.declarations != NULL;
-            
         case AST_BLOCK:
             return node->block.statements != NULL;
-            
         case AST_IF_STMT:
             return node->ifStmt.thenBranch != NULL || node->ifStmt.elseBranch != NULL;
-            
         case AST_FOR_STMT:
             return node->forStmt.body != NULL;
-            
         case AST_WHILE_STMT:
         case AST_DO_WHILE_STMT:
             return node->whileStmt.body != NULL;
-            
         case AST_SWITCH_STMT:
             return node->switchStmt.cases != NULL || node->switchStmt.defaultCase != NULL;
-            
         case AST_CASE_STMT:
             return node->caseStmt.body != NULL;
-            
         case AST_TRY_CATCH_STMT:
             return node->tryCatchStmt.tryBody != NULL || 
                    node->tryCatchStmt.catchBody != NULL || 
                    node->tryCatchStmt.finallyBody != NULL;
-            
         case AST_ARRAY_LITERAL:
             return node->arrayLiteral.elements != NULL;
-            
         case AST_FUNC_CALL:
             return node->funcCall.arguments != NULL;
-            
         case AST_LAMBDA:
             return node->lambda.parameters != NULL;
-            
         case AST_CURRY_EXPR:
             return node->curryExpr.appliedArgs != NULL;
-            
         case AST_ASPECT_DEF:
-            return node->aspectDef.pointcuts != NULL || node->aspectDef.advice != NULL;
-            
+            return true; // Se asume que la memoria se asigna en los arrays pointcuts/advice
         case AST_ADVICE:
             return node->advice.body != NULL;
-            
         case AST_PATTERN_MATCH:
             return node->patternMatch.cases != NULL;
-            
         case AST_PATTERN_CASE:
             return node->patternCase.body != NULL;
-            
         default:
             return false;
     }
 }
 
-// Fix the bug in freeAstNode function to handle null pointers properly
+// Función para liberar un nodo AST y todos sus hijos
 void freeAstNode(AstNode* node) {
     if (!node) return;
     
-    // Add stricter pointer validation with additional checks
     uintptr_t node_addr = (uintptr_t)node;
-    
-    // Check for common invalid address patterns
     if (node_addr < 0x1000 || 
         node_addr > (uintptr_t)0x7fffffffffffffff ||
-        (node_addr & 0x7) != 0 ||  // Check alignment (pointers should be 8-byte aligned)
-        (node_addr >= 0x2000000000 && node_addr <= 0x20ffffffffff) ||  // Detect pattern in corrupted pointers
-        node_addr == 0x200a202020202020 ||  // Specific bad address we've seen
-        node_addr == 0x200a3b2928746e69) {  // Another bad address we've seen
+        (node_addr & 0x7) != 0 ||
+        (node_addr >= 0x2000000000 && node_addr <= 0x20ffffffffff) ||
+        node_addr == 0x200a202020202020 ||
+        node_addr == 0x200a3b2928746e69) {
         logger_log(LOG_WARNING, "Skipping invalid AST node address %p", (void*)node);
         return;
     }
     
-    // Additional validation - try to safely access the type field
-    // This is a cautious approach to avoid dereferencing bad pointers
     AstNodeType type;
     if (!memcpy(&type, &node->type, sizeof(AstNodeType)) || 
-        (type < AST_PROGRAM || type > AST_BREAK_STMT)) {  // Updated to include new types
+        (type < AST_PROGRAM || type > AST_PATTERN_CASE)) {
         logger_log(LOG_WARNING, "Detected invalid node type %d at address %p", type, (void*)node);
         return;
     }
     
-    // Debug tracking
     error_push_debug(__func__, __FILE__, __LINE__, (void*)freeAstNode);
     
-    // Now we can proceed with the normal cleanup
     switch (node->type) {
         case AST_PROGRAM:
             for (int i = 0; i < node->program.statementCount; i++) {
@@ -261,6 +233,9 @@ void freeAstNode(AstNode* node) {
             freeAstNode(node->binaryOp.left);
             freeAstNode(node->binaryOp.right);
             break;
+        case AST_UNARY_OP:
+            freeAstNode(node->unaryOp.expr);
+            break;
         case AST_FUNC_CALL:
             if (node->funcCall.arguments) {
                 for (int i = 0; i < node->funcCall.argCount; i++) {
@@ -270,10 +245,9 @@ void freeAstNode(AstNode* node) {
             }
             break;
         case AST_MEMBER_ACCESS:
-            // Fix the Circle issue - make sure we check if object exists
             if (node->memberAccess.object) {
                 freeAstNode(node->memberAccess.object);
-                node->memberAccess.object = NULL; // Prevent double-free
+                node->memberAccess.object = NULL;
             }
             break;
         case AST_PRINT_STMT:
@@ -323,7 +297,6 @@ void freeAstNode(AstNode* node) {
                 free(node->doWhileStmt.body);
             }
             break;
-        
         case AST_SWITCH_STMT:
             freeAstNode(node->switchStmt.expr);
             if (node->switchStmt.cases) {
@@ -339,7 +312,6 @@ void freeAstNode(AstNode* node) {
                 free(node->switchStmt.defaultCase);
             }
             break;
-        
         case AST_CASE_STMT:
             freeAstNode(node->caseStmt.expr);
             if (node->caseStmt.body) {
@@ -349,7 +321,6 @@ void freeAstNode(AstNode* node) {
                 free(node->caseStmt.body);
             }
             break;
-        
         case AST_TRY_CATCH_STMT:
             if (node->tryCatchStmt.tryBody) {
                 for (int i = 0; i < node->tryCatchStmt.tryCount; i++) {
@@ -370,15 +341,13 @@ void freeAstNode(AstNode* node) {
                 free(node->tryCatchStmt.finallyBody);
             }
             break;
-        
         case AST_THROW_STMT:
             freeAstNode(node->throwStmt.expr);
             break;
-        
         case AST_BREAK_STMT:
-            // No additional fields to free
             break;
-            
+        case AST_CONTINUE_STMT:
+            break;
         case AST_CURRY_EXPR:
             freeAstNode(node->curryExpr.baseFunc);
             if (node->curryExpr.appliedArgs) {
@@ -388,7 +357,45 @@ void freeAstNode(AstNode* node) {
                 free(node->curryExpr.appliedArgs);
             }
             break;
-            
+        case AST_NEW_EXPR:
+            if (node->newExpr.arguments) {
+                for (int i = 0; i < node->newExpr.argCount; i++) {
+                    freeAstNode(node->newExpr.arguments[i]);
+                }
+                free(node->newExpr.arguments);
+            }
+            break;
+        case AST_THIS_EXPR:
+            // No hay campos dinámicos para liberar en 'this'
+            break;
+        case AST_FUNC_COMPOSE:
+            freeAstNode(node->funcCompose.left);
+            freeAstNode(node->funcCompose.right);
+            break;
+        case AST_POINTCUT:
+            break;
+        case AST_ADVICE:
+            if (node->advice.body) {
+                for (int i = 0; i < node->advice.bodyCount; i++) {
+                    freeAstNode(node->advice.body[i]);
+                }
+                free(node->advice.body);
+            }
+            break;
+        case AST_ASPECT_DEF:
+            if (node->aspectDef.pointcuts) {
+                for (int i = 0; i < node->aspectDef.pointcutCount; i++) {
+                    freeAstNode(node->aspectDef.pointcuts[i]);
+                }
+                free(node->aspectDef.pointcuts);
+            }
+            if (node->aspectDef.advice) {
+                for (int i = 0; i < node->aspectDef.adviceCount; i++) {
+                    freeAstNode(node->aspectDef.advice[i]);
+                }
+                free(node->aspectDef.advice);
+            }
+            break;
         case AST_PATTERN_MATCH:
             freeAstNode(node->patternMatch.expr);
             if (node->patternMatch.cases) {
@@ -401,7 +408,6 @@ void freeAstNode(AstNode* node) {
                 freeAstNode(node->patternMatch.otherwise);
             }
             break;
-            
         case AST_PATTERN_CASE:
             freeAstNode(node->patternCase.pattern);
             if (node->patternCase.body) {
@@ -411,12 +417,6 @@ void freeAstNode(AstNode* node) {
                 free(node->patternCase.body);
             }
             break;
-        
-        case AST_FUNC_COMPOSE:
-            freeAstNode(node->funcCompose.left);
-            freeAstNode(node->funcCompose.right);
-            break;
-            
         default:
             break;
     }
@@ -457,17 +457,14 @@ void printAst(AstNode* node, int indent) {
     
     if (!node) return;
     
-    // Calcular la profundidad máxima (para estadísticas)
     if (indent > stats.max_depth) {
         stats.max_depth = indent;
     }
     
-    // Imprimir sangría
     for (int i = 0; i < indent; i++) {
         printf("  ");
     }
     
-    // Imprimir información del nodo según su tipo
     const char* typeStr = astNodeTypeToString(node->type);
     
     switch (node->type) {
@@ -477,20 +474,16 @@ void printAst(AstNode* node, int indent) {
                 printAst(node->program.statements[i], indent + 1);
             }
             break;
-            
         case AST_FUNC_DEF:
             printf("FuncDef: '%s' (%d params, %d statements)\n", 
                   node->funcDef.name, node->funcDef.paramCount, node->funcDef.bodyCount);
-            // Imprimir parámetros
             for (int i = 0; i < node->funcDef.paramCount; i++) {
                 printAst(node->funcDef.parameters[i], indent + 1);
             }
-            // Imprimir cuerpo
             for (int i = 0; i < node->funcDef.bodyCount; i++) {
                 printAst(node->funcDef.body[i], indent + 1);
             }
             break;
-            
         case AST_CLASS_DEF:
             if (strlen(node->classDef.baseClassName) > 0) {
                 printf("ClassDef: '%s' extends '%s' (%d members)\n", 
@@ -499,91 +492,131 @@ void printAst(AstNode* node, int indent) {
                 printf("ClassDef: '%s' (%d members)\n", 
                       node->classDef.name, node->classDef.memberCount);
             }
-            // Imprimir miembros
             for (int i = 0; i < node->classDef.memberCount; i++) {
                 printAst(node->classDef.members[i], indent + 1);
             }
             break;
-            
         case AST_VAR_DECL:
             printf("VarDecl: '%s' type:'%s'\n", node->varDecl.name, node->varDecl.type);
             if (node->varDecl.initializer) {
                 printAst(node->varDecl.initializer, indent + 1);
             }
             break;
-            
         case AST_VAR_ASSIGN:
             printf("VarAssign: '%s'\n", node->varAssign.name);
             if (node->varAssign.initializer) {
                 printAst(node->varAssign.initializer, indent + 1);
             }
             break;
-            
         case AST_PRINT_STMT:
             printf("PrintStmt:\n");
             if (node->printStmt.expr) {
                 printAst(node->printStmt.expr, indent + 1);
             }
             break;
-            
         case AST_RETURN_STMT:
             printf("ReturnStmt:\n");
             if (node->returnStmt.expr) {
                 printAst(node->returnStmt.expr, indent + 1);
             }
             break;
-            
         case AST_BREAK_STMT:
             printf("BreakStmt\n");
             break;
-            
         case AST_CONTINUE_STMT:
             printf("ContinueStmt\n");
             break;
-            
         case AST_NUMBER_LITERAL:
             printf("NumberLiteral: %g\n", node->numberLiteral.value);
             break;
-            
         case AST_STRING_LITERAL:
             printf("StringLiteral: \"%s\"\n", node->stringLiteral.value);
             break;
-            
         case AST_BOOLEAN_LITERAL:
             printf("BooleanLiteral: %s\n", node->boolLiteral.value ? "true" : "false");
             break;
-            
         case AST_NULL_LITERAL:
             printf("NullLiteral\n");
             break;
-            
         case AST_IDENTIFIER:
             printf("Identifier: %s\n", node->identifier.name);
             break;
-            
         case AST_BINARY_OP:
             printf("BinaryOp: '%c'\n", node->binaryOp.op);
             printAst(node->binaryOp.left, indent + 1);
             printAst(node->binaryOp.right, indent + 1);
             break;
-            
         case AST_UNARY_OP:
             printf("UnaryOp: '%c'\n", node->unaryOp.op);
             printAst(node->unaryOp.expr, indent + 1);
             break;
-            
         case AST_FUNC_CALL:
             printf("FuncCall: '%s' (%d args)\n", node->funcCall.name, node->funcCall.argCount);
             for (int i = 0; i < node->funcCall.argCount; i++) {
                 printAst(node->funcCall.arguments[i], indent + 1);
             }
             break;
-            
         case AST_MEMBER_ACCESS:
             printf("MemberAccess: .%s\n", node->memberAccess.member);
             printAst(node->memberAccess.object, indent + 1);
             break;
-            
+        case AST_NEW_EXPR:
+            printf("NewExpr: new %s (%d args)\n", node->newExpr.className, node->newExpr.argCount);
+            for (int i = 0; i < node->newExpr.argCount; i++) {
+                printAst(node->newExpr.arguments[i], indent + 1);
+            }
+            break;
+        case AST_THIS_EXPR:
+            printf("ThisExpr\n");
+            break;
+        case AST_FUNC_COMPOSE:
+            printf("FuncCompose:\n");
+            printAst(node->funcCompose.left, indent + 1);
+            printAst(node->funcCompose.right, indent + 1);
+            break;
+        case AST_CURRY_EXPR:
+            printf("CurryExpr: applied %d/%d\n", node->curryExpr.appliedCount, node->curryExpr.totalArgCount);
+            printAst(node->curryExpr.baseFunc, indent + 1);
+            for (int i = 0; i < node->curryExpr.appliedCount; i++) {
+                printAst(node->curryExpr.appliedArgs[i], indent + 1);
+            }
+            break;
+        case AST_POINTCUT:
+            printf("Pointcut: '%s' pattern:'%s'\n", node->pointcut.name, node->pointcut.pattern);
+            break;
+        case AST_ADVICE:
+            printf("Advice: type %d on pointcut '%s' (%d statements)\n", node->advice.type, node->advice.pointcutName, node->advice.bodyCount);
+            for (int i = 0; i < node->advice.bodyCount; i++) {
+                printAst(node->advice.body[i], indent + 1);
+            }
+            break;
+        case AST_ASPECT_DEF:
+            printf("AspectDef: '%s' (%d pointcuts, %d advices)\n", node->aspectDef.name, node->aspectDef.pointcutCount, node->aspectDef.adviceCount);
+            for (int i = 0; i < node->aspectDef.pointcutCount; i++) {
+                printAst(node->aspectDef.pointcuts[i], indent + 1);
+            }
+            for (int i = 0; i < node->aspectDef.adviceCount; i++) {
+                printAst(node->aspectDef.advice[i], indent + 1);
+            }
+            break;
+        case AST_PATTERN_MATCH:
+            printf("PatternMatch:\n");
+            printAst(node->patternMatch.expr, indent + 1);
+            for (int i = 0; i < node->patternMatch.caseCount; i++) {
+                printAst(node->patternMatch.cases[i], indent + 1);
+            }
+            if (node->patternMatch.otherwise) {
+                printf("Otherwise:\n");
+                printAst(node->patternMatch.otherwise, indent + 1);
+            }
+            break;
+        case AST_PATTERN_CASE:
+            printf("PatternCase:\n");
+            printAst(node->patternCase.pattern, indent + 1);
+            for (int i = 0; i < node->patternCase.bodyCount; i++) {
+                printAst(node->patternCase.body[i], indent + 1);
+            }
+            break;
         default:
             printf("Node of type %d (%s)\n", node->type, typeStr);
             break;
@@ -602,64 +635,7 @@ AstNode* copyAstNode(AstNode* node) {
         return NULL;
     }
     
-    // Copiar todos los campos del nodo original
     memcpy(copy, node, sizeof(AstNode));
-    
-    // Para tipos específicos, debemos hacer un manejo especial para evitar problemas con punteros
-    
-    switch (node->type) {
-        case AST_STRING_LITERAL:
-            // Duplicar la cadena para evitar que ambos nodos apunten a la misma memoria
-            if (node->stringLiteral.value) {
-                // Corregido: No podemos asignar a un array, debemos usar strcpy
-                char* temp = strdup(node->stringLiteral.value);
-                if (!temp) {
-                    error_report("AST", __LINE__, 0, "Failed to allocate memory for string copy", ERROR_MEMORY);
-                    free(copy);
-                    return NULL;
-                }
-                strncpy(copy->stringLiteral.value, temp, sizeof(copy->stringLiteral.value) - 1);
-                copy->stringLiteral.value[sizeof(copy->stringLiteral.value) - 1] = '\0';
-                free(temp); // Liberamos la memoria temporal
-            }
-            break;
-            
-        case AST_IDENTIFIER:
-            // Duplicar el nombre del identificador
-            if (node->identifier.name) {
-                // Corregido: No podemos asignar a un array, debemos usar strcpy
-                char* temp = strdup(node->identifier.name);
-                if (!temp) {
-                    error_report("AST", __LINE__, 0, "Failed to allocate memory for identifier name", ERROR_MEMORY);
-                    free(copy);
-                    return NULL;
-                }
-                strncpy(copy->identifier.name, temp, sizeof(copy->identifier.name) - 1);
-                copy->identifier.name[sizeof(copy->identifier.name) - 1] = '\0';
-                free(temp); // Liberamos la memoria temporal
-            }
-            break;
-            
-        // Algunos casos particulares que requieren duplicación de memoria
-        // En una implementación completa, se duplicarían todos los punteros relevantes
-        
-        case AST_PROGRAM:
-        case AST_FUNC_DEF:
-        case AST_IF_STMT:
-        case AST_WHILE_STMT:
-        case AST_DO_WHILE_STMT:
-        case AST_FOR_STMT:
-            // Estos tipos contienen arrays de nodos que deberían ser copiados profundamente
-            // Para una copia superficial, simplemente usamos los mismos punteros
-            // NOTA: Esto puede llevar a problemas si se modifican los nodos hijo
-            // En una implementación completa, se haría una copia profunda recursiva
-            break;
-    }
-    
-    // Nota: No estamos copiando profundamente todos los hijos,
-    // solo estamos creando una copia superficial que comparte punteros
-    // con el nodo original
-    
     return copy;
 }
 
@@ -703,6 +679,8 @@ const char* astNodeTypeToString(AstNodeType type) {
         case AST_LAMBDA: return "LAMBDA";
         case AST_FUNC_COMPOSE: return "FUNC_COMPOSE";
         case AST_CURRY_EXPR: return "CURRY_EXPR";
+        case AST_NEW_EXPR: return "NEW_EXPR";
+        case AST_THIS_EXPR: return "THIS_EXPR";
         case AST_POINTCUT: return "POINTCUT";
         case AST_ADVICE: return "ADVICE";
         case AST_PATTERN_MATCH: return "PATTERN_MATCH";

@@ -41,7 +41,7 @@ void parser_get_stats(int* nodes_created, int* errors_found);
  */
 void freeAst(AstNode *root);
 
-// Agregar prototipos de las funciones internas que faltan
+// Prototipos de funciones auxiliares internas
 void nextToken(void);
 void expectToken(int tokenType);
 AstNode** parseBlock(int* count);

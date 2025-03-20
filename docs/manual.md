@@ -1047,7 +1047,7 @@ El lenguaje de programación Lyn se encuentra actualmente en una fase de desarro
 11. ✅ **Loop constructs** (while, do-while)
 12. ✅ **Aspect-oriented programming basics** (aspects, pointcuts, advice)
 
-13. ⚠️ **Classes and objects** (basic structure exists but limited functionality)
+13. ✅ **Classes and objects**
 14. ⚠️ **Function definitions and calls** (basic structure but not fully tested)
 15. ⚠️ **Type system** (basic inference but not complete)
 16. ⚠️ **For loops** (syntax exists but might have issues with complex cases)
