@@ -4,21 +4,25 @@
 #include "ast.h"
 #include <stdbool.h>
 
-// Compila el AST proporcionado a código C
-bool compileToC(AstNode* ast, const char* outputPath);
-
-// Establece el nivel de depuración para el compilador
-void compiler_set_debug_level(int level);
-
-// Obtiene estadísticas de compilación
+// Compiler statistics
 typedef struct {
     int nodes_processed;
     int functions_compiled;
     int variables_declared;
-    int errors_encountered;
+    int type_errors_detected;  // Added to track type errors
 } CompilerStats;
 
-// Obtiene estadísticas de la última compilación
+// Function to set debug level (0=none, 1=basic, 2=detailed, 3=all)
+void compiler_set_debug_level(int level);
+
+// Function to get compiler statistics
 CompilerStats compiler_get_stats(void);
 
-#endif /* COMPILER_H */
+// Main compilation function
+bool compileToC(AstNode* ast, const char* outputPath);
+
+// Type checking functions - accessible for testing
+void check_assignment_types(AstNode* node);
+void check_function_call_types(AstNode* node);
+
+#endif

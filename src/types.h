@@ -20,7 +20,9 @@ typedef enum {
     TYPE_CLASS,
     TYPE_FUNCTION,
     TYPE_LAMBDA,
-    TYPE_CURRIED     // New type for curried functions
+    TYPE_CURRIED,     // New type for curried functions
+    TYPE_OBJECT,      // Added for object type
+    TYPE_NULL         // Added for null type
 } TypeKind;
 
 // Then define the Type structure
@@ -129,5 +131,14 @@ const char* typeof_value(struct AstNode* expr);
 TypeInfo* get_type_info(Type* type);
 FieldInfo** get_fields(Type* type, int* count);
 MethodInfo** get_methods(Type* type, int* count);
+
+// Type inference functions
+Type* infer_type_from_literal(const char* literal);
+Type* infer_type_from_binary_op(Type* left, Type* right, const char* operator);
+Type* get_common_type(Type* type1, Type* type2);
+
+// Type checking functions
+bool types_are_compatible(Type* expected, Type* actual);
+const char* type_to_string(Type* type);
 
 #endif

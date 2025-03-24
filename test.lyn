@@ -1,5 +1,5 @@
 // ************************************************************************
-// * Basic Testing Script for Lyn Language
+// * Type System Testing Script for Lyn Language
 // ************************************************************************
 
 func sayHello()
@@ -24,6 +24,106 @@ main
     print(decimal)
     print("texto = ")
     print(texto)
+    
+    // ===================================================================
+    // Type System Tests
+    // ===================================================================
+    
+    print("\n=== Type System Tests ===")
+    
+    // Type inference tests
+    print("\n--- Type Inference ---")
+    
+    // Explicit type declarations
+    explicit_int: int = 42
+    explicit_float: float = 3.14
+    
+    // Inferred types
+    inferred_int = 100        // Should infer as int
+    inferred_float = 2.718    // Should infer as float
+    inferred_string = "Hello type system"  // Should infer as string
+    
+    print("Values with explicit types:")
+    print("explicit_int: ")
+    print(explicit_int)
+    print("explicit_float: ")
+    print(explicit_float)
+    
+    print("Values with inferred types:")
+    print("inferred_int: ")
+    print(inferred_int)
+    print("inferred_float: ")
+    print(inferred_float)
+    print("inferred_string: ")
+    print(inferred_string)
+    
+    // Type compatibility tests
+    print("\n--- Type Compatibility ---")
+    
+    // Valid assignments (compatible types)
+    int_to_int = entero       // int to int (same type)
+    int_to_float = entero     // int to float (int can be assigned to float)
+    
+    print("int_to_int: ")
+    print(int_to_int)
+    print("int_to_float: ")
+    print(int_to_float)
+    
+    // Mixed type operations
+    print("\n--- Mixed Type Operations ---")
+    
+    // Integer operations
+    sum_int = entero + 10
+    print("entero + 10 = ")
+    print(sum_int)
+    
+    // Float operations
+    product_float = decimal * 2
+    print("decimal * 2 = ")
+    print(product_float)
+    
+    // Mixed int and float (should promote to float)
+    mixed_result = entero + decimal
+    print("entero + decimal = ")
+    print(mixed_result)
+    
+    // Simple variables without string concatenation
+    greeting = "Hello World"  // Direct string assignment without concatenation
+    message = "The answer is 42"
+    
+    // Avoid string concatenation in print statements
+    print("String value: ")
+    print(greeting)
+    
+    // Integer concatenation with strings
+    num = 42
+    message = "The answer is: " + num
+    print(message)
+    
+    // ===================================================================
+    // Function Type Tests
+    // ===================================================================
+    
+    print("\n=== Function Type Tests ===")
+    
+    // Function with explicit return type - simplified
+    func add(a: int, b: int) -> int
+        return a + b;
+    end
+    
+    // Function that works with strings - simplified
+    func greet(name: string) -> string
+        return "Hello, " + name;  // Keep the full greeting
+    end
+    
+    // Test function calls with correct argument types
+    sum_result = add(5, 3)
+    print("add(5, 3) = ")
+    print(sum_result)
+    
+    greeting_result = greet("World")
+    print("greet result: ")
+    print(greeting_result)
     
     // ===================================================================
     // Arithmetic Operations
@@ -148,6 +248,46 @@ main
     var myCar = new Car()
     print("Car instance created.")
     print("My car brand is: " + myCar.brand)  // Use myCar to prevent unused warning
+    
+    // ===================================================================
+    // Additional Type System Tests
+    // ===================================================================
+    
+    print("\n=== Advanced Type System Tests ===")
+    
+    // Boolean operations
+    bool_val1 = true
+    bool_val2 = false
+    
+    bool_and = bool_val1 and bool_val2
+    print("true and false = ")
+    print(bool_and)
+    
+    bool_or = bool_val1 or bool_val2
+    print("true or false = ")
+    print(bool_or)
+    
+    // Comparison operations (returning boolean)
+    is_greater = 10 > 5
+    print("10 > 5 = ")
+    print(is_greater)
+    
+    is_equal = 7 == 7
+    print("7 == 7 = ")
+    print(is_equal)
+    
+    // Type conversions
+    int_val = 42
+    float_val = 3.14
+    
+    // Automatic conversion from int to float in mixed expression
+    mixed_expr = int_val + float_val
+    print("int_val + float_val = ")
+    print(mixed_expr)
+    
+    // String concatenation with numeric conversion
+    str_numeric = "The answer is: " + int_val
+    print(str_numeric)
     
     sayHello()
     

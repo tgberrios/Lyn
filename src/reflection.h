@@ -27,7 +27,7 @@ bool is_interface(Type* type);
 bool implements_interface(Type* type, Type* interface);
 
 // Reflection utilities
-char* type_to_string(Type* type);
+const char* type_to_string(Type* type);
 void print_type_info(TypeInfo* info);
 TypeInfo* get_type_info_by_name(const char* name);
 

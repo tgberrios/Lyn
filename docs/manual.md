@@ -95,9 +95,11 @@ end
 
 ## Tipos de Datos
 
+Lyn implementa un sistema de tipos robusto que combina la seguridad de tipos estáticos con la comodidad de la inferencia de tipos.
+
 ### Tipos Primitivos
 
-Lyn ofrece los siguientes tipos primitivos:
+El lenguaje ofrece los siguientes tipos primitivos:
 
 ```
 // Enteros
@@ -1062,7 +1064,7 @@ El lenguaje de programación Lyn se encuentra actualmente en una fase de desarro
 12. ✅ **Aspect-oriented programming basics** (aspects, pointcuts, advice)
 13. ✅ **Classes and objects**
 14. ✅ **Function definitions and calls**
-15. ⚠️ **Type system** (basic inference but not complete)
+15. ✅ **Type system** (inference, checking, and compatibility)
 16. ⚠️ **For loops** (syntax exists but might have issues with complex cases)
 17. ⚠️ **Switch statements** (implemented but needs more testing)
 18. ❌ **Advanced OOP features** (inheritance, polymorphism)

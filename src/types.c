@@ -1318,3 +1318,209 @@ const char* typeof_value(AstNode* expr) {
             return "unknown";
     }
 }
+
+// New implementation for type inference from literals
+Type* infer_type_from_literal(const char* literal) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)infer_type_from_literal);
+    
+    if (literal == NULL) {
+        logger_log(LOG_WARNING, "Null literal in type inference");
+        return create_primitive_type(TYPE_UNKNOWN);
+    }
+    
+    // Check if it's a string literal
+    if (literal[0] == '"' || literal[0] == '\'') {
+        logger_log(LOG_DEBUG, "Inferred string type for literal: %s", literal);
+        return create_primitive_type(TYPE_STRING);
+    }
+    
+    // Check if it's a boolean
+    if (strcmp(literal, "true") == 0 || strcmp(literal, "false") == 0) {
+        logger_log(LOG_DEBUG, "Inferred boolean type for literal: %s", literal);
+        return create_primitive_type(TYPE_BOOL);
+    }
+    
+    // Check if it's a number
+    bool has_decimal = false;
+    bool is_valid_number = true;
+    bool first_char = true;
+    
+    for (int i = 0; literal[i] != '\0'; i++) {
+        if (first_char && literal[i] == '-') {
+            // Negative sign is OK as first character
+            first_char = false;
+            continue;
+        }
+        
+        first_char = false;
+        
+        if (literal[i] == '.') {
+            if (has_decimal) {
+                // Second decimal point is invalid
+                is_valid_number = false;
+                break;
+            }
+            has_decimal = true;
+        } else if (literal[i] < '0' || literal[i] > '9') {
+            // Non-digit character (excluding decimal point)
+            is_valid_number = false;
+            break;
+        }
+    }
+    
+    if (is_valid_number) {
+        if (has_decimal) {
+            logger_log(LOG_DEBUG, "Inferred float type for literal: %s", literal);
+            return create_primitive_type(TYPE_FLOAT);
+        } else {
+            logger_log(LOG_DEBUG, "Inferred int type for literal: %s", literal);
+            return create_primitive_type(TYPE_INT);
+        }
+    }
+    
+    // If we've reached here, the literal doesn't match any known type pattern
+    logger_log(LOG_WARNING, "Unable to infer type for literal: %s", literal);
+    return create_primitive_type(TYPE_UNKNOWN);
+}
+
+// Implementation for type inference from binary operations
+Type* infer_type_from_binary_op(Type* left, Type* right, const char* operator) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)infer_type_from_binary_op);
+    
+    if (!left || !right) {
+        logger_log(LOG_WARNING, "Null type in binary operation inference");
+        return create_primitive_type(TYPE_UNKNOWN);
+    }
+    
+    if (strcmp(operator, "+") == 0) {
+        // String concatenation
+        if (left->kind == TYPE_STRING || right->kind == TYPE_STRING) {
+            logger_log(LOG_DEBUG, "Inferred string type for concatenation");
+            return create_primitive_type(TYPE_STRING);
+        }
+        
+        // Numeric addition
+        return get_common_type(left, right);
+    }
+    else if (strcmp(operator, "-") == 0 || 
+             strcmp(operator, "*") == 0 || 
+             strcmp(operator, "/") == 0) {
+        // Numeric operations
+        if ((left->kind == TYPE_INT || left->kind == TYPE_FLOAT) &&
+            (right->kind == TYPE_INT || right->kind == TYPE_FLOAT)) {
+            return get_common_type(left, right);
+        }
+        
+        logger_log(LOG_WARNING, "Invalid operands for arithmetic operation: %s", operator);
+        return create_primitive_type(TYPE_UNKNOWN);
+    }
+    else if (strcmp(operator, ">") == 0 || 
+             strcmp(operator, "<") == 0 ||
+             strcmp(operator, ">=") == 0 || 
+             strcmp(operator, "<=") == 0 ||
+             strcmp(operator, "==") == 0 || 
+             strcmp(operator, "!=") == 0) {
+        // Comparison operators always return boolean
+        logger_log(LOG_DEBUG, "Inferred boolean type for comparison operation");
+        return create_primitive_type(TYPE_BOOL);
+    }
+    else if (strcmp(operator, "and") == 0 || 
+             strcmp(operator, "or") == 0) {
+        // Logical operators require boolean operands and return boolean
+        if (left->kind != TYPE_BOOL || right->kind != TYPE_BOOL) {
+            logger_log(LOG_WARNING, "Logical operators expect boolean operands");
+        }
+        return create_primitive_type(TYPE_BOOL);
+    }
+    
+    logger_log(LOG_WARNING, "Unrecognized binary operator: %s", operator);
+    return create_primitive_type(TYPE_UNKNOWN);
+}
+
+// Implementation to find common type between two types
+Type* get_common_type(Type* type1, Type* type2) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)get_common_type);
+    
+    if (!type1 || !type2) {
+        logger_log(LOG_WARNING, "Null type in common type calculation");
+        return create_primitive_type(TYPE_UNKNOWN);
+    }
+    
+    // Same types
+    if (type1->kind == type2->kind) {
+        return clone_type(type1);
+    }
+    
+    // Type promotion rules
+    if ((type1->kind == TYPE_INT && type2->kind == TYPE_FLOAT) ||
+        (type1->kind == TYPE_FLOAT && type2->kind == TYPE_INT)) {
+        logger_log(LOG_DEBUG, "Promoting to float in binary operation");
+        return create_primitive_type(TYPE_FLOAT);
+    }
+    
+    // String and another type (convert to string)
+    if (type1->kind == TYPE_STRING || type2->kind == TYPE_STRING) {
+        logger_log(LOG_DEBUG, "Converting to string in binary operation with string");
+        return create_primitive_type(TYPE_STRING);
+    }
+    
+    // If no common type found
+    logger_log(LOG_WARNING, "No common type found between %s and %s", 
+               typeToString(type1), typeToString(type2));
+    return create_primitive_type(TYPE_UNKNOWN);
+}
+
+// Implementation for type compatibility checking
+bool types_are_compatible(Type* expected, Type* actual) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)types_are_compatible);
+    
+    if (!expected || !actual) {
+        logger_log(LOG_WARNING, "Null type in compatibility check");
+        return false;
+    }
+    
+    // Same type
+    if (are_types_equal(expected, actual)) {
+        return true;
+    }
+    
+    // UNKNOWN type is compatible with anything (useful during error recovery)
+    if (expected->kind == TYPE_UNKNOWN || actual->kind == TYPE_UNKNOWN) {
+        return true;
+    }
+    
+    // NULL is compatible with any object/array type
+    if (actual->kind == TYPE_NULL && 
+        (expected->kind == TYPE_OBJECT || 
+         expected->kind == TYPE_ARRAY || 
+         expected->kind == TYPE_CLASS)) {
+        return true;
+    }
+    
+    // Type coercion rules
+    if (expected->kind == TYPE_FLOAT && actual->kind == TYPE_INT) {
+        logger_log(LOG_DEBUG, "Compatible: int can be coerced to float");
+        return true;
+    }
+    
+    // Class inheritance (if classes are compatible)
+    if (expected->kind == TYPE_CLASS && actual->kind == TYPE_CLASS) {
+        return is_subtype_of(actual, expected);
+    }
+    
+    logger_log(LOG_DEBUG, "Incompatible types: expected %s, got %s", 
+               typeToString(expected), typeToString(actual));
+    return false;
+}
+
+// Utility function to convert a type to a string representation
+const char* type_to_string(Type* type) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)type_to_string);
+    
+    if (!type) {
+        return "unknown";
+    }
+    
+    // Use the existing typeToString function
+    return typeToString(type);
+}
