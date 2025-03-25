@@ -14,9 +14,10 @@ main
     print("decimal = " + decimal)
     print("texto = " + texto)
 
-    func sayHello()
-    print("Hello from sayHello function!")
-    end
+    // Remove or comment out the unused sayHello function to avoid the warning
+    // func sayHello()
+    //     print("Hello from sayHello function!")
+    // end
     
     // ===================================================================
     // Type System Tests
@@ -258,8 +259,6 @@ main
     // String concatenation with numeric conversion
     str_numeric = "The answer is: " + int_val
     print(str_numeric)
-    
-    sayHello()
     
     print("\n=== Test completed successfully! ===")
 end

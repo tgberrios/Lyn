@@ -804,6 +804,17 @@ main
 end
 ```
 
+## Helper Functions for String Operations
+
+The Lyn compiler now provides two helper functions to simplify string operations:
+
+- **to_string(value: double) -> const char\***  
+  Converts a numeric value into its string representation.
+- **concat_any(s1: const char\*, s2: const char\*) -> char\***  
+  Allocates and returns a new string that is the concatenation of two input strings.
+
+These functions are automatically defined in the compiler's preamble and used when string concatenation is detected, especially in mixed-type operations.
+
 ## Buenas Prácticas
 
 ### Convenciones de Nombrado

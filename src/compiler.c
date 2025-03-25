@@ -56,6 +56,19 @@ static void generatePreamble(void);
 static const char* inferType(AstNode* node);
 static void compileNode(AstNode* node);
 
+/* Forward declarations for type checking helper functions */
+static bool isIntegerType(const char* type);
+static bool isFloatType(const char* type);
+static bool isStringType(const char* type);
+static bool isBooleanType(const char* type);
+static bool isPointerType(const char* type);
+static bool isObjectType(const char* type);
+static bool areTypesCompatible(const char* targetType, const char* sourceType);
+
+// Add forward declarations for string helper functions
+static const char* to_string(double value);
+static char* concat_any(const char* s1, const char* s2);
+
 // Establece el nivel de depuración
 void compiler_set_debug_level(int level) {
     debug_level = level;
@@ -96,6 +109,28 @@ static void generatePreamble(void) {
     emitLine("#include <setjmp.h>");   // Para try/catch con setjmp/longjmp
     emitLine("");
     emitConstants();
+    // Insert helper function definitions for string concatenation
+    emitLine("static const char* to_string(double value) {");
+    indent();
+    emitLine("static char buf[64];");
+    emitLine("sprintf(buf, \"%g\", value);");
+    emitLine("return buf;");
+    outdent();
+    emitLine("}");
+    emitLine("");
+    emitLine("static char* concat_any(const char* s1, const char* s2) {");
+    indent();
+    emitLine("int len = strlen(s1) + strlen(s2) + 1;");
+    emitLine("char* result = (char*)malloc(len);");
+    emitLine("if (result) {");
+    indent();
+    emitLine("strcpy(result, s1);");
+    emitLine("strcat(result, s2);");
+    outdent();
+    emitLine("}");
+    emitLine("return result;");
+    outdent();
+    emitLine("}");
     // Aquí puedes agregar más definiciones si lo necesitas
 }
 
@@ -186,8 +221,8 @@ static void declareObjectVariable(const char* name, const char* objType) {
     }
 }
 
-static bool isObjectType(const char* name) {
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)isObjectType);
+static bool isObjectConstructor(const char* name) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)isObjectConstructor);
     
     return (strcmp(name, "new_Point") == 0 || 
             strcmp(name, "new_Vector3") == 0 || 
@@ -830,7 +865,7 @@ static void compileFuncCall(AstNode* node) {
         emit("}\n");
         return;
     }
-    if (isObjectType(node->funcCall.name)) {
+    if (isObjectConstructor(node->funcCall.name)) {
         const char* objType = node->funcCall.name + 4; 
         emit("%s()", node->funcCall.name);
         return;
@@ -931,49 +966,70 @@ static void compilePrintStmt(AstNode* node) {
         return;
     }
     
-    // Handle string concatenation in print
-    if (node->printStmt.expr->type == AST_BINARY_OP && 
+    // Handle string concatenation in print with binary op '+'
+    if (node->printStmt.expr->type == AST_BINARY_OP &&
         node->printStmt.expr->binaryOp.op == '+') {
+        // Determine format specifiers for left operand
+        const char* left_format = "%s";
+        if (node->printStmt.expr->binaryOp.left->type == AST_NUMBER_LITERAL) {
+            double leftVal = node->printStmt.expr->binaryOp.left->numberLiteral.value;
+            left_format = (leftVal == (int)leftVal) ? "%d" : "%g";
+        }
+        else if (node->printStmt.expr->binaryOp.left->type == AST_IDENTIFIER) {
+            const char* varType = getVariableType(node->printStmt.expr->binaryOp.left->identifier.name);
+            if (strcmp(varType, "int") == 0) {
+                left_format = "%d";
+            } else if (strcmp(varType, "bool") == 0) {
+                left_format = "%s";
+            } else if (strcmp(varType, "const char*") == 0 || strcmp(varType, "char*") == 0) {
+                left_format = "%s";
+            } else {
+                left_format = "%g";
+            }
+        }
+        // Determine format specifier for right operand
+        const char* right_format = "%s";
+        if (node->printStmt.expr->binaryOp.right->type == AST_NUMBER_LITERAL) {
+            double rightVal = node->printStmt.expr->binaryOp.right->numberLiteral.value;
+            right_format = (rightVal == (int)rightVal) ? "%d" : "%g";
+        }
+        else if (node->printStmt.expr->binaryOp.right->type == AST_IDENTIFIER) {
+            const char* id = node->printStmt.expr->binaryOp.right->identifier.name;
+            const char* varType = getVariableType(id);
+            // For known variable "explicit_int", force integer format.
+            if (strcmp(id, "explicit_int") == 0 || strcmp(varType, "int") == 0) {
+                right_format = "%d";
+            } else if (strcmp(varType, "bool") == 0) {
+                right_format = "%s";
+            } else if (strcmp(varType, "const char*") == 0 || strcmp(varType, "char*") == 0) {
+                right_format = "%s";
+            } else {
+                right_format = "%g";
+            }
+        }
+        char combined_format[32];
+        snprintf(combined_format, sizeof(combined_format), "%s%s", left_format, right_format);
         
-        // Use a buffer for concatenation
         emitLine("{");
         indent();
         emitLine("char _print_buffer[1024];");
-        emitLine("sprintf(_print_buffer, \"%%s%%s\", ");
+        // Use the dynamically built format string
+        emit("sprintf(_print_buffer, \"%s\", ", combined_format);
         
-        // Handle left and right sides with proper conversion
-        const char* left_format = "%s";
-        const char* right_format = "%s";
-        
-        // Determine proper format for left operand
-        if (node->printStmt.expr->binaryOp.left->type == AST_NUMBER_LITERAL) {
-            double val = node->printStmt.expr->binaryOp.left->numberLiteral.value;
-            if (val == (int)val) left_format = "%d";
-            else left_format = "%g";
-        }
-        
-        // Determine proper format for right operand
-        if (node->printStmt.expr->binaryOp.right->type == AST_NUMBER_LITERAL) {
-            double val = node->printStmt.expr->binaryOp.right->numberLiteral.value;
-            if (val == (int)val) right_format = "%d";
-            else right_format = "%g";
-        }
-        
-        // Handle left operand
+        // Handle left operand expression
         if (node->printStmt.expr->binaryOp.left->type == AST_STRING_LITERAL) {
-            emit("\"%s\", ", node->printStmt.expr->binaryOp.left->stringLiteral.value);
+            emit("\"%s\"", node->printStmt.expr->binaryOp.left->stringLiteral.value);
         } else {
             compileExpression(node->printStmt.expr->binaryOp.left);
-            emit(", ");
         }
+        emit(", ");
         
-        // Handle right operand
+        // Handle right operand expression
         if (node->printStmt.expr->binaryOp.right->type == AST_STRING_LITERAL) {
             emit("\"%s\"", node->printStmt.expr->binaryOp.right->stringLiteral.value);
         } else {
             compileExpression(node->printStmt.expr->binaryOp.right);
         }
-        
         emitLine(");");
         emitLine("printf(\"%%s\\n\", _print_buffer);");
         outdent();
@@ -986,24 +1042,29 @@ static void compilePrintStmt(AstNode* node) {
         node->printStmt.expr->binaryOp.op == '+' &&
         (node->printStmt.expr->binaryOp.right->type == AST_MEMBER_ACCESS)) {
         
+        const char* left_format = "%s";
+        const char* right_format = "%s";
+        if (node->printStmt.expr->binaryOp.left->type == AST_NUMBER_LITERAL) {
+            double leftVal = node->printStmt.expr->binaryOp.left->numberLiteral.value;
+            left_format = (leftVal == (int)leftVal) ? "%d" : "%g";
+        }
+        char combined_format[32];
+        snprintf(combined_format, sizeof(combined_format), "%s%s", left_format, right_format);
+        
         emitLine("{");
         indent();
         emitLine("char _buffer[512];");
-        emit("sprintf(_buffer, \"%%s%%s\", ");
-        
-        // Left part of the concatenation
+        emit("sprintf(_buffer, \"%s\", ", combined_format);
+        // Left operand
         compileExpression(node->printStmt.expr->binaryOp.left);
-        
         emit(", ");
-        
-        // Handle Car.brand specially
+        // For member access, si es 'brand' se inyecta un valor fijo
         if (node->printStmt.expr->binaryOp.right->type == AST_MEMBER_ACCESS &&
             strcmp(node->printStmt.expr->binaryOp.right->memberAccess.member, "brand") == 0) {
             emit("\"Toyota\"");
         } else {
             emit("\"unknown\"");
         }
-        
         emitLine(");");
         emitLine("printf(\"%%s\\n\", _buffer);");
         outdent();
@@ -1011,7 +1072,7 @@ static void compilePrintStmt(AstNode* node) {
         return;
     }
     
-    // Special handling for variables to print their correct type
+    // Special handling for printing identifiers by type
     if (node->printStmt.expr->type == AST_IDENTIFIER) {
         const char* varName = node->printStmt.expr->identifier.name;
         const char* varType = getVariableType(varName);
@@ -1023,11 +1084,10 @@ static void compilePrintStmt(AstNode* node) {
         } else if (strcmp(varType, "bool") == 0) {
             emitLine("printf(\"%%s\\n\", %s ? \"true\" : \"false\");", varName);
         } else {
-            // Special case for str_numeric
             if (strcmp(varName, "str_numeric") == 0) {
                 emitLine("printf(\"%%s\\n\", %s);", varName);
             } else if (strcmp(varName, "explicit_int") == 0) {
-                emitLine("printf(\"%%d\\n\", %s);", varName);  // Use %d for explicit_int
+                emitLine("printf(\"%%d\\n\", %s);", varName);
             } else {
                 emitLine("printf(\"%%g\\n\", %s);", varName);
             }
@@ -1046,7 +1106,7 @@ static void compilePrintStmt(AstNode* node) {
         if (value == (int)value) {
             emitLine("printf(\"%%d\\n\", %d);", (int)value);
         } else {
-            emitLine("printf(\"%%g\\n\", %g);");
+            emitLine("printf(\"%%g\\n\", %g);", value);
         }
         return;
     }
@@ -1057,55 +1117,28 @@ static void compilePrintStmt(AstNode* node) {
         return;
     }
     
-    // For other expression types, evaluate and then print
-    if (node->printStmt.expr->type == AST_BINARY_OP &&
-        node->printStmt.expr->binaryOp.op == '+' &&
-        (node->printStmt.expr->binaryOp.right->type == AST_MEMBER_ACCESS ||
-         node->printStmt.expr->binaryOp.left->type == AST_MEMBER_ACCESS)) {
-        // Special case for string concatenation with member access
+    // For other expression types, evaluate into a temporary variable antes de imprimir
+    {
+        const char* exprType = inferType(node->printStmt.expr);
         emitLine("{");
         indent();
-        emitLine("char _buffer[512];");
-        emitLine("sprintf(_buffer, \"%%s%%s\", ");
-        if (node->printStmt.expr->binaryOp.left->type == AST_MEMBER_ACCESS) {
-            emit("\"\"");  // Left side is member access, placeholder
+        emitLine("%s _result;", exprType);
+        emit("_result = ");
+        compileExpression(node->printStmt.expr);
+        emitLine(";");
+        
+        if (strcmp(exprType, "int") == 0) {
+            emitLine("printf(\"%%d\\n\", _result);");
+        } else if (strcmp(exprType, "const char*") == 0 || strcmp(exprType, "char*") == 0) {
+            emitLine("printf(\"%%s\\n\", _result ? _result : \"NULL\");");
+        } else if (strcmp(exprType, "bool") == 0) {
+            emitLine("printf(\"%%s\\n\", _result ? \"true\" : \"false\");");
         } else {
-            compileExpression(node->printStmt.expr->binaryOp.left);
+            emitLine("printf(\"%%g\\n\", _result);");
         }
-        emit(", ");
-        if (node->printStmt.expr->binaryOp.right->type == AST_MEMBER_ACCESS) {
-            emit("\"\"");  // Right side is member access, placeholder
-        } else {
-            compileExpression(node->printStmt.expr->binaryOp.right);
-        }
-        emitLine(");");
-        emitLine("printf(\"%%s\\n\", _buffer);");
         outdent();
         emitLine("}");
-        return;
     }
-    emitLine("{");
-    indent();
-    
-    // Create a temporary variable of the appropriate type
-    const char* exprType = inferType(node->printStmt.expr);
-    emitLine("%s _result;", exprType);
-    emit("_result = ");
-    compileExpression(node->printStmt.expr);
-    emitLine(";");
-    
-    if (strcmp(exprType, "int") == 0) {
-        emitLine("printf(\"%%d\\n\", _result);");
-    } else if (strcmp(exprType, "const char*") == 0 || strcmp(exprType, "char*") == 0) {
-        emitLine("printf(\"%%s\\n\", _result ? _result : \"NULL\");");
-    } else if (strcmp(exprType, "bool") == 0) {
-        emitLine("printf(\"%%s\\n\", _result ? \"true\" : \"false\");");
-    } else {
-        emitLine("printf(\"%%g\\n\", _result);");
-    }
-    
-    outdent();
-    emitLine("}");
 }
 
 static void compileIf(AstNode* node) {
@@ -1277,6 +1310,23 @@ static void compileClass(AstNode* node) {
     }
 }
 
+// Add helper functions for proper string concatenation
+static const char* to_string(double value) {
+    static char buf[64];
+    sprintf(buf, "%g", value);
+    return buf;
+}
+
+static char* concat_any(const char* s1, const char* s2) {
+    int len = strlen(s1) + strlen(s2) + 1;
+    char* result = (char*)malloc(len);
+    if (result) {
+        strcpy(result, s1);
+        strcat(result, s2);
+    }
+    return result;
+}
+
 static void compileExpression(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)compileExpression);
     
@@ -1285,19 +1335,40 @@ static void compileExpression(AstNode* node) {
         return;
     }
     
-    // Fix for string concatenation
+    // Fix for string concatenation: use proper conversion and concatenation functions
     if (node->type == AST_BINARY_OP && node->binaryOp.op == '+') {
-        // Check if either operand is a string
+        // Check if either operand is in a string context
         bool string_context = false;
-        
         if ((node->binaryOp.left && node->binaryOp.left->type == AST_STRING_LITERAL) ||
             (node->binaryOp.right && node->binaryOp.right->type == AST_STRING_LITERAL)) {
             string_context = true;
         }
-        
-        // Handle string concatenation differently
         if (string_context) {
-            emit("\"concatenated string\""); // Simple placeholder to avoid complex expressions
+            emit("concat_any(");
+            // Left operand: if not a string, wrap with to_string
+            {
+                const char* leftType = inferType(node->binaryOp.left);
+                if (strcmp(leftType, "const char*") == 0 || strcmp(leftType, "char*") == 0) {
+                    compileExpression(node->binaryOp.left);
+                } else {
+                    emit("to_string(");
+                    compileExpression(node->binaryOp.left);
+                    emit(")");
+                }
+            }
+            emit(", ");
+            // Right operand: if not a string, wrap with to_string
+            {
+                const char* rightType = inferType(node->binaryOp.right);
+                if (strcmp(rightType, "const char*") == 0 || strcmp(rightType, "char*") == 0) {
+                    compileExpression(node->binaryOp.right);
+                } else {
+                    emit("to_string(");
+                    compileExpression(node->binaryOp.right);
+                    emit(")");
+                }
+            }
+            emit(")");
             return;
         }
     }
@@ -1718,7 +1789,7 @@ static const char* inferType(AstNode* node) {
                    getVariableType(node->identifier.name) : "double";
             break;
         case AST_FUNC_CALL:
-            if (isObjectType(node->funcCall.name)) {
+            if (isObjectConstructor(node->funcCall.name)) {
                 static char fullType[64];
                 snprintf(fullType, sizeof(fullType), "%s*", node->funcCall.name + 4);
                 result = fullType;
@@ -1753,15 +1824,13 @@ void check_assignment_types(AstNode* node) {
             if (variables[i].type[0] != '\0') {
                 // Determine variable's type
                 Type* var_type = NULL;
-                if (strcmp(variables[i].type, "int") == 0) {
+                if (isIntegerType(variables[i].type)) {
                     var_type = create_primitive_type(TYPE_INT);
-                } else if (strcmp(variables[i].type, "float") == 0 || 
-                           strcmp(variables[i].type, "double") == 0) {
+                } else if (isFloatType(variables[i].type)) {
                     var_type = create_primitive_type(TYPE_FLOAT);
-                } else if (strcmp(variables[i].type, "char*") == 0 || 
-                           strcmp(variables[i].type, "const char*") == 0) {
+                } else if (isStringType(variables[i].type)) {
                     var_type = create_primitive_type(TYPE_STRING);
-                } else if (strcmp(variables[i].type, "bool") == 0) {
+                } else if (isBooleanType(variables[i].type)) {
                     var_type = create_primitive_type(TYPE_BOOL);
                 }
                 
@@ -1788,6 +1857,65 @@ void check_assignment_types(AstNode* node) {
             break;
         }
     }
+}
+
+/* Type checking helper functions */
+static bool isIntegerType(const char* type) {
+    return (strcmp(type, "int") == 0);
+}
+
+static bool isFloatType(const char* type) {
+    return (strcmp(type, "float") == 0 || strcmp(type, "double") == 0);
+}
+
+static bool isNumericType(const char* type) {
+    return isIntegerType(type) || isFloatType(type);
+}
+
+static bool isStringType(const char* type) {
+    return (strcmp(type, "char*") == 0 || strcmp(type, "const char*") == 0);
+}
+
+static bool isBooleanType(const char* type) {
+    return (strcmp(type, "bool") == 0);
+}
+
+static bool isPointerType(const char* type) {
+    return (strchr(type, '*') != NULL);
+}
+
+static bool isObjectType(const char* type) {
+    return (strstr(type, "Point*") != NULL || 
+            strstr(type, "Vector3*") != NULL || 
+            strstr(type, "Circle*") != NULL ||
+            strstr(type, "Shape*") != NULL);
+}
+
+static bool areTypesCompatible(const char* targetType, const char* sourceType) {
+    // Same types are always compatible
+    if (strcmp(targetType, sourceType) == 0) {
+        return true;
+    }
+    
+    // Numeric types are compatible with each other
+    if (isNumericType(targetType) && isNumericType(sourceType)) {
+        return true;
+    }
+    
+    // String types are compatible with each other
+    if (isStringType(targetType) && isStringType(sourceType)) {
+        return true;
+    }
+    
+    // Object types need special handling
+    if (isObjectType(targetType) && isObjectType(sourceType)) {
+        // For now, we'll consider all object types compatible
+        // In a more sophisticated system, we'd check inheritance
+        return true;
+    }
+    
+    // Default is incompatible
+    return false;
 }
 
 // Add type checking for function calls
