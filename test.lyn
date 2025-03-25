@@ -1,11 +1,3 @@
-// ************************************************************************
-// * Type System Testing Script for Lyn Language
-// ************************************************************************
-
-func sayHello()
-    print("Hello from sayHello function!")
-end
-
 main
     // ===================================================================
     // Variables and Type Tests
@@ -18,12 +10,13 @@ main
     
     // Print variable values
     print("\n=== Variables and their values ===")
-    print("entero = ")
-    print(entero)
-    print("decimal = ")
-    print(decimal)
-    print("texto = ")
-    print(texto)
+    print("entero = " + entero)
+    print("decimal = " + decimal)
+    print("texto = " + texto)
+
+    func sayHello()
+    print("Hello from sayHello function!")
+    end
     
     // ===================================================================
     // Type System Tests
@@ -44,18 +37,13 @@ main
     inferred_string = "Hello type system"  // Should infer as string
     
     print("Values with explicit types:")
-    print("explicit_int: ")
-    print(explicit_int)
-    print("explicit_float: ")
-    print(explicit_float)
+    print("explicit_int: " + explicit_int)
+    print("explicit_float: " + explicit_float)
     
     print("Values with inferred types:")
-    print("inferred_int: ")
-    print(inferred_int)
-    print("inferred_float: ")
-    print(inferred_float)
-    print("inferred_string: ")
-    print(inferred_string)
+    print("inferred_int: " + inferred_int)
+    print("inferred_float: " + inferred_float)
+    print("inferred_string: " + inferred_string)
     
     // Type compatibility tests
     print("\n--- Type Compatibility ---")
@@ -64,36 +52,29 @@ main
     int_to_int = entero       // int to int (same type)
     int_to_float = entero     // int to float (int can be assigned to float)
     
-    print("int_to_int: ")
-    print(int_to_int)
-    print("int_to_float: ")
-    print(int_to_float)
+    print("int_to_int: " + int_to_int)
+    print("int_to_float: " + int_to_float)
     
     // Mixed type operations
     print("\n--- Mixed Type Operations ---")
     
     // Integer operations
     sum_int = entero + 10
-    print("entero + 10 = ")
-    print(sum_int)
+    print("entero + 10 = " + sum_int)
     
     // Float operations
     product_float = decimal * 2
-    print("decimal * 2 = ")
-    print(product_float)
+    print("decimal * 2 = " + product_float)
     
     // Mixed int and float (should promote to float)
     mixed_result = entero + decimal
-    print("entero + decimal = ")
-    print(mixed_result)
+    print("entero + decimal = " + mixed_result)
     
     // Simple variables without string concatenation
     greeting = "Hello World"  // Direct string assignment without concatenation
     message = "The answer is 42"
     
-    // Avoid string concatenation in print statements
-    print("String value: ")
-    print(greeting)
+    print("String value: " + greeting)
     
     // Integer concatenation with strings
     num = 42
@@ -118,12 +99,10 @@ main
     
     // Test function calls with correct argument types
     sum_result = add(5, 3)
-    print("add(5, 3) = ")
-    print(sum_result)
+    print("add(5, 3) = " + sum_result)
     
     greeting_result = greet("World")
-    print("greet result: ")
-    print(greeting_result)
+    print("greet result: " + greeting_result)
     
     // ===================================================================
     // Arithmetic Operations
@@ -133,23 +112,19 @@ main
     
     // Addition
     suma = 5 + 3
-    print("5 + 3 = ")
-    print(suma)
+    print("5 + 3 = " + suma)
     
     // Subtraction
     resta = 10 - 4
-    print("10 - 4 = ")
-    print(resta)
+    print("10 - 4 = " + resta)
     
     // Multiplication
     producto = 3 * 7
-    print("3 * 7 = ")
-    print(producto)
+    print("3 * 7 = " + producto)
     
     // Division
     division = 20 / 4
-    print("20 / 4 = ")
-    print(division)
+    print("20 / 4 = " + division)
     
     // ===================================================================
     // Control Flow
@@ -240,7 +215,7 @@ main
     
     print("\n=== Class and Object Test ===")
     
-    class Car;
+    class Car
         brand = "Toyota"
         print("Creating a Car with brand = " + brand)
     end
@@ -260,21 +235,17 @@ main
     bool_val2 = false
     
     bool_and = bool_val1 and bool_val2
-    print("true and false = ")
-    print(bool_and)
+    print("true and false = " + bool_and)
     
     bool_or = bool_val1 or bool_val2
-    print("true or false = ")
-    print(bool_or)
+    print("true or false = " + bool_or)
     
     // Comparison operations (returning boolean)
     is_greater = 10 > 5
-    print("10 > 5 = ")
-    print(is_greater)
+    print("10 > 5 = " + is_greater)
     
     is_equal = 7 == 7
-    print("7 == 7 = ")
-    print(is_equal)
+    print("7 == 7 = " + is_equal)
     
     // Type conversions
     int_val = 42
@@ -282,8 +253,7 @@ main
     
     // Automatic conversion from int to float in mixed expression
     mixed_expr = int_val + float_val
-    print("int_val + float_val = ")
-    print(mixed_expr)
+    print("int_val + float_val = " + mixed_expr)
     
     // String concatenation with numeric conversion
     str_numeric = "The answer is: " + int_val

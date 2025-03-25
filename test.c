@@ -139,12 +139,28 @@ int main() {
     double decimal __attribute__((unused)) = 3.14;
     const char* texto __attribute__((unused)) =     "Hola, Lyn!"    ;
     printf("%s\n", "\n=== Variables and their values ===");
-    printf("%s\n", "entero = ");
-    printf("%d\n", entero);
-    printf("%s\n", "decimal = ");
-    printf("%g\n", decimal);
-    printf("%s\n", "texto = ");
-    printf("%s\n", texto);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "entero = ",         entero        );
+        printf("%s\n", _print_buffer);
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "decimal = ",         decimal        );
+        printf("%s\n", _print_buffer);
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "texto = ",         texto        );
+        printf("%s\n", _print_buffer);
+    }
+    void sayHello(    ) {
+        // Local variables
+        printf("%s\n", "Hello from sayHello function!");
+    }
     printf("%s\n", "\n=== Type System Tests ===");
     printf("%s\n", "\n--- Type Inference ---");
     int explicit_int __attribute__((unused)) =     42    ;
@@ -153,41 +169,85 @@ int main() {
     double inferred_float __attribute__((unused)) = 2.718;
     const char* inferred_string __attribute__((unused)) = "Hello type system";
     printf("%s\n", "Values with explicit types:");
-    printf("%s\n", "explicit_int: ");
-    printf("%d\n", explicit_int);
-    printf("%s\n", "explicit_float: ");
-    printf("%g\n", explicit_float);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "explicit_int: ",         explicit_int        );
+        printf("%s\n", _print_buffer);
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "explicit_float: ",         explicit_float        );
+        printf("%s\n", _print_buffer);
+    }
     printf("%s\n", "Values with inferred types:");
-    printf("%s\n", "inferred_int: ");
-    printf("%d\n", inferred_int);
-    printf("%s\n", "inferred_float: ");
-    printf("%g\n", inferred_float);
-    printf("%s\n", "inferred_string: ");
-    printf("%s\n", inferred_string);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "inferred_int: ",         inferred_int        );
+        printf("%s\n", _print_buffer);
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "inferred_float: ",         inferred_float        );
+        printf("%s\n", _print_buffer);
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "inferred_string: ",         inferred_string        );
+        printf("%s\n", _print_buffer);
+    }
     printf("%s\n", "\n--- Type Compatibility ---");
     int int_to_int __attribute__((unused)) =     entero    ;
     int int_to_float __attribute__((unused)) =     entero    ;
-    printf("%s\n", "int_to_int: ");
-    printf("%d\n", int_to_int);
-    printf("%s\n", "int_to_float: ");
-    printf("%d\n", int_to_float);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "int_to_int: ",         int_to_int        );
+        printf("%s\n", _print_buffer);
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "int_to_float: ",         int_to_float        );
+        printf("%s\n", _print_buffer);
+    }
     printf("%s\n", "\n--- Mixed Type Operations ---");
     double sum_int __attribute__((unused));
     sum_int =     (    entero     +     10    )    ;
-    printf("%s\n", "entero + 10 = ");
-    printf("%g\n", sum_int);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "entero + 10 = ",         sum_int        );
+        printf("%s\n", _print_buffer);
+    }
     double product_float __attribute__((unused));
     product_float =     (    decimal     *     2    )    ;
-    printf("%s\n", "decimal * 2 = ");
-    printf("%g\n", product_float);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "decimal * 2 = ",         product_float        );
+        printf("%s\n", _print_buffer);
+    }
     double mixed_result __attribute__((unused));
     mixed_result =     (    entero     +     decimal    )    ;
-    printf("%s\n", "entero + decimal = ");
-    printf("%g\n", mixed_result);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "entero + decimal = ",         mixed_result        );
+        printf("%s\n", _print_buffer);
+    }
     const char* greeting __attribute__((unused)) =     "Hello World"    ;
     const char* message __attribute__((unused)) =     "The answer is 42"    ;
-    printf("%s\n", "String value: ");
-    printf("%s\n", greeting);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "String value: ",         greeting        );
+        printf("%s\n", _print_buffer);
+    }
     int num __attribute__((unused)) = 42;
     message =     "concatenated string"    ;
     printf("%s\n", message);
@@ -201,28 +261,52 @@ int main() {
         return buffer;
     }
     double sum_result __attribute__((unused)) =     add(    5    ,     3    )    ;
-    printf("%s\n", "add(5, 3) = ");
-    printf("%g\n", sum_result);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "add(5, 3) = ",         sum_result        );
+        printf("%s\n", _print_buffer);
+    }
     const char* greeting_result __attribute__((unused)) = greet("World");
-    printf("%s\n", "greet result: ");
-    printf("%s\n", greeting_result);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "greet result: ",         greeting_result        );
+        printf("%s\n", _print_buffer);
+    }
     printf("%s\n", "\n=== Arithmetic operations ===");
     double suma __attribute__((unused));
     suma =     (    5     +     3    )    ;
-    printf("%s\n", "5 + 3 = ");
-    printf("%g\n", suma);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "5 + 3 = ",         suma        );
+        printf("%s\n", _print_buffer);
+    }
     double resta __attribute__((unused));
     resta =     (    10     -     4    )    ;
-    printf("%s\n", "10 - 4 = ");
-    printf("%g\n", resta);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "10 - 4 = ",         resta        );
+        printf("%s\n", _print_buffer);
+    }
     double producto __attribute__((unused));
     producto =     (    3     *     7    )    ;
-    printf("%s\n", "3 * 7 = ");
-    printf("%g\n", producto);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "3 * 7 = ",         producto        );
+        printf("%s\n", _print_buffer);
+    }
     double division __attribute__((unused));
     division =     (    20     /     4    )    ;
-    printf("%s\n", "20 / 4 = ");
-    printf("%g\n", division);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "20 / 4 = ",         division        );
+        printf("%s\n", _print_buffer);
+    }
     printf("%s\n", "\n=== Control flow statements ===");
     int valor __attribute__((unused)) = 42;
     if (    (    valor     >     10    )    ) {
@@ -274,26 +358,46 @@ int main() {
     bool bool_val2 __attribute__((unused)) =     false    ;
     double bool_and __attribute__((unused));
     bool_and =     (    bool_val1     &&     bool_val2    )    ;
-    printf("%s\n", "true and false = ");
-    printf("%g\n", bool_and);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "true and false = ",         bool_and        );
+        printf("%s\n", _print_buffer);
+    }
     double bool_or __attribute__((unused));
     bool_or =     (    bool_val1     ||     bool_val2    )    ;
-    printf("%s\n", "true or false = ");
-    printf("%g\n", bool_or);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "true or false = ",         bool_or        );
+        printf("%s\n", _print_buffer);
+    }
     double is_greater __attribute__((unused));
     is_greater =     (    10     >     5    )    ;
-    printf("%s\n", "10 > 5 = ");
-    printf("%g\n", is_greater);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "10 > 5 = ",         is_greater        );
+        printf("%s\n", _print_buffer);
+    }
     double is_equal __attribute__((unused));
     is_equal =     (    7     ==     7    )    ;
-    printf("%s\n", "7 == 7 = ");
-    printf("%g\n", is_equal);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "7 == 7 = ",         is_equal        );
+        printf("%s\n", _print_buffer);
+    }
     int_val =     42    ;
     float_val =     3.14    ;
     double mixed_expr __attribute__((unused));
     mixed_expr =     (    int_val     +     float_val    )    ;
-    printf("%s\n", "int_val + float_val = ");
-    printf("%g\n", mixed_expr);
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s", 
+        "int_val + float_val = ",         mixed_expr        );
+        printf("%s\n", _print_buffer);
+    }
     char str_numeric[256];
     sprintf(str_numeric, "The answer is: %d", int_val);
     printf("%s\n", str_numeric);
