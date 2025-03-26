@@ -277,6 +277,41 @@ for i in range(0, 10, 2)  // 0, 2, 4, 6, 8
 end
 ```
 
+#### For con colecciones
+
+```
+// Iterar sobre los elementos de un array
+nombres = ["Ana", "Luis", "Carlos"]
+for nombre in nombres
+    print("Hola, " + nombre)
+end
+
+// Iterar sobre caracteres de un string
+mensaje = "Hola"
+for letra in mensaje
+    print(letra)
+end
+```
+
+#### For tradicional estilo C
+
+```
+// Bucle tradicional con inicialización, condición y actualización
+for (i = 0; i < 5; i = i + 1)
+    print(i)
+end
+
+// Bucle con múltiples variables
+for (i = 0, j = 10; i < j; i = i + 1, j = j - 1)
+    print("i = " + i + ", j = " + j)
+end
+
+// Partes opcionales
+for (; condicion;)
+    // Solo condición definida
+end
+```
+
 #### While
 
 ```

@@ -1183,29 +1183,130 @@ static void compileIf(AstNode* node) {
 static void compileFor(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)compileFor);
     
-    // Create a local variable for the iterator
-    emitLine("// For loop with iterator: %s", node->forStmt.iterator);
+    // Comprobación de seguridad para el nodo
+    if (!node || node->type != AST_FOR_STMT) {
+        logger_log(LOG_WARNING, "Invalid node passed to compileFor");
+        return;
+    }
     
-    // Add the iterator to our variables table
-    addVariable(node->forStmt.iterator, "int");
-    markVariableDeclared(node->forStmt.iterator);
+    // Determinar el tipo de bucle for y compilar según corresponda
+    switch (node->forStmt.forType) {
+        case FOR_RANGE:
+            // Caso: for i in range(start, end[, step])
+            emitLine("// For loop with range: for %s in range(...)", node->forStmt.iterator);
+            
+            // Añadir el iterador a la tabla de variables
+            addVariable(node->forStmt.iterator, "int");
+            markVariableDeclared(node->forStmt.iterator);
+            
+            // Compilar el bucle for con range
+            emit("for (int %s = ", node->forStmt.iterator);
+            compileExpression(node->forStmt.rangeStart);
+            emit("; %s < ", node->forStmt.iterator);
+            compileExpression(node->forStmt.rangeEnd);
+            
+            // Si hay un paso especificado, usarlo para el incremento
+            if (node->forStmt.rangeStep) {
+                emit("; %s += ", node->forStmt.iterator);
+                compileExpression(node->forStmt.rangeStep);
+            } else {
+                emit("; %s++", node->forStmt.iterator);
+            }
+            emitLine(") {");
+            break;
+            
+        case FOR_COLLECTION:
+            // Caso: for elem in collection
+            emitLine("// For loop with collection: for %s in collection", node->forStmt.iterator);
+            
+            // Para iterar sobre colecciones, necesitamos variables auxiliares
+            emitLine("{");
+            indent();
+            
+            // Declarar e inicializar la colección
+            emitLine("// Obtain collection");
+            emit("void* _collection = ");
+            compileExpression(node->forStmt.collection);
+            emitLine(";");
+            
+            // Añadir el iterador a la tabla de variables
+            addVariable(node->forStmt.iterator, "void*");
+            markVariableDeclared(node->forStmt.iterator);
+            
+            // Necesitamos determinar el tipo de colección para elegir el enfoque correcto
+            emitLine("// Determine collection type and iterate");
+            emitLine("if (_collection) {");
+            indent();
+            
+            // Por ahora, asumimos que es un array
+            emitLine("int _size = 0;");
+            emitLine("// Get collection size (depends on collection type)");
+            emitLine("void** _items = (void**)_collection;");
+            emitLine("while (_items[_size] != NULL) _size++;");
+            
+            // Generar bucle para recorrer la colección
+            emitLine("for (int _i = 0; _i < _size; _i++) {");
+            indent();
+            emitLine("void* %s = _items[_i];", node->forStmt.iterator);
+            
+            // Al salir del ámbito del for sobre colecciones
+            outdent();
+            emitLine("}");
+            outdent();
+            emitLine("}");
+            
+            // Cerramos el bloque al final después de compilar el cuerpo
+            return;  // Manejo especial para este caso
+            
+        case FOR_TRADITIONAL:
+            // Caso: for (init; condition; update)
+            emitLine("// Traditional C-style for loop");
+            
+            // Inicio del bucle tradicional
+            emit("for (");
+            
+            // Inicialización (opcional)
+            if (node->forStmt.init) {
+                compileExpression(node->forStmt.init);
+            }
+            emit("; ");
+            
+            // Condición (opcional)
+            if (node->forStmt.condition) {
+                compileExpression(node->forStmt.condition);
+            }
+            emit("; ");
+            
+            // Actualización (opcional)
+            if (node->forStmt.update) {
+                compileExpression(node->forStmt.update);
+            }
+            
+            emitLine(") {");
+            break;
+            
+        default:
+            logger_log(LOG_ERROR, "Unknown for loop type: %d", node->forStmt.forType);
+            emitLine("// Unknown for loop type");
+            emitLine("while (0) {");  // Bucle inerte como fallback
+            break;
+    }
     
-    // Standard C for loop
-    emit("for (int %s = ", node->forStmt.iterator);
-    compileExpression(node->forStmt.rangeStart);
-    emit("; %s < ", node->forStmt.iterator);
-    compileExpression(node->forStmt.rangeEnd);
-    emit("; %s++) {", node->forStmt.iterator);
-    
+    // Compilar el cuerpo del bucle for (común a todas las variantes excepto FOR_COLLECTION)
     indent();
-    
-    // Compile loop body
     for (int i = 0; i < node->forStmt.bodyCount; i++) {
         compileNode(node->forStmt.body[i]);
     }
-    
     outdent();
+    
+    // Cerrar el bucle
     emitLine("}");
+    
+    // Para FOR_COLLECTION, necesitamos cerrar el bloque adicional
+    if (node->forStmt.forType == FOR_COLLECTION) {
+        outdent();
+        emitLine("}");
+    }
 }
 
 static void compileLambda(AstNode* node) {

@@ -262,3 +262,63 @@ main
     
     print("\n=== Test completed successfully! ===")
 end
+
+// Tests para los diferentes tipos de bucles for
+main
+    print("=== Tests de bucles for ampliados ===")
+    
+    // Test 1: Bucle for con range básico
+    print("Test 1: For con range básico")
+    for i in range(1, 6)
+        print(i)
+    end
+    
+    // Test 2: Bucle for con range y paso
+    print("Test 2: For con range y paso")
+    for i in range(0, 10, 2)
+        print(i)
+    end
+    
+    // Test 3: Bucle for con colección (array)
+    print("Test 3: For con colección")
+    numeros = [10, 20, 30, 40, 50]
+    for num in numeros
+        print(num)
+    end
+    
+    // Test 4: Bucle for tradicional estilo C
+    print("Test 4: For tradicional estilo C")
+    for (i = 0; i < 5; i = i + 1)
+        print(i)
+    end
+    
+    // Test 5: Bucle for tradicional con múltiples operaciones
+    print("Test 5: For tradicional con múltiples operaciones")
+    for (i = 0, sum = 0; i < 5; i = i + 1, sum = sum + i)
+        print("Iteración " + i + ", suma = " + sum)
+    end
+    
+    // Test 6: Bucles for anidados
+    print("Test 6: Bucles for anidados")
+    for i in range(1, 4)
+        for j in range(1, 4)
+            print("i = " + i + ", j = " + j)
+        end
+    end
+    
+    // Test 7: Bucle for con colección de strings
+    print("Test 7: For con colección de strings")
+    nombres = ["Ana", "Luis", "María", "Carlos"]
+    for nombre in nombres
+        print("Hola, " + nombre)
+    end
+    
+    // Test 8: For tradicional con partes opcionales
+    print("Test 8: For tradicional con condición solamente")
+    j = 0
+    for (; j < 3; j = j + 1)
+        print("j = " + j)
+    end
+    
+    print("Pruebas de bucles for completadas")
+end

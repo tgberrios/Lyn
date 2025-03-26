@@ -68,6 +68,13 @@ typedef enum {
     ADVICE_AROUND = 2
 } AdviceType;
 
+// Tipo de bucle for
+typedef enum {
+    FOR_RANGE = 0,     // for i in range(start, end)
+    FOR_COLLECTION = 1, // for elem in collection
+    FOR_TRADITIONAL = 2 // for (init; condition; update)
+} ForLoopType;
+
 // Estructura base para todos los nodos AST
 typedef struct AstNode {
     AstNodeType type;
@@ -146,9 +153,15 @@ typedef struct AstNode {
         
         // AST_FOR_STMT
         struct {
-            char iterator[256];
-            struct AstNode* rangeStart;
-            struct AstNode* rangeEnd;
+            ForLoopType forType;    // Tipo de bucle for
+            char iterator[256];     // Nombre del iterador (para range y collection)
+            struct AstNode* rangeStart; // Para range
+            struct AstNode* rangeEnd;   // Para range
+            struct AstNode* rangeStep;  // Paso para range (opcional)
+            struct AstNode* collection; // Para iterar sobre colecciones
+            struct AstNode* init;       // Para bucle tradicional
+            struct AstNode* condition;  // Para bucle tradicional
+            struct AstNode* update;     // Para bucle tradicional
             struct AstNode** body;
             int bodyCount;
         } forStmt;

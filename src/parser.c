@@ -1668,65 +1668,146 @@ static AstNode *parseIfStmt(void) {
 static AstNode *parseForStmt(void) {
     advanceToken(); // consume 'for'
     
-    if (currentToken.type != TOKEN_IDENTIFIER)
-        parserError("Expected iterator identifier in for loop", currentToken);
+    AstNode *forNode = createAstNode(AST_FOR_STMT);
     
-    char iterator[256];
-    strncpy(iterator, currentToken.lexeme, sizeof(iterator));
-    advanceToken();
-    
-    if (currentToken.type != TOKEN_IN)
-        parserError("Expected 'in' in for loop", currentToken);
-    advanceToken();
-    
-    if (currentToken.type != TOKEN_RANGE)
-        parserError("Expected 'range' in for loop", currentToken);
-    advanceToken();
-    
-    if (currentToken.type != TOKEN_LPAREN)
-        parserError("Expected '(' after 'range'", currentToken);
-    advanceToken();
-    
-    AstNode *rangeStart = parseExpression();
-    AstNode *rangeEnd = NULL;
-    
-    if (currentToken.type == TOKEN_COMMA) {
+    // Determinar el tipo de bucle for
+    if (currentToken.type == TOKEN_LPAREN) {
+        // Caso: for (init; condition; update) - estilo C tradicional
+        forNode->forStmt.forType = FOR_TRADITIONAL;
+        
+        advanceToken(); // consume '('
+        
+        // Parsear inicialización (opcional)
+        if (currentToken.type != TOKEN_SEMICOLON) {
+            forNode->forStmt.init = parseExpression();
+        } else {
+            forNode->forStmt.init = NULL;
+        }
+        
+        if (currentToken.type != TOKEN_SEMICOLON)
+            parserError("Expected ';' after initialization in for loop", currentToken);
+        advanceToken(); // consume ';'
+        
+        // Parsear condición (opcional)
+        if (currentToken.type != TOKEN_SEMICOLON) {
+            forNode->forStmt.condition = parseExpression();
+        } else {
+            forNode->forStmt.condition = NULL;
+        }
+        
+        if (currentToken.type != TOKEN_SEMICOLON)
+            parserError("Expected ';' after condition in for loop", currentToken);
+        advanceToken(); // consume ';'
+        
+        // Parsear actualización (opcional)
+        if (currentToken.type != TOKEN_RPAREN) {
+            forNode->forStmt.update = parseExpression();
+        } else {
+            forNode->forStmt.update = NULL;
+        }
+        
+        if (currentToken.type != TOKEN_RPAREN)
+            parserError("Expected ')' to close for loop declaration", currentToken);
+        advanceToken(); // consume ')'
+        
+        // Inicializar otros campos para que sean NULL/0
+        forNode->forStmt.iterator[0] = '\0';
+        forNode->forStmt.rangeStart = NULL;
+        forNode->forStmt.rangeEnd = NULL;
+        forNode->forStmt.rangeStep = NULL;
+        forNode->forStmt.collection = NULL;
+    } 
+    else if (currentToken.type == TOKEN_IDENTIFIER) {
+        // Guardar el nombre del iterador
+        strncpy(forNode->forStmt.iterator, currentToken.lexeme, sizeof(forNode->forStmt.iterator));
         advanceToken();
-        rangeEnd = parseExpression();
-    } else {
-        AstNode *zeroNode = createAstNode(AST_NUMBER_LITERAL);
-        zeroNode->numberLiteral.value = 0;
-        rangeEnd = rangeStart;
-        rangeStart = zeroNode;
+        
+        if (currentToken.type != TOKEN_IN)
+            parserError("Expected 'in' after iterator in for loop", currentToken);
+        advanceToken(); // consume 'in'
+        
+        if (currentToken.type == TOKEN_RANGE) {
+            // Caso: for i in range(start, end[, step])
+            forNode->forStmt.forType = FOR_RANGE;
+            advanceToken(); // consume 'range'
+            
+            if (currentToken.type != TOKEN_LPAREN)
+                parserError("Expected '(' after 'range'", currentToken);
+            advanceToken(); // consume '('
+            
+            // Parsear inicio del rango
+            forNode->forStmt.rangeStart = parseExpression();
+            
+            if (currentToken.type == TOKEN_COMMA) {
+                advanceToken(); // consume ','
+                // Parsear fin del rango
+                forNode->forStmt.rangeEnd = parseExpression();
+                
+                // Parsear paso (opcional)
+                if (currentToken.type == TOKEN_COMMA) {
+                    advanceToken(); // consume ','
+                    forNode->forStmt.rangeStep = parseExpression();
+                } else {
+                    forNode->forStmt.rangeStep = NULL;
+                }
+            } else {
+                // Solo se dio un valor: range(end)
+                // Inicio implícito en 0, el valor parsado es el fin
+                AstNode *zeroNode = createAstNode(AST_NUMBER_LITERAL);
+                zeroNode->numberLiteral.value = 0;
+                forNode->forStmt.rangeEnd = forNode->forStmt.rangeStart;
+                forNode->forStmt.rangeStart = zeroNode;
+                forNode->forStmt.rangeStep = NULL;
+            }
+            
+            if (currentToken.type != TOKEN_RPAREN)
+                parserError("Expected ')' after range arguments", currentToken);
+            advanceToken(); // consume ')'
+            
+            // Inicializar otros campos que no se usan
+            forNode->forStmt.collection = NULL;
+            forNode->forStmt.init = NULL;
+            forNode->forStmt.condition = NULL;
+            forNode->forStmt.update = NULL;
+        } 
+        else {
+            // Caso: for elem in collection
+            forNode->forStmt.forType = FOR_COLLECTION;
+            
+            // Parsear la colección a iterar
+            forNode->forStmt.collection = parseExpression();
+            
+            // Inicializar otros campos que no se usan
+            forNode->forStmt.rangeStart = NULL;
+            forNode->forStmt.rangeEnd = NULL;
+            forNode->forStmt.rangeStep = NULL;
+            forNode->forStmt.init = NULL;
+            forNode->forStmt.condition = NULL;
+            forNode->forStmt.update = NULL;
+        }
     }
-    
-    if (currentToken.type != TOKEN_RPAREN)
-        parserError("Expected ')' after range arguments", currentToken);
-    advanceToken();
+    else {
+        parserError("Invalid for loop syntax", currentToken);
+    }
     
     skipStatementSeparators();
     
-    AstNode **body = NULL;
-    int bodyCount = 0;
+    // Parsear el cuerpo del bucle for (común a todos los tipos)
+    forNode->forStmt.body = NULL;
+    forNode->forStmt.bodyCount = 0;
     
     while (currentToken.type != TOKEN_END && currentToken.type != TOKEN_EOF) {
         AstNode *stmt = parseStatement();
-        bodyCount++;
-        body = realloc(body, bodyCount * sizeof(AstNode*));
-        body[bodyCount - 1] = stmt;
+        forNode->forStmt.bodyCount++;
+        forNode->forStmt.body = memory_realloc(forNode->forStmt.body, 
+                                             forNode->forStmt.bodyCount * sizeof(AstNode*));
+        forNode->forStmt.body[forNode->forStmt.bodyCount - 1] = stmt;
         skipStatementSeparators();
     }
     
     if (currentToken.type != TOKEN_END)
         parserError("Expected 'end' to close for loop", currentToken);
-    advanceToken();
-    
-    AstNode *forNode = createAstNode(AST_FOR_STMT);
-    strncpy(forNode->forStmt.iterator, iterator, sizeof(forNode->forStmt.iterator));
-    forNode->forStmt.rangeStart = rangeStart;
-    forNode->forStmt.rangeEnd = rangeEnd;
-    forNode->forStmt.body = body;
-    forNode->forStmt.bodyCount = bodyCount;
+    advanceToken(); // consume 'end'
     
     return forNode;
 }
