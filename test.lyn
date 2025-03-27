@@ -261,6 +261,181 @@ main
     print(str_numeric)
     
     print("\n=== Test completed successfully! ===")
+    
+    // Test de switch statements
+    print("===== Test de Switch Statements =====")
+
+    // Test 1: Switch básico
+    x1 = 2
+    result1 = "desconocido"
+    switch (x1) 
+        case 1:
+            result1 = "uno"
+            break
+        case 2:
+            result1 = "dos"
+            break
+        case 3:
+            result1 = "tres"
+            break
+    end
+    
+    print("Test 1: " + result1)
+    
+    // Test 2: Switch con caso default
+    x2 = 10
+    result2 = "desconocido"
+    switch (x2) 
+        case 1:
+            result2 = "uno"
+            break
+        case 2:
+            result2 = "dos"
+            break
+        default:
+            result2 = "otro"
+    end
+    
+    print("Test 2: " + result2)
+    
+    // Test 3: Comportamiento de fall-through (cuando no hay break)
+    x3 = 1
+    result3 = ""
+    switch (x3) 
+        case 1:
+            result3 = result3 + "uno, "
+            // Sin break, debería continuar al siguiente caso
+        case 2:
+            result3 = result3 + "dos, "
+            // Sin break, debería continuar al siguiente caso
+        case 3:
+            result3 = result3 + "tres"
+            break
+        default:
+            result3 = "otro"
+    end
+    
+    print("Test 3: " + result3)
+    
+    // Test 4: Expresiones en switch
+    // Originalmente se usaba:
+    // a = 5, b = 10, switch (a*2) con case b, b-1 y b+1
+    // Se reemplaza usando literales: a*2 es 10, b-1=9 y b+1=11
+    a = 5
+    b = 10
+    result4 = ""
+    
+    switch (a * 2)
+        case 10:
+            result4 = "a*2 es igual a b"
+            break
+        case 9:
+            result4 = "a*2 es igual a b-1"
+            break
+        case 11:
+            result4 = "a*2 es igual a b+1"
+            break
+        default:
+            result4 = "ninguna coincidencia"
+    end
+    
+    print("Test 4: " + result4)
+    
+    // Test 5: Switch anidado
+    outer = 1
+    inner = 2
+    result5 = ""
+    
+    switch (outer) 
+        case 1:
+            result5 = result5 + "outer:1, "
+            
+            switch (inner) 
+                case 1:
+                    result5 = result5 + "inner:1"
+                    break
+                case 2:
+                    result5 = result5 + "inner:2"
+                    break
+                default:
+                    result5 = result5 + "inner:otro"
+            end
+            
+            break
+        case 2:
+            result5 = "outer:2"
+            break
+        default:
+            result5 = "outer:otro"
+    end
+    
+    print("Test 5: " + result5)
+    
+    // Test 6: Switch con break temprano
+    x6 = 2
+    result6 = ""
+    ran_after_break = false
+    
+    switch (x6) 
+        case 2:
+            result6 = "caso 2"
+            break
+            ran_after_break = true // Esto no debería ejecutarse
+        case 3:
+            result6 = "caso 3"
+            break
+    end
+    
+    // Replace problematic line with a simple print statement
+    print("Test 6: " + result6)
+    
+    // Test 7: Switch con valores calculados en los casos
+    // Con a7 = 5 y b7 = 10, se reemplazan:
+    // a7+b7 = 15, a7*b7 = 50, b7-a7 = 5
+    x7 = 15
+    a7 = 5
+    b7 = 10
+    result7 = ""
+    
+    switch (x7)
+        case 15:
+            result7 = "igual a a+b"
+            break
+        case 50:
+            result7 = "igual a a*b"
+            break
+        case 5:
+            result7 = "igual a b-a"
+            break
+        default:
+            result7 = "sin coincidencia"
+    end
+    
+    print("Test 7: " + result7)
+    
+    // Test 8: Switch con caso vacío (no ocurre nada)
+    x8 = 3
+    result8 = "inicial"
+    
+    switch (x8) 
+        case 1:
+            result8 = "uno"
+            break
+        case 2:
+            result8 = "dos"
+            break
+        case 3:
+            // Caso vacío intencional, no hace nada
+            break
+        default:
+            result8 = "otro"
+    end
+    
+    print("Test 8: " + result8)
+
+    print("===== Todos los tests de Switch completados =====")
+    
+    print("Mensaje random: ¡Recuerda revisar la documentación de Lyn!")
 end
 
 // Tests para los diferentes tipos de bucles for

@@ -387,6 +387,178 @@ int main() {
     sprintf(str_numeric, "The answer is: %d", int_val);
     printf("%s\n", str_numeric);
     printf("%s\n", "\n=== Test completed successfully! ===");
+    printf("%s\n", "===== Test de Switch Statements =====");
+    int x1 __attribute__((unused)) = 2;
+    const char* result1 __attribute__((unused)) =     "desconocido"    ;
+    switch (    x1    ) {
+        case         1        :
+            result1 =             "uno"            ;
+            break;
+        case         2        :
+            result1 =             "dos"            ;
+            break;
+        case         3        :
+            result1 =             "tres"            ;
+            break;
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s",         "Test 1: "        ,         result1        );
+        printf("%s\n", _print_buffer);
+    }
+    int x2 __attribute__((unused)) = 10;
+    const char* result2 __attribute__((unused)) =     "desconocido"    ;
+    switch (    x2    ) {
+        case         1        :
+            result2 =             "uno"            ;
+            break;
+        case         2        :
+            result2 =             "dos"            ;
+            break;
+        default:
+            result2 =             "otro"            ;
+            break;
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s",         "Test 2: "        ,         result2        );
+        printf("%s\n", _print_buffer);
+    }
+    int x3 __attribute__((unused)) = 1;
+    const char* result3 __attribute__((unused)) =     ""    ;
+    switch (    x3    ) {
+        case         1        :
+            result3 =             concat_any(            result3            ,             "uno, "            )            ;
+            break;
+        case         2        :
+            result3 =             concat_any(            result3            ,             "dos, "            )            ;
+            break;
+        case         3        :
+            result3 =             concat_any(            result3            ,             "tres"            )            ;
+            break;
+        default:
+            result3 =             "otro"            ;
+            break;
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s",         "Test 3: "        ,         result3        );
+        printf("%s\n", _print_buffer);
+    }
+    int a __attribute__((unused)) = 5;
+    int b __attribute__((unused)) = 10;
+    const char* result4 __attribute__((unused)) =     ""    ;
+    switch (    (    a     *     2    )    ) {
+        case         10        :
+            result4 =             "a*2 es igual a b"            ;
+            break;
+        case         9        :
+            result4 =             "a*2 es igual a b-1"            ;
+            break;
+        case         11        :
+            result4 =             "a*2 es igual a b+1"            ;
+            break;
+        default:
+            result4 =             "ninguna coincidencia"            ;
+            break;
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s",         "Test 4: "        ,         result4        );
+        printf("%s\n", _print_buffer);
+    }
+    int outer __attribute__((unused)) = 1;
+    int inner __attribute__((unused)) = 2;
+    const char* result5 __attribute__((unused)) =     ""    ;
+    switch (    outer    ) {
+        case         1        :
+            result5 =             concat_any(            result5            ,             "outer:1, "            )            ;
+            switch (            inner            ) {
+                case                 1                :
+                    result5 =                     concat_any(                    result5                    ,                     "inner:1"                    )                    ;
+                    break;
+                case                 2                :
+                    result5 =                     concat_any(                    result5                    ,                     "inner:2"                    )                    ;
+                    break;
+                default:
+                    result5 =                     concat_any(                    result5                    ,                     "inner:otro"                    )                    ;
+                    break;
+            }
+            break;
+        case         2        :
+            result5 =             "outer:2"            ;
+            break;
+        default:
+            result5 =             "outer:otro"            ;
+            break;
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s",         "Test 5: "        ,         result5        );
+        printf("%s\n", _print_buffer);
+    }
+    int x6 __attribute__((unused)) = 2;
+    const char* result6 __attribute__((unused)) =     ""    ;
+    bool ran_after_break __attribute__((unused)) =     false    ;
+    switch (    x6    ) {
+        case         2        :
+            result6 =             "caso 2"            ;
+            ran_after_break =             true            ;
+            break;
+        case         3        :
+            result6 =             "caso 3"            ;
+            break;
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s",         "Test 6: "        ,         result6        );
+        printf("%s\n", _print_buffer);
+    }
+    int x7 __attribute__((unused)) = 15;
+    int a7 __attribute__((unused)) = 5;
+    int b7 __attribute__((unused)) = 10;
+    const char* result7 __attribute__((unused)) =     ""    ;
+    switch (    x7    ) {
+        case         15        :
+            result7 =             "igual a a+b"            ;
+            break;
+        case         50        :
+            result7 =             "igual a a*b"            ;
+            break;
+        case         5        :
+            result7 =             "igual a b-a"            ;
+            break;
+        default:
+            result7 =             "sin coincidencia"            ;
+            break;
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s",         "Test 7: "        ,         result7        );
+        printf("%s\n", _print_buffer);
+    }
+    int x8 __attribute__((unused)) = 3;
+    const char* result8 __attribute__((unused)) =     "inicial"    ;
+    switch (    x8    ) {
+        case         1        :
+            result8 =             "uno"            ;
+            break;
+        case         2        :
+            result8 =             "dos"            ;
+            break;
+        case         3        :
+            break;
+        default:
+            result8 =             "otro"            ;
+            break;
+    }
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%s",         "Test 8: "        ,         result8        );
+        printf("%s\n", _print_buffer);
+    }
+    printf("%s\n", "===== Todos los tests de Switch completados =====");
+    printf("%s\n", "Mensaje random: ¡Recuerda revisar la documentación de Lyn!");
     // Ensure test function is called
     test_function();
     return 0;

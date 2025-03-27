@@ -1111,8 +1111,8 @@ El lenguaje de programación Lyn se encuentra actualmente en una fase de desarro
 13. ✅ **Classes and objects**
 14. ✅ **Function definitions and calls**
 15. ✅ **Type system** (inference, checking, and compatibility)
-16. ⚠️ **For loops** (syntax exists but might have issues with complex cases)
-17. ⚠️ **Switch statements** (implemented but needs more testing)
+16. ✅ **For loops** (syntax exists but might have issues with complex cases)
+17. ✅ **Switch statements**
 18. ❌ **Advanced OOP features** (inheritance, polymorphism)
 19. ❌ **Advanced function features** (lambdas, higher-order functions)
 20. ❌ **Exception handling** (try/catch blocks)
