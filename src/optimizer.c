@@ -1,3 +1,16 @@
+/**
+ * @file optimizer.c
+ * @brief AST optimization implementation for the Lyn compiler
+ * 
+ * This file implements various optimization passes for the Abstract Syntax Tree (AST):
+ * - Constant folding
+ * - Dead code elimination
+ * - Redundant statement removal
+ * - Constant propagation
+ * - Common subexpression elimination
+ * - Scope analysis
+ */
+
 #include "optimizer.h"
 #include "ast.h"
 #include "error.h"
@@ -7,13 +20,16 @@
 #include <string.h>
 #include <stdbool.h>
 
+/** Current optimization level */
 static OptimizerLevel currentLevel = OPT_LEVEL_0;
-static int debug_level = 1;  // Default debug level
 
-// Statistics for optimizations performed
+/** Default debug level for the optimizer */
+static int debug_level = 1;
+
+/** Statistics tracking for optimizations performed */
 static OptimizationStats stats = {0};
 
-// Optimizer options - enabled by default based on optimization level
+/** Optimizer options - enabled by default based on optimization level */
 static OptimizerOptions options = {
     .enable_constant_folding = true,
     .enable_dead_code_elimination = true,
@@ -23,28 +39,53 @@ static OptimizerOptions options = {
     .enable_scope_analysis = true
 };
 
+/**
+ * @brief Sets the optimizer options
+ * 
+ * @param new_options New optimizer options to apply
+ */
 void optimizer_set_options(OptimizerOptions new_options) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)optimizer_set_options);
     options = new_options;
     logger_log(LOG_INFO, "Optimizer options updated");
 }
 
+/**
+ * @brief Gets the current optimizer options
+ * 
+ * @return OptimizerOptions Current optimizer options
+ */
 OptimizerOptions optimizer_get_options(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)optimizer_get_options);
     return options;
 }
 
+/**
+ * @brief Sets the debug level for the optimizer
+ * 
+ * @param level New debug level (0=minimum, 3=maximum)
+ */
 void optimizer_set_debug_level(int level) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)optimizer_set_debug_level);
     debug_level = level;
     logger_log(LOG_INFO, "Optimizer debug level set to %d", level);
 }
 
+/**
+ * @brief Gets the current debug level for the optimizer
+ * 
+ * @return int Current debug level (0=minimum, 3=maximum)
+ */
 int optimizer_get_debug_level(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)optimizer_get_debug_level);
     return debug_level;
 }
 
+/**
+ * @brief Initializes the optimizer with a specified optimization level
+ * 
+ * @param level Optimization level to use
+ */
 void optimizer_init(OptimizerLevel level) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)optimizer_init);
     
@@ -55,56 +96,66 @@ void optimizer_init(OptimizerLevel level) {
     logger_log(LOG_INFO, "Optimizer initialized with level %d", level);
 }
 
+/**
+ * @brief Gets the current optimization statistics
+ * 
+ * @return OptimizationStats Current optimization statistics
+ */
 OptimizationStats optimizer_get_stats(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)optimizer_get_stats);
     return stats;
 }
 
 /**
- * Symbol table entry for variable scope analysis and constant propagation
+ * @brief Symbol table entry for variable scope analysis and constant propagation
  */
 typedef struct SymbolEntry {
-    char name[256];                  // Variable name
-    int scope_level;                 // Scope nesting level
-    bool is_constant;                // Whether it holds a constant value
-    AstNode* constant_value;         // If constant, its value
-    AstNode* declaration_node;       // Declaration node
-    struct SymbolEntry* next;        // Next entry in same scope
+    char name[256];                  ///< Variable name
+    int scope_level;                 ///< Scope nesting level
+    bool is_constant;                ///< Whether it holds a constant value
+    AstNode* constant_value;         ///< If constant, its value
+    AstNode* declaration_node;       ///< Declaration node
+    struct SymbolEntry* next;        ///< Next entry in same scope
 } SymbolEntry;
 
 /**
- * Symbol table for scope analysis
+ * @brief Symbol table for scope analysis
  */
 typedef struct {
-    SymbolEntry** scopes;            // Array of scope entry points
-    int scope_count;                 // Number of scopes
-    int current_scope;               // Current scope level
+    SymbolEntry** scopes;            ///< Array of scope entry points
+    int scope_count;                 ///< Number of scopes
+    int current_scope;               ///< Current scope level
 } SymbolTable;
 
 /**
- * Expression hash table entry for common subexpression elimination
+ * @brief Expression hash table entry for common subexpression elimination
  */
 typedef struct ExprHashEntry {
-    AstNode* expr;                   // Expression node
-    AstNode* var_ref;                // Variable that holds the result
-    struct ExprHashEntry* next;      // Next entry in hash bucket
+    AstNode* expr;                   ///< Expression node
+    AstNode* var_ref;                ///< Variable that holds the result
+    struct ExprHashEntry* next;      ///< Next entry in hash bucket
 } ExprHashEntry;
 
 /**
- * Expression hash table for common subexpression elimination
+ * @brief Expression hash table for common subexpression elimination
  */
 typedef struct {
-    ExprHashEntry** buckets;         // Hash buckets
-    int bucket_count;                // Number of buckets
-    int entry_count;                 // Number of entries
+    ExprHashEntry** buckets;         ///< Hash buckets
+    int bucket_count;                ///< Number of buckets
+    int entry_count;                 ///< Number of entries
 } ExprHashTable;
 
-// Global symbol and expression tables
+/** Global symbol table for scope analysis */
 static SymbolTable symbol_table = {0};
+
+/** Global expression hash table for common subexpression elimination */
 static ExprHashTable expr_table = {0};
 
 /**
- * Initialize symbol table
+ * @brief Initializes the symbol table
+ * 
+ * Frees any existing table and creates a new empty table with a global scope.
+ * Also initializes the expression hash table.
  */
 static void init_symbol_table(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)init_symbol_table);
@@ -136,7 +187,9 @@ static void init_symbol_table(void) {
 }
 
 /**
- * Enter a new scope in the symbol table
+ * @brief Enters a new scope in the symbol table
+ * 
+ * Creates a new scope level and updates the current scope pointer.
  */
 static void enter_scope(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)enter_scope);
@@ -153,7 +206,10 @@ static void enter_scope(void) {
 }
 
 /**
- * Exit current scope
+ * @brief Exits the current scope
+ * 
+ * Frees all symbols in the current scope and updates the current scope pointer.
+ * Cannot exit the global scope (level 0).
  */
 static void exit_scope(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)exit_scope);
@@ -320,7 +376,17 @@ static void clear_expr_table(void) {
 }
 
 /**
- * Compute hash for an expression
+ * @brief Computes a hash value for an expression
+ * 
+ * Creates a hash value based on the expression's type and contents.
+ * For numeric literals, uses the bits of the double value.
+ * For strings and identifiers, uses a rolling hash of the characters.
+ * For binary operations, combines hashes of both operands.
+ * For function calls, hashes the name and argument count.
+ * For member access, combines hashes of object and member name.
+ * 
+ * @param expr AST node to hash
+ * @return unsigned int Hash value modulo bucket count
  */
 static unsigned int hash_expression(AstNode* expr) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)hash_expression);
@@ -403,7 +469,18 @@ static unsigned int hash_expression(AstNode* expr) {
 }
 
 /**
- * Check if two expressions are equivalent
+ * @brief Checks if two expressions are equivalent
+ * 
+ * Compares two AST nodes for structural equality.
+ * For literals, compares values directly.
+ * For strings and identifiers, compares content.
+ * For binary operations, compares operator and both operands.
+ * For function calls, compares name, argument count, and all arguments.
+ * For member access, compares object and member name.
+ * 
+ * @param expr1 First expression to compare
+ * @param expr2 Second expression to compare
+ * @return bool true if expressions are equivalent
  */
 static bool are_expressions_equal(AstNode* expr1, AstNode* expr2) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)are_expressions_equal);
@@ -449,7 +526,14 @@ static bool are_expressions_equal(AstNode* expr1, AstNode* expr2) {
 }
 
 /**
- * Add expression to hash table
+ * @brief Adds an expression to the hash table
+ * 
+ * If the expression already exists in the table, returns the variable reference
+ * that holds its result. Otherwise, adds the new expression and returns NULL.
+ * 
+ * @param expr Expression to add
+ * @param var_ref Variable reference that holds the result
+ * @return AstNode* Existing variable reference if found, NULL if added new
  */
 static AstNode* add_expr_to_table(AstNode* expr, AstNode* var_ref) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)add_expr_to_table);
@@ -485,7 +569,13 @@ static AstNode* add_expr_to_table(AstNode* expr, AstNode* var_ref) {
 }
 
 /**
- * Create a deep copy of a node for constant propagation
+ * @brief Creates a deep copy of an AST node for constant propagation
+ * 
+ * Makes a shallow copy of the node structure. This is sufficient for constant
+ * propagation since we only need to copy literal nodes.
+ * 
+ * @param node AST node to clone
+ * @return AstNode* New copy of the node, or NULL if allocation fails
  */
 static AstNode* clone_node(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)clone_node);
@@ -504,7 +594,14 @@ static AstNode* clone_node(AstNode* node) {
 }
 
 /**
- * Performs variable scope analysis and builds symbol table
+ * @brief Performs variable scope analysis and builds symbol table
+ * 
+ * Traverses the AST to build a symbol table tracking variable declarations,
+ * scopes, and constant values. This information is used by other optimization
+ * passes like constant propagation.
+ * 
+ * @param node AST node to analyze
+ * @return AstNode* Modified AST with scope information
  */
 static AstNode* scope_analysis(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)scope_analysis);
@@ -703,7 +800,13 @@ static AstNode* scope_analysis(AstNode* node) {
 }
 
 /**
- * Performs constant propagation (replace variable references with known constants)
+ * @brief Performs constant propagation optimization
+ * 
+ * Replaces variable references with their known constant values when possible.
+ * This optimization is enabled at optimization level 2 and above.
+ * 
+ * @param node AST node to optimize
+ * @return AstNode* Modified AST with constants propagated
  */
 static AstNode* constant_propagation(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)constant_propagation);
@@ -824,7 +927,13 @@ static AstNode* constant_propagation(AstNode* node) {
 }
 
 /**
- * Performs constant folding (evaluating constant expressions)
+ * @brief Performs constant folding optimization
+ * 
+ * Evaluates constant expressions at compile time, replacing them with their
+ * computed values. This optimization is enabled at optimization level 1 and above.
+ * 
+ * @param node AST node to optimize
+ * @return AstNode* Modified AST with constant expressions folded
  */
 static AstNode* constant_folding(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)constant_folding);
@@ -943,7 +1052,17 @@ static AstNode* constant_folding(AstNode* node) {
 }
 
 /**
- * Eliminates dead code (code that will never be executed)
+ * @brief Performs dead code elimination optimization
+ * 
+ * Removes code that can never be executed, such as:
+ * - Code after an unconditional return
+ * - Unreachable branches in if statements with constant conditions
+ * - Bodies of while loops with false conditions
+ * 
+ * This optimization is enabled at optimization level 2 and above.
+ * 
+ * @param node AST node to optimize
+ * @return AstNode* Modified AST with dead code removed
  */
 static AstNode* dead_code_elimination(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)dead_code_elimination);
@@ -1066,7 +1185,16 @@ static AstNode* dead_code_elimination(AstNode* node) {
 }
 
 /**
- * Removes redundant statements like self-assignments
+ * @brief Removes redundant statements from the AST
+ * 
+ * Eliminates unnecessary statements like:
+ * - Self-assignments (var = var)
+ * - Problematic type conversions
+ * 
+ * This optimization is enabled at optimization level 1 and above.
+ * 
+ * @param node AST node to optimize
+ * @return AstNode* Modified AST with redundant statements removed
  */
 static AstNode* remove_redundant_statements(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)remove_redundant_statements);
@@ -1199,6 +1327,22 @@ static AstNode* remove_redundant_statements(AstNode* node) {
     return node;
 }
 
+/**
+ * @brief Main entry point for AST optimization
+ * 
+ * Applies a series of optimization passes to the AST based on the current
+ * optimization level:
+ * 
+ * Level 1:
+ * - Constant folding
+ * - Redundant statement removal
+ * 
+ * Level 2:
+ * - Dead code elimination
+ * 
+ * @param ast AST to optimize
+ * @return AstNode* Optimized AST, or NULL if input is NULL
+ */
 AstNode* optimize_ast(AstNode* ast) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)optimize_ast);
     

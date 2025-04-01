@@ -1,4 +1,19 @@
-// Primero incluir los archivos de cabecera necesarios
+/**
+ * @file compiler.c
+ * @brief Implementation of the Lyn compiler that generates C code
+ * 
+ * This file contains the implementation of the Lyn compiler that translates
+ * Lyn source code into C code. It handles all aspects of compilation including:
+ * - AST traversal and code generation
+ * - Type checking and inference
+ * - Variable management
+ * - Function compilation
+ * - Control flow structures
+ * - Object-oriented features
+ * - Error handling and reporting
+ */
+
+// First include necessary header files
 #include "compiler.h"
 #include "ast.h"
 #include "error.h"
@@ -10,28 +25,30 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdarg.h>  // Para va_list
-#include <setjmp.h>  // Para setjmp/longjmp
+#include <stdarg.h>  // For va_list
+#include <setjmp.h>  // For setjmp/longjmp
 
-// Definición de MAX_VARIABLES
+// Definition of MAX_VARIABLES
 #define MAX_VARIABLES 256
 
-// Estructuras antes del código principal
+/**
+ * @brief Structure to store information about variables during compilation
+ */
 typedef struct {
-    char name[256];
-    char type[64];
-    bool isDeclared;
-    bool isPointer;
+    char name[256];      // Variable name
+    char type[64];       // Variable type
+    bool isDeclared;     // Whether the variable has been declared
+    bool isPointer;      // Whether the variable is a pointer type
 } VariableInfo;
 
-// Variables estáticas
-static FILE* outputFile = NULL;
-static int indentLevel = 0;
-static VariableInfo variables[MAX_VARIABLES];
-static int variableCount = 0;
-static int debug_level = 0;  // Nivel de depuración
+// Static variables
+static FILE* outputFile = NULL;           // Output file for generated C code
+static int indentLevel = 0;               // Current indentation level
+static VariableInfo variables[MAX_VARIABLES];  // Table of variables
+static int variableCount = 0;             // Number of variables in the table
+static int debug_level = 0;               // Debug level for compiler
 
-// Estadísticas del compilador
+// Compiler statistics
 static CompilerStats stats = {0};
 
 // Forward declare all internal functions to avoid ordering issues
@@ -49,8 +66,8 @@ static void compileFor(AstNode* node);
 static void compileLambda(AstNode* node);
 static void compileClass(AstNode* node);
 static void compileStringLiteral(AstNode* node);
-static void compileWhile(AstNode* node);  // Añadida para el caso AST_WHILE_STMT
-static void compileDoWhile(AstNode* node); // Añadida para el caso AST_DO_WHILE_STMT
+static void compileWhile(AstNode* node);
+static void compileDoWhile(AstNode* node);
 static void emitConstants(void);
 static void generatePreamble(void);
 static const char* inferType(AstNode* node);
@@ -69,24 +86,39 @@ static bool areTypesCompatible(const char* targetType, const char* sourceType);
 static const char* to_string(double value);
 static char* concat_any(const char* s1, const char* s2);
 
-// Establece el nivel de depuración
+/**
+ * @brief Sets the debug level for the compiler
+ * 
+ * @param level The new debug level (0=minimum, 3=maximum)
+ */
 void compiler_set_debug_level(int level) {
     debug_level = level;
     logger_log(LOG_INFO, "Compiler debug level set to %d", level);
 }
 
-// Obtiene estadísticas del compilador
+/**
+ * @brief Gets the current compiler statistics
+ * 
+ * @return CompilerStats Current statistics about the compilation process
+ */
 CompilerStats compiler_get_stats(void) {
     return stats;
 }
 
-/* getCTypeString: retorna el nombre del tipo (almacenado en typeName) o "void*" si es NULL */
+/**
+ * @brief Gets the C type string representation of a Type
+ * 
+ * @param type The Type to convert
+ * @return const char* String representation of the type, or "void*" if NULL
+ */
 static const char* getCTypeString(Type* type) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)getCTypeString);
     return type ? type->typeName : "void*";
 }
 
-/* Emite constantes especiales */
+/**
+ * @brief Emits constant definitions needed by the generated code
+ */
 static void emitConstants(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)emitConstants);
     logger_log(LOG_DEBUG, "Emitting constant definitions");
@@ -96,19 +128,22 @@ static void emitConstants(void) {
     emitLine("");
 }
 
-/* Genera el preámbulo con los #include necesarios */
+/**
+ * @brief Generates the preamble with necessary includes and helper functions
+ */
 static void generatePreamble(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)generatePreamble);
     logger_log(LOG_DEBUG, "Generating preamble with includes");
-    emitLine("#include <stddef.h>");   // Para NULL
-    emitLine("#include <stdbool.h>");  // Para bool, true, false
-    emitLine("#include <stdio.h>");    // Para printf, etc.
-    emitLine("#include <stdlib.h>");   // Para malloc, etc.
-    emitLine("#include <string.h>");   // Para strcmp, etc.
-    emitLine("#include <math.h>");     // Para sqrt, etc.
-    emitLine("#include <setjmp.h>");   // Para try/catch con setjmp/longjmp
+    emitLine("#include <stddef.h>");   // For NULL
+    emitLine("#include <stdbool.h>");  // For bool, true, false
+    emitLine("#include <stdio.h>");    // For printf, etc.
+    emitLine("#include <stdlib.h>");   // For malloc, etc.
+    emitLine("#include <string.h>");   // For strcmp, etc.
+    emitLine("#include <math.h>");     // For sqrt, etc.
+    emitLine("#include <setjmp.h>");   // For try/catch with setjmp/longjmp
     emitLine("");
     emitConstants();
+    
     // Insert helper function definitions for string concatenation
     emitLine("static const char* to_string(double value) {");
     indent();
@@ -118,6 +153,7 @@ static void generatePreamble(void) {
     outdent();
     emitLine("}");
     emitLine("");
+    
     emitLine("static char* concat_any(const char* s1, const char* s2) {");
     indent();
     emitLine("int len = strlen(s1) + strlen(s2) + 1;");
@@ -131,10 +167,14 @@ static void generatePreamble(void) {
     emitLine("return result;");
     outdent();
     emitLine("}");
-    // Aquí puedes agregar más definiciones si lo necesitas
 }
 
-/* Funciones para manejar la tabla de variables */
+/**
+ * @brief Adds a variable to the variable table
+ * 
+ * @param name Name of the variable
+ * @param type Type of the variable
+ */
 static void addVariable(const char* name, const char* type) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)addVariable);
     
@@ -2079,7 +2119,4 @@ void check_function_call_types(AstNode* node) {
             }
         }
     }
-    
-    // Add similar checks for other known functions
-    // ...
 }

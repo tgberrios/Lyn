@@ -1,24 +1,39 @@
 #include "ast.h"
-#include "memory.h"   // Usa malloc/free o tus funciones personalizadas
+#include "memory.h"   // Uses malloc/free or custom memory functions
 #include "error.h"
 #include "logger.h"
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>    // Para fprintf, stderr
+#include <stdio.h>    // For fprintf, stderr
 #include <stdint.h>   // For uintptr_t
 #include <stdbool.h>
 
-// Nivel de depuración: 0=mínimo, 3=máximo
+/**
+ * @file ast.c
+ * @brief Implementation of the Abstract Syntax Tree (AST) system
+ * 
+ * This file implements the core functionality for managing Abstract Syntax Trees
+ * in the Lyn compiler. It provides functions for creating, manipulating, and
+ * managing AST nodes, including memory management, debugging, and tree traversal.
+ */
+
+// Debug level: 0=minimum, 3=maximum
 static int debug_level = 1;
 
-// Estadísticas de uso del AST
+// AST usage statistics
 static AstStats stats = {0};
 
-// Inicializa el sistema AST
+/**
+ * @brief Initializes the AST system
+ * 
+ * This function initializes the AST system by resetting all statistics
+ * and setting up the initial state. It should be called before any AST
+ * operations are performed.
+ */
 void ast_init(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)ast_init);
     
-    // Reiniciar estadísticas
+    // Reset statistics
     stats.nodes_created = 0;
     stats.nodes_freed = 0;
     stats.max_depth = 0;
@@ -29,7 +44,12 @@ void ast_init(void) {
     }
 }
 
-// Limpia y libera recursos del sistema AST
+/**
+ * @brief Cleans up and frees resources from the AST system
+ * 
+ * This function performs cleanup operations on the AST system,
+ * logging final statistics about node creation and memory usage.
+ */
 void ast_cleanup(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)ast_cleanup);
     
@@ -39,7 +59,11 @@ void ast_cleanup(void) {
     }
 }
 
-// Establece el nivel de depuración para el sistema AST
+/**
+ * @brief Sets the debug level for the AST system
+ * 
+ * @param level The new debug level (0=minimum, 3=maximum)
+ */
 void ast_set_debug_level(int level) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)ast_set_debug_level);
     
@@ -47,20 +71,37 @@ void ast_set_debug_level(int level) {
     logger_log(LOG_INFO, "AST debug level set to %d", level);
 }
 
-// Obtiene el nivel de depuración actual
+/**
+ * @brief Gets the current debug level
+ * 
+ * @return int The current debug level
+ */
 int ast_get_debug_level(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)ast_get_debug_level);
     
     return debug_level;
 }
 
-// Obtiene estadísticas de uso de nodos AST
+/**
+ * @brief Gets AST node usage statistics
+ * 
+ * @return AstStats Current statistics about AST node usage
+ */
 AstStats ast_get_stats(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)ast_get_stats);
     
     return stats;
 }
 
+/**
+ * @brief Creates a new AST node of the specified type
+ * 
+ * This function allocates and initializes a new AST node with the given type.
+ * It also updates the AST statistics and performs memory allocation checks.
+ * 
+ * @param type The type of AST node to create
+ * @return AstNode* The newly created node, or NULL if allocation fails
+ */
 AstNode* createAstNode(AstNodeType type) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)createAstNode);
     
@@ -72,7 +113,7 @@ AstNode* createAstNode(AstNodeType type) {
     }
     
     node->type = type;
-    node->inferredType = NULL;  // No tipo inferido inicialmente
+    node->inferredType = NULL;  // No inferred type initially
     
     stats.nodes_created++;
     stats.memory_used += sizeof(AstNode);
@@ -84,7 +125,15 @@ AstNode* createAstNode(AstNodeType type) {
     return node;
 }
 
-// Función auxiliar que determina si un nodo tiene memoria asignada dinámicamente
+/**
+ * @brief Determines if a node has dynamically allocated memory
+ * 
+ * This helper function checks if an AST node has any dynamically allocated
+ * memory that needs to be freed.
+ * 
+ * @param node The AST node to check
+ * @return bool true if the node has allocated memory, false otherwise
+ */
 static bool hasAllocatedMemory(AstNode* node) {
     if (!node) return false;
     
@@ -123,7 +172,7 @@ static bool hasAllocatedMemory(AstNode* node) {
         case AST_CURRY_EXPR:
             return node->curryExpr.appliedArgs != NULL;
         case AST_ASPECT_DEF:
-            return true; // Se asume que la memoria se asigna en los arrays pointcuts/advice
+            return true; // Memory is assumed to be allocated in pointcuts/advice arrays
         case AST_ADVICE:
             return node->advice.body != NULL;
         case AST_PATTERN_MATCH:
@@ -135,7 +184,15 @@ static bool hasAllocatedMemory(AstNode* node) {
     }
 }
 
-// Función para liberar un nodo AST y todos sus hijos
+/**
+ * @brief Frees an AST node and all its children
+ * 
+ * This function recursively frees an AST node and all its child nodes,
+ * ensuring proper memory cleanup. It includes safety checks for invalid
+ * memory addresses and node types.
+ * 
+ * @param node The AST node to free
+ */
 void freeAstNode(AstNode* node) {
     if (!node) return;
     
@@ -159,6 +216,7 @@ void freeAstNode(AstNode* node) {
     
     error_push_debug(__func__, __FILE__, __LINE__, (void*)freeAstNode);
     
+    // Free child nodes based on node type
     switch (node->type) {
         case AST_PROGRAM:
             for (int i = 0; i < node->program.statementCount; i++) {
@@ -428,13 +486,27 @@ void freeAstNode(AstNode* node) {
     }
 }
 
+/**
+ * @brief Frees an entire AST tree
+ * 
+ * This function frees the entire AST tree starting from the root node.
+ * 
+ * @param root The root node of the AST tree to free
+ */
 void freeAst(AstNode* root) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)freeAst);
     logger_log(LOG_DEBUG, "Starting to free AST tree");
     freeAstNode(root);
 }
 
-// Libera un programa AST completo
+/**
+ * @brief Frees a complete AST program
+ * 
+ * This function frees an AST program node and all its contents,
+ * ensuring proper cleanup of all program-related nodes.
+ * 
+ * @param program The program node to free
+ */
 void freeAstProgram(AstNode* program) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)freeAstProgram);
     
@@ -451,7 +523,15 @@ void freeAstProgram(AstNode* program) {
     }
 }
 
-// Imprime un nodo AST de forma recursiva con sangría para depuración
+/**
+ * @brief Prints an AST node recursively with indentation for debugging
+ * 
+ * This function provides a human-readable representation of the AST,
+ * useful for debugging and understanding the program structure.
+ * 
+ * @param node The AST node to print
+ * @param indent The current indentation level
+ */
 void printAst(AstNode* node, int indent) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)printAst);
     
@@ -467,6 +547,7 @@ void printAst(AstNode* node, int indent) {
     
     const char* typeStr = astNodeTypeToString(node->type);
     
+    // Print node based on its type
     switch (node->type) {
         case AST_PROGRAM:
             printf("Program (%d statements)\n", node->program.statementCount);
@@ -623,7 +704,15 @@ void printAst(AstNode* node, int indent) {
     }
 }
 
-// Crea una copia superficial de un nodo AST
+/**
+ * @brief Creates a shallow copy of an AST node
+ * 
+ * This function creates a copy of an AST node without recursively
+ * copying its children. It's useful for temporary node manipulation.
+ * 
+ * @param node The AST node to copy
+ * @return AstNode* A copy of the node, or NULL if allocation fails
+ */
 AstNode* copyAstNode(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)copyAstNode);
     
@@ -639,7 +728,15 @@ AstNode* copyAstNode(AstNode* node) {
     return copy;
 }
 
-// Convierte un tipo de nodo a su representación en string para debug
+/**
+ * @brief Converts an AST node type to its string representation
+ * 
+ * This function provides a human-readable string representation
+ * of an AST node type for debugging purposes.
+ * 
+ * @param type The AST node type to convert
+ * @return const char* String representation of the node type
+ */
 const char* astNodeTypeToString(AstNodeType type) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)astNodeTypeToString);
     

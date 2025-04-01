@@ -1,3 +1,15 @@
+/**
+ * @file aspect_weaver.c
+ * @brief Implementation of the aspect weaving system for the Lyn language
+ * 
+ * This file implements the Aspect-Oriented Programming (AOP) system
+ * for the Lyn language. The weaver is responsible for:
+ * 1. Collecting all aspects defined in the program
+ * 2. Identifying joinpoints that match the pointcuts
+ * 3. Applying the corresponding advice at the joinpoints
+ * 4. Maintaining weaving process statistics
+ */
+
 #include "aspect_weaver.h"
 #include "logger.h"
 #include "error.h"
@@ -8,23 +20,32 @@
 // Usamos la enumeración AdviceType definida en ast.h en lugar de defines
 #include "ast.h"
 
-// Definiciones de los tipos de advice
+/**
+ * @brief Types of advice supported by the system
+ * 
+ * ADVICE_BEFORE: Executes before the joinpoint
+ * ADVICE_AFTER: Executes after the joinpoint
+ * ADVICE_AROUND: Executes around the joinpoint (can control execution)
+ */
 #define ADVICE_BEFORE 0
 #define ADVICE_AFTER  1
 #define ADVICE_AROUND 2
 
-// Nivel de depuración del weaver
+/** Weaver debug level (0 = no logs, 1 = basic, 2 = detailed, 3 = very detailed) */
 static int debug_level = 0;
 
-// Estadísticas del proceso de weaving
+/** Weaving process statistics */
 static WeavingStats stats = {0};
 
-// Lista de aspectos encontrados durante el análisis
+/**
+ * @brief Structure to maintain a list of found aspects
+ */
 typedef struct {
-    AstNode** aspects;
-    int count;
+    AstNode** aspects;  ///< Array of AST nodes representing aspects
+    int count;         ///< Number of aspects found
 } AspectList;
 
+/** Global list of aspects found during analysis */
 static AspectList aspect_list = {NULL, 0};
 
 // Prototipos de funciones internas
@@ -34,13 +55,21 @@ static bool matches_pointcut(const char* pattern, const char* target);
 static AstNode* clone_advice_body(AstNode* advice);
 static void insert_advice(AstNode* target, AstNode* advice, int position);
 
+/**
+ * @brief Initializes the aspect weaving system
+ * 
+ * This function:
+ * 1. Resets weaver statistics
+ * 2. Cleans up the aspect list
+ * 3. Prepares the system for a new weaving process
+ */
 void weaver_init(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)weaver_init);
     
-    // Reiniciar estadísticas
+    // Reset statistics
     stats = (WeavingStats){0};
     
-    // Limpiar lista de aspectos
+    // Clean up aspect list
     if (aspect_list.aspects) {
         free(aspect_list.aspects);
         aspect_list.aspects = NULL;
@@ -50,6 +79,15 @@ void weaver_init(void) {
     logger_log(LOG_INFO, "Aspect weaver initialized");
 }
 
+/**
+ * @brief Sets the weaver's debug level
+ * 
+ * @param level Debug level (0-3)
+ *             0: No logs
+ *             1: Basic logs
+ *             2: Detailed logs
+ *             3: Very detailed logs
+ */
 void weaver_set_debug_level(int level) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)weaver_set_debug_level);
     
@@ -57,6 +95,16 @@ void weaver_set_debug_level(int level) {
     logger_log(LOG_INFO, "Aspect weaver debug level set to %d", level);
 }
 
+/**
+ * @brief Processes the AST to apply aspects
+ * 
+ * This function is the main entry point of the weaver. It performs two steps:
+ * 1. Collects all aspects defined in the program
+ * 2. Applies the found aspects to their corresponding joinpoints
+ * 
+ * @param ast Root AST node of the program
+ * @return true if the process was successful, false otherwise
+ */
 bool weaver_process(AstNode* ast) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)weaver_process);
     
@@ -67,19 +115,19 @@ bool weaver_process(AstNode* ast) {
     
     logger_log(LOG_INFO, "Starting aspect weaving process");
     
-    // Paso 1: Recolectar todos los aspectos del programa
+    // Step 1: Collect all aspects in the program
     if (!collect_aspects(ast)) {
         return false;
     }
     
     if (aspect_list.count == 0) {
         logger_log(LOG_INFO, "No aspects found in the program");
-        return true;  // No hay aspectos, pero no es un error
+        return true;  // No aspects, but not an error
     }
     
     logger_log(LOG_INFO, "Found %d aspects in the program", aspect_list.count);
     
-    // Paso 2: Aplicar los aspectos encontrados
+    // Step 2: Apply the found aspects
     if (!apply_aspects(ast)) {
         return false;
     }
@@ -90,17 +138,28 @@ bool weaver_process(AstNode* ast) {
     return true;
 }
 
+/**
+ * @brief Gets the weaving process statistics
+ * 
+ * @return WeavingStats structure with current statistics
+ */
 WeavingStats weaver_get_stats(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)weaver_get_stats);
     return stats;
 }
 
+/**
+ * @brief Cleans up resources used by the weaver
+ * 
+ * This function frees the memory allocated for the aspect list
+ * and prepares the system for a new weaving process
+ */
 void weaver_cleanup(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)weaver_cleanup);
     
-    // Liberar memoria de la lista de aspectos
+    // Free aspect list memory
     if (aspect_list.aspects) {
-        // No liberamos los nodos AST aquí ya que son parte del AST principal
+        // Don't free AST nodes here as they are part of the main AST
         free(aspect_list.aspects);
         aspect_list.aspects = NULL;
     }
@@ -109,12 +168,21 @@ void weaver_cleanup(void) {
     logger_log(LOG_INFO, "Aspect weaver cleanup completed");
 }
 
+/**
+ * @brief Collects all aspects defined in the AST
+ * 
+ * This function recursively traverses the AST looking for aspect
+ * definitions and stores them in the global aspect_list.
+ * 
+ * @param node Current AST node
+ * @return true if collection was successful, false otherwise
+ */
 static bool collect_aspects(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)collect_aspects);
     
     if (!node) return true;
     
-    // Si encontramos un aspecto, lo agregamos a la lista
+    // If we find an aspect, add it to the list
     if (node->type == AST_ASPECT_DEF) {
         aspect_list.count++;
         aspect_list.aspects = memory_realloc(aspect_list.aspects, 
@@ -131,7 +199,7 @@ static bool collect_aspects(AstNode* node) {
         }
     }
     
-    // Recursivamente buscar en los hijos
+    // Recursively search in children
     switch (node->type) {
         case AST_PROGRAM:
             for (int i = 0; i < node->program.statementCount; i++) {
@@ -178,12 +246,23 @@ static bool collect_aspects(AstNode* node) {
     return true;
 }
 
+/**
+ * @brief Applies the collected aspects to the AST
+ * 
+ * This function:
+ * 1. Finds joinpoints that match the pointcuts
+ * 2. Clones and applies the corresponding advice
+ * 3. Updates the process statistics
+ * 
+ * @param node Current AST node
+ * @return true if application was successful, false otherwise
+ */
 static bool apply_aspects(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)apply_aspects);
     
     if (!node) return true;
     
-    // Si es una definición de función, verificar si coincide con algún pointcut
+    // If it's a function definition, check if it matches any pointcut
     if (node->type == AST_FUNC_DEF) {
         logger_log(LOG_DEBUG, "Checking function '%s' for aspect application", node->funcDef.name);
         
@@ -193,7 +272,6 @@ static bool apply_aspects(AstNode* node) {
             for (int j = 0; j < aspect->aspectDef.pointcutCount; j++) {
                 AstNode* pointcut = aspect->aspectDef.pointcuts[j];
                 
-                // Mejorar el logging para ver los patrones que se están evaluando
                 logger_log(LOG_DEBUG, "Checking if '%s' matches pattern '%s'", 
                           node->funcDef.name, pointcut->pointcut.pattern);
                 
@@ -203,19 +281,19 @@ static bool apply_aspects(AstNode* node) {
                     logger_log(LOG_INFO, "Found joinpoint: %s matches %s",
                              node->funcDef.name, pointcut->pointcut.pattern);
                     
-                    // Aplicar todos los advice asociados a este pointcut
+                    // Apply all advice associated with this pointcut
                     for (int k = 0; k < aspect->aspectDef.adviceCount; k++) {
                         AstNode* advice = aspect->aspectDef.advice[k];
                         
                         if (strcmp(advice->advice.pointcutName, pointcut->pointcut.name) == 0) {
-                            // Clonar el cuerpo del advice
+                            // Clone the advice body
                             AstNode* advice_body = clone_advice_body(advice);
                             if (!advice_body) {
                                 strncpy(stats.error_msg, "Failed to clone advice body", sizeof(stats.error_msg)-1);
                                 return false;
                             }
                             
-                            // Insertar el advice según su tipo
+                            // Insert advice according to its type
                             switch (advice->advice.type) {
                                 case ADVICE_BEFORE:
                                     logger_log(LOG_INFO, "Applying BEFORE advice to %s", node->funcDef.name);
@@ -257,7 +335,7 @@ static bool apply_aspects(AstNode* node) {
         }
     }
     
-    // Recursivamente procesar los hijos
+    // Recursively process children
     switch (node->type) {
         case AST_PROGRAM:
             for (int i = 0; i < node->program.statementCount; i++) {
@@ -266,7 +344,7 @@ static bool apply_aspects(AstNode* node) {
             break;
             
         case AST_FUNC_DEF:
-            // Procesar el cuerpo de la función después de aplicar aspectos
+            // Process function body after applying aspects
             for (int i = 0; i < node->funcDef.bodyCount; i++) {
                 if (!apply_aspects(node->funcDef.body[i])) return false;
             }
@@ -305,17 +383,29 @@ static bool apply_aspects(AstNode* node) {
     return true;
 }
 
+/**
+ * @brief Checks if a function name matches a pointcut pattern
+ * 
+ * This function implements a pattern matching system that supports:
+ * 1. Exact matching
+ * 2. Wildcard at the end (*)
+ * 3. Wildcards in the middle of the pattern
+ * 
+ * @param pattern Pointcut pattern (e.g., "test_*", "get*", "*_test")
+ * @param target Function name to check
+ * @return true if there's a match, false otherwise
+ */
 static bool matches_pointcut(const char* pattern, const char* target) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)matches_pointcut);
     
     logger_log(LOG_DEBUG, "Matching '%s' against pattern '%s'", target, pattern);
     
-    // Caso especial para patrones terminados en "*" como "test_*"
+    // Special case for patterns ending with "*" like "test_*"
     size_t pattern_len = strlen(pattern);
     size_t target_len = strlen(target);
     
     if (pattern_len > 0 && pattern[pattern_len - 1] == '*') {
-        // Comparar los caracteres antes del '*'
+        // Compare characters before the '*'
         size_t prefix_len = pattern_len - 1;
         if (target_len >= prefix_len && strncmp(target, pattern, prefix_len) == 0) {
             logger_log(LOG_INFO, "Match found! Function '%s' matches pattern '%s'", 
@@ -324,24 +414,23 @@ static bool matches_pointcut(const char* pattern, const char* target) {
         }
     }
     
-    // Coincidencia exacta
+    // Exact match
     if (strcmp(pattern, target) == 0) {
         logger_log(LOG_INFO, "Exact match found! Function '%s' matches pattern '%s'", 
                   target, pattern);
         return true;
     }
     
-    // El resto del código original para coincidencias más complejas...
+    // More complex algorithm to handle wildcards in the middle of the pattern
     const char* p = pattern;
     const char* t = target;
     
-    // Algoritmo más complejo para manejar comodines en medio del patrón
     while (*p && *t) {
         if (*p == '*') {
             p++;
-            if (!*p) return true; // * al final coincide con todo
+            if (!*p) return true; // * at the end matches everything
             
-            // Buscar la siguiente parte después del *
+            // Look for the next part after the *
             while (*t) {
                 if (matches_pointcut(p, t)) return true;
                 t++;
@@ -355,9 +444,18 @@ static bool matches_pointcut(const char* pattern, const char* target) {
         t++;
     }
     
-    return *p == *t; // Ambos deben haber terminado
+    return *p == *t; // Both must have ended
 }
 
+/**
+ * @brief Clones the body of an advice
+ * 
+ * This function creates a deep copy of an advice's body,
+ * including all its statements and expressions.
+ * 
+ * @param advice AST node of the advice to clone
+ * @return AstNode* New AST node with the cloned body, NULL on error
+ */
 static AstNode* clone_advice_body(AstNode* advice) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)clone_advice_body);
     
@@ -365,22 +463,20 @@ static AstNode* clone_advice_body(AstNode* advice) {
         return NULL;
     }
     
-    // Crear un nodo de bloque para contener todas las sentencias del advice
+    // Create a block node to contain all advice statements
     AstNode* block = createAstNode(AST_BLOCK);
     if (!block) {
         return NULL;
     }
     
-    // Copiar cada sentencia del advice al bloque
+    // Copy each statement from the advice to the block
     block->block.statements = (AstNode**)memory_alloc(sizeof(AstNode*) * advice->advice.bodyCount);
     block->block.statementCount = advice->advice.bodyCount;
     
     for (int i = 0; i < advice->advice.bodyCount; i++) {
-        // Aquí estamos utilizando copyAstNode para hacer una copia real
-        // de cada sentencia en el cuerpo del advice
         block->block.statements[i] = copyAstNode(advice->advice.body[i]);
         if (!block->block.statements[i]) {
-            // Si falla la copia, liberar lo que ya se ha copiado
+            // If copy fails, free what has been copied so far
             for (int j = 0; j < i; j++) {
                 freeAstNode(block->block.statements[j]);
             }
@@ -393,15 +489,25 @@ static AstNode* clone_advice_body(AstNode* advice) {
     return block;
 }
 
+/**
+ * @brief Inserts an advice into a target function
+ * 
+ * This function inserts an advice's body at a specific position
+ * within a function's body.
+ * 
+ * @param target AST node of the target function
+ * @param advice AST node of the advice to insert
+ * @param position Position where to insert the advice (-1 for the end)
+ */
 static void insert_advice(AstNode* target, AstNode* advice, int position) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)insert_advice);
     
     if (target->type != AST_FUNC_DEF || !advice) return;
     
-    // Calcular la posición de inserción
+    // Calculate insertion position
     int insert_pos = (position >= 0) ? position : target->funcDef.bodyCount;
     
-    // Hacer espacio para el nuevo advice
+    // Make space for the new advice
     target->funcDef.bodyCount++;
     target->funcDef.body = memory_realloc(target->funcDef.body,
                                          target->funcDef.bodyCount * sizeof(AstNode*));
@@ -411,14 +517,14 @@ static void insert_advice(AstNode* target, AstNode* advice, int position) {
         return;
     }
     
-    // Desplazar los elementos existentes si es necesario
+    // Shift existing elements if necessary
     if (insert_pos < target->funcDef.bodyCount - 1) {
         memmove(&target->funcDef.body[insert_pos + 1],
                 &target->funcDef.body[insert_pos],
                 (target->funcDef.bodyCount - insert_pos - 1) * sizeof(AstNode*));
     }
     
-    // Insertar el advice
+    // Insert the advice
     target->funcDef.body[insert_pos] = advice;
     
     if (debug_level >= 3) {

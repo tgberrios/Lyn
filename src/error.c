@@ -1,5 +1,14 @@
-#define _GNU_SOURCE         /* Para habilitar Dl_info en dlfcn.h */
-#include <dlfcn.h>         /* Debe ir primero para que Dl_info esté disponible */
+/**
+ * @file error.c
+ * @brief Implementation of error handling and reporting system for the Lyn compiler
+ * 
+ * This file provides a comprehensive error handling system that includes
+ * error reporting, stack trace generation, source code context extraction,
+ * and debug information tracking.
+ */
+
+#define _GNU_SOURCE         /* Enable Dl_info in dlfcn.h */
+#include <dlfcn.h>         /* Must be first to make Dl_info available */
 #include "error.h"
 #include "logger.h"
 #include <stdio.h>
@@ -12,29 +21,36 @@
 #define CONTEXT_SIZE    120
 #define STACK_MAX_DEPTH 16
 
-// ANSI color codes (opcional, se pueden eliminar si se prefiere sin color)
+// ANSI color codes for terminal output
 #define COLOR_RESET     "\x1b[0m"
 #define COLOR_RED       "\x1b[31m"
 #define COLOR_CYAN      "\x1b[36m"
 #define COLOR_YELLOW    "\x1b[33m"
 
-// Estructura para debugging info
+/**
+ * @brief Structure to store debugging information for stack traces
+ */
 typedef struct {
-    const char* function;
-    const char* file;
-    int line;
-    void* address;
+    const char* function;  ///< Name of the function
+    const char* file;      ///< Source file name
+    int line;             ///< Line number in source file
+    void* address;        ///< Memory address of the function
 } DebugInfo;
 
 static ErrorInfo errors[MAX_ERRORS];
 static int errorCount = 0;
 static const char* sourceCode = NULL;
 
-// Añadir info de debugging al ErrorInfo
+// Debug stack for tracking function calls
 static DebugInfo debugStack[STACK_MAX_DEPTH];
 static int debugStackDepth = 0;
 
-// Internal: print a short stack trace (3 frames max)
+/**
+ * @brief Prints a short stack trace (maximum 3 frames)
+ * 
+ * Uses backtrace and dladdr to generate a human-readable stack trace
+ * with function names and source locations when available.
+ */
 static void print_stack_short(void) {
     void* buffer[STACK_MAX_DEPTH];
     int frames = backtrace(buffer, STACK_MAX_DEPTH);
@@ -45,7 +61,7 @@ static void print_stack_short(void) {
     for (int i = 1; i < frames && i < 5; i++) {
         Dl_info info;
         if (dladdr(buffer[i], &info) && info.dli_sname) {
-            // Encontrar debug info correspondiente
+            // Find corresponding debug info
             for (int j = 0; j < debugStackDepth; j++) {
                 if (debugStack[j].address == buffer[i]) {
                     fprintf(stderr, "    %s%s%s at %s:%d\n",
@@ -66,11 +82,18 @@ next_frame:
     free(symbols);
 }
 
-// Internal: extract source context from sourceCode
+/**
+ * @brief Extracts source code context around an error location
+ * 
+ * Retrieves up to 3 lines of source code context around the error location,
+ * including line numbers and proper formatting.
+ * 
+ * @param e Pointer to the ErrorInfo structure to populate with context
+ */
 static void extract_context(ErrorInfo* e) {
     if (!sourceCode) return;
     
-    // Buscar el inicio de la línea anterior
+    // Find the start of the previous line
     const char* start = sourceCode;
     const char* p = sourceCode;
     int ln = 1;
@@ -81,7 +104,7 @@ static void extract_context(ErrorInfo* e) {
         p++;
     }
 
-    // Capturar 3 líneas de contexto
+    // Capture 3 lines of context
     char buffer[CONTEXT_SIZE * 3 + 1] = {0};
     int pos = 0;
     int lineCount = 0;
@@ -92,7 +115,7 @@ static void extract_context(ErrorInfo* e) {
             int len = p - lineStart;
             if (len > CONTEXT_SIZE) len = CONTEXT_SIZE;
             
-            // Añadir número de línea
+            // Add line number
             pos += snprintf(buffer + pos, sizeof(buffer) - pos, 
                           "%4d | %.*s\n", targetLine + lineCount, len, lineStart);
             
@@ -106,7 +129,17 @@ static void extract_context(ErrorInfo* e) {
     e->errorPosition = (e->column - 1);
 }
 
-// Report an error (store error info and log it)
+/**
+ * @brief Reports an error with source location and context
+ * 
+ * Stores error information and logs it with appropriate context and suggestions.
+ * 
+ * @param file Source file name where the error occurred
+ * @param line Line number in the source file
+ * @param col Column number in the source file
+ * @param msg Error message
+ * @param type Type of error that occurred
+ */
 void error_report(const char* file, int line, int col, const char* msg, ErrorType type) {
     if (errorCount >= MAX_ERRORS) return;
     ErrorInfo* e = &errors[errorCount++];
@@ -118,7 +151,7 @@ void error_report(const char* file, int line, int col, const char* msg, ErrorTyp
     extract_context(e);
     logger_log(LOG_ERROR, "[%s:%d:%d] %s", file, line, col, msg);
     
-    // Añadir sugerencia de corrección según el tipo de error
+    // Add correction suggestions based on error type
     switch(type) {
         case ERROR_SYNTAX:
             logger_log(LOG_INFO, "Suggestion: Check syntax near this location");
@@ -129,21 +162,32 @@ void error_report(const char* file, int line, int col, const char* msg, ErrorTyp
         case ERROR_TYPE:
             logger_log(LOG_INFO, "Suggestion: Check type compatibility");
             break;
-        // ...otros casos...
+        // ...other cases...
     }
 }
 
-// Set the source for context extraction
+/**
+ * @brief Sets the source code for context extraction
+ * 
+ * @param src Pointer to the source code string
+ */
 void error_set_source(const char* src) {
     sourceCode = src;
 }
 
-// Print the last error in minimal perfect style
+/**
+ * @brief Prints the last reported error with context and stack trace
+ * 
+ * Displays error information in a user-friendly format including:
+ * - Error location and message
+ * - Source code context with caret pointing to error
+ * - Short stack trace
+ */
 void error_print_current(void) {
     if (errorCount == 0) return;
     ErrorInfo* e = &errors[errorCount - 1];
 
-    // Header: icon, file, line, column y mensaje
+    // Header: icon, file, line, column and message
     fprintf(stderr, COLOR_RED "❌ %s:%d:%d" COLOR_RESET " %s\n", e->file, e->line, e->column, e->message);
 
     // Context + caret
@@ -156,7 +200,14 @@ void error_print_current(void) {
     print_stack_short();
 }
 
-// Nuevo: Push debug info
+/**
+ * @brief Pushes debug information onto the debug stack
+ * 
+ * @param func Function name
+ * @param file Source file name
+ * @param line Line number
+ * @param addr Function address
+ */
 void error_push_debug(const char* func, const char* file, int line, void* addr) {
     if (debugStackDepth >= STACK_MAX_DEPTH) return;
     debugStack[debugStackDepth].function = func;
@@ -166,14 +217,30 @@ void error_push_debug(const char* func, const char* file, int line, void* addr) 
     debugStackDepth++;
 }
 
+/**
+ * @brief Gets the total number of errors reported
+ * 
+ * @return int Number of errors reported
+ */
 int error_get_count(void) {
     return errorCount;
 }
 
+/**
+ * @brief Gets the most recently reported error
+ * 
+ * @return const ErrorInfo* Pointer to the last error, or NULL if no errors
+ */
 const ErrorInfo* error_get_last(void) {
     return errorCount > 0 ? &errors[errorCount - 1] : NULL;
 }
 
+/**
+ * @brief Gets a human-readable message for an error type
+ * 
+ * @param type The type of error
+ * @return const char* String describing the error type
+ */
 const char* get_error_message(ErrorType type) {
     switch(type) {
         case ERROR_SYNTAX:    return "Syntax Error";

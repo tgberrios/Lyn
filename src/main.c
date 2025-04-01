@@ -1,3 +1,12 @@
+/**
+ * @file main.c
+ * @brief Main entry point for the Lyn compiler
+ * 
+ * This file contains the main function and supporting functions for the Lyn compiler.
+ * It handles command-line argument parsing, file operations, and orchestrates the
+ * compilation process including lexing, parsing, optimization, and code generation.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,20 +16,26 @@
 #include "optimizer.h"
 #include "logger.h"
 #include "error.h"
-#include "memory.h"  // Para usar funciones de memoria manejadas
-#include "types.h"   // Para la integración del sistema de tipos
-#include "aspect_weaver.h"  // Incluir el header del aspect weaver
+#include "memory.h"  // For managed memory functions
+#include "types.h"   // For type system integration
+#include "aspect_weaver.h"  // Include aspect weaver header
 #include <unistd.h>
-#include <getopt.h>  // Incluir explícitamente para optarg y optind
+#include <getopt.h>  // Include explicitly for optarg and optind
 
-// Declarar externamente estas variables para que IntelliSense las reconozca
+// Declare these variables externally for IntelliSense recognition
 extern char *optarg;
 extern int optind, opterr, optopt;
 
-// Nivel de depuración global (0=mínimo, 3=máximo)
-static int debug_level = 1;
+static int debug_level = 1;  ///< Global debug level (0=minimum, 3=maximum)
 
-// Función para establecer el nivel de depuración en todos los módulos
+/**
+ * @brief Sets the debug level across all compiler modules
+ * 
+ * Updates the debug level in all compiler components to ensure consistent
+ * logging behavior throughout the compilation process.
+ * 
+ * @param level The new debug level to set (0-3)
+ */
 static void set_global_debug_level(int level) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)set_global_debug_level);
     
@@ -34,7 +49,15 @@ static void set_global_debug_level(int level) {
     logger_log(LOG_INFO, "Global debug level set to %d", level);
 }
 
-// Leer archivo fuente con gestión de errores integrada
+/**
+ * @brief Reads a source file with integrated error handling
+ * 
+ * Opens and reads the contents of a source file, handling various error
+ * conditions that might occur during file operations.
+ * 
+ * @param path Path to the source file to read
+ * @return char* Contents of the file as a string, or NULL if an error occurred
+ */
 char* readFile(const char* path) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)readFile);
     
@@ -85,14 +108,22 @@ char* readFile(const char* path) {
     return buffer;
 }
 
-// Compilar el código C generado a un ejecutable
+/**
+ * @brief Compiles generated C code into an executable
+ * 
+ * Uses gcc to compile the generated C code into an executable file.
+ * 
+ * @param outputPath Path to the generated C source file
+ * @param executablePath Path where the executable should be created
+ * @return int 0 if compilation was successful, non-zero otherwise
+ */
 int compileOutputC(const char* outputPath, const char* executablePath) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)compileOutputC);
     
     logger_log(LOG_INFO, "Compiling C code '%s' to executable '%s'", outputPath, executablePath);
     
     char command[1024];
-    // Añadimos explícitamente -lm para garantizar el enlace con la biblioteca matemática
+    // Add -lm explicitly to ensure math library linking
     snprintf(command, sizeof(command), "gcc -o %s %s -lm -Wall", executablePath, outputPath);
     
     logger_log(LOG_DEBUG, "Executing compiler command: %s", command);
@@ -107,6 +138,13 @@ int compileOutputC(const char* outputPath, const char* executablePath) {
     return result;
 }
 
+/**
+ * @brief Prints usage information for the compiler
+ * 
+ * Displays command-line options and usage instructions to the user.
+ * 
+ * @param program_name Name of the compiler executable
+ */
 void print_usage(const char* program_name) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)print_usage);
     
@@ -120,6 +158,11 @@ void print_usage(const char* program_name) {
     logger_log(LOG_INFO, "Help information displayed");
 }
 
+/**
+ * @brief Prints version information for the compiler
+ * 
+ * Displays the compiler's version number and copyright information.
+ */
 void print_version() {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)print_version);
     
@@ -129,8 +172,27 @@ void print_version() {
     logger_log(LOG_INFO, "Version information displayed");
 }
 
+/**
+ * @brief Main entry point for the Lyn compiler
+ * 
+ * Orchestrates the entire compilation process, including:
+ * - Command-line argument parsing
+ * - Source file reading
+ * - Lexical analysis
+ * - Parsing
+ * - Type checking
+ * - Optimization
+ * - Code generation
+ * - Aspect weaving
+ * - C code compilation
+ * - Program execution
+ * 
+ * @param argc Number of command-line arguments
+ * @param argv Array of command-line argument strings
+ * @return int 0 if compilation was successful, non-zero otherwise
+ */
 int main(int argc, char* argv[]) {
-    // Inicializar el logger
+    // Initialize logger
     logger_init("lyn_compiler.log");
     logger_set_level(LOG_DEBUG);
     
@@ -247,12 +309,12 @@ int main(int argc, char* argv[]) {
     logger_log(LOG_DEBUG, "Source code read: %d bytes", (int)strlen(source));
     logger_log(LOG_INFO, "Source parsed successfully");
 
-    // Inicializar y ejecutar el tejedor de aspectos
+    // Initialize and run the aspect weaver
     logger_log(LOG_INFO, "Initializing aspect weaver...");
     weaver_init();
-    weaver_set_debug_level(debug_opt); // Usar el nivel de depuración de línea de comandos
+    weaver_set_debug_level(debug_opt); // Use command-line debug level
 
-    // Procesar el AST con el tejedor de aspectos
+    // Process AST with aspect weaver
     if (!weaver_process(ast)) {
         WeavingStats weaving_stats = weaver_get_stats();
         logger_log(LOG_WARNING, "Aspect weaving encountered issues: %s", weaving_stats.error_msg);

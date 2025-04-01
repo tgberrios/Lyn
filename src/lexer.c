@@ -1,3 +1,12 @@
+/**
+ * @file lexer.c
+ * @brief Implementation of the lexical analyzer for the Lyn programming language
+ * 
+ * This file implements the lexical analyzer (lexer) that converts source code
+ * into a stream of tokens. It handles keywords, identifiers, numbers, strings,
+ * and various operators and punctuation marks.
+ */
+
 #include "lexer.h"
 #include "memory.h"
 #include "error.h"
@@ -10,24 +19,35 @@
 #ifdef DEBUG_MEMORY
     #define DBG_PRINT(...) fprintf(stderr, __VA_ARGS__)
 #else
-    #define DBG_PRINT(...) /* No hace nada */
+    #define DBG_PRINT(...) /* Do nothing */
 #endif
 
-#define TOKEN_INVALID -1  // Token inválido
+#define TOKEN_INVALID -1  ///< Invalid token type
 
+///< Current source code being processed
 static const char *source;
-static int position;
-static int line = 1;
-static int col = 1;
-static int debug_level = 1;
+static int position;      ///< Current position in source code
+static int line = 1;      ///< Current line number
+static int col = 1;       ///< Current column number
+static int debug_level = 1; ///< Current debug level
 
-#define KEYWORD_TABLE_SIZE 101
+#define KEYWORD_TABLE_SIZE 101  ///< Size of the keyword hash table
+
+/**
+ * @brief Structure for keyword lookup table
+ */
 static struct {
-    char* keyword;
-    TokenType type;
+    char* keyword;       ///< The keyword string
+    TokenType type;      ///< The corresponding token type
 } keyword_table[KEYWORD_TABLE_SIZE];
-static int keyword_count = 0;
+static int keyword_count = 0;  ///< Number of keywords in the table
 
+/**
+ * @brief Inserts a keyword into the lookup table
+ * 
+ * @param word The keyword string to insert
+ * @param type The token type associated with the keyword
+ */
 static void insertKeyword(const char* word, TokenType type) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)insertKeyword);
     if (keyword_count >= KEYWORD_TABLE_SIZE) {
@@ -42,6 +62,12 @@ static void insertKeyword(const char* word, TokenType type) {
     }
 }
 
+/**
+ * @brief Looks up a word in the keyword table
+ * 
+ * @param word The word to look up
+ * @return TokenType The token type if found, TOKEN_IDENTIFIER otherwise
+ */
 static TokenType lookupKeyword(const char* word) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)lookupKeyword);
     for (int i = 0; i < keyword_count; i++) {
@@ -52,9 +78,12 @@ static TokenType lookupKeyword(const char* word) {
     return TOKEN_IDENTIFIER;
 }
 
+/**
+ * @brief Initializes the keyword lookup table with all language keywords
+ */
 static void initializeKeywords(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)initializeKeywords);
-    // Agregar palabras clave
+    // Add keywords
     insertKeyword("func", TOKEN_FUNC);
     insertKeyword("return", TOKEN_RETURN);
     insertKeyword("print", TOKEN_PRINT);
@@ -97,12 +126,15 @@ static void initializeKeywords(void) {
     insertKeyword("and", TOKEN_AND);
     insertKeyword("or", TOKEN_OR);
     insertKeyword("new", TOKEN_NEW);
-    // Si se requieren keywords para new y this, opcionalmente se pueden registrar (o se detectan como identificador)
+    
     if (debug_level >= 2) {
         logger_log(LOG_DEBUG, "Initialized %d keywords", keyword_count);
     }
 }
 
+/**
+ * @brief Initializes the lexer and keyword table
+ */
 void lexerInitialize(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)lexerInitialize);
     for (int i = 0; i < keyword_count; i++) {
@@ -113,6 +145,11 @@ void lexerInitialize(void) {
     logger_log(LOG_INFO, "Lexer initialized with %d keywords", keyword_count);
 }
 
+/**
+ * @brief Initializes the lexer with source code
+ * 
+ * @param src The source code to tokenize
+ */
 void lexerInit(const char *src) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)lexerInit);
     logger_log(LOG_INFO, "Initializing lexer");
@@ -123,6 +160,11 @@ void lexerInit(const char *src) {
     error_set_source(src);
 }
 
+/**
+ * @brief Reports a lexer error and exits
+ * 
+ * @param message The error message to report
+ */
 static void lexerError(const char* message) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)lexerError);
     logger_log(LOG_ERROR, "Lexer error: %s at line %d, col %d", message, line, col);
@@ -131,6 +173,11 @@ static void lexerError(const char* message) {
     exit(1);
 }
 
+/**
+ * @brief Saves the current state of the lexer
+ * 
+ * @return LexerState The current state of the lexer
+ */
 LexerState lexSaveState(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)lexSaveState);
     if (debug_level >= 3) {
@@ -140,6 +187,11 @@ LexerState lexSaveState(void) {
     return state;
 }
 
+/**
+ * @brief Restores the lexer to a previously saved state
+ * 
+ * @param state The state to restore
+ */
 void lexRestoreState(LexerState state) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)lexRestoreState);
     if (debug_level >= 3) {
@@ -152,17 +204,30 @@ void lexRestoreState(LexerState state) {
     col = state.col;
 }
 
+/**
+ * @brief Advances the lexer position and returns the current character
+ * 
+ * @return char The current character
+ */
 static char advance(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)advance);
     col++;
     return source[position++];
 }
 
+/**
+ * @brief Peeks at the next character without advancing
+ * 
+ * @return char The next character
+ */
 static char peek(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)peek);
     return source[position];
 }
 
+/**
+ * @brief Skips whitespace and comments in the source code
+ */
 static void skipWhitespaceAndComments(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)skipWhitespaceAndComments);
     int oldLine = line, oldCol = col, oldPos = position;
@@ -195,6 +260,11 @@ static void skipWhitespaceAndComments(void) {
     }
 }
 
+/**
+ * @brief Gets the next token from the source code
+ * 
+ * @return Token The next token in the source code
+ */
 Token getNextToken(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)getNextToken);
     skipWhitespaceAndComments();
@@ -207,6 +277,8 @@ Token getNextToken(void) {
     }
     char c = advance();
     Token token = { 0, "", line, col - 1 };
+    
+    // Handle identifiers and keywords
     if (isalpha(c) || c == '_') {
         int start = position - 1;
         while (isalnum(source[position]) || source[position] == '_')
@@ -221,6 +293,8 @@ Token getNextToken(void) {
         }
         return token;
     }
+    
+    // Handle numbers
     if (isdigit(c) || (c == '.' && isdigit(peek()))) {
         int start = position - 1;
         while (isdigit(source[position]) || source[position] == '.')
@@ -242,6 +316,8 @@ Token getNextToken(void) {
         }
         return token;
     }
+    
+    // Handle string literals
     if (c == '"') {
         int start = position;
         while (source[position] != '"' && source[position] != '\0') {
@@ -254,7 +330,7 @@ Token getNextToken(void) {
         int length = position - start;
         strncpy(token.lexeme, source + start, length);
         token.lexeme[length] = '\0';
-        advance(); // Consume closing quote.
+        advance(); // Consume closing quote
         token.type = TOKEN_STRING;
         if (debug_level >= 2) {
             logger_log(LOG_DEBUG, "Lexer produced token: %s \"%s\" at line %d, col %d", 
@@ -262,6 +338,8 @@ Token getNextToken(void) {
         }
         return token;
     }
+    
+    // Handle operators and punctuation
     switch (c) {
         case '=':
             if (peek() == '=') { advance(); token.type = TOKEN_EQ; strcpy(token.lexeme, "=="); }
@@ -362,6 +440,12 @@ Token getNextToken(void) {
     return token;
 }
 
+/**
+ * @brief Converts a token type to its string representation
+ * 
+ * @param type The token type to convert
+ * @return const char* String representation of the token type
+ */
 const char* tokenTypeToString(TokenType type) {
     switch (type) {
         case TOKEN_EOF: return "TOKEN_EOF";
@@ -371,6 +455,11 @@ const char* tokenTypeToString(TokenType type) {
     }
 }
 
+/**
+ * @brief Sets the debug level for the lexer
+ * 
+ * @param level The new debug level (0=none, 1=basic, 2=detailed, 3=all)
+ */
 void lexer_set_debug_level(int level) {
     debug_level = level;
     logger_log(LOG_INFO, "Lexer debug level set to %d", level);

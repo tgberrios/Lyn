@@ -1,3 +1,16 @@
+/**
+ * @file templates.c
+ * @brief Implementation of template system for the Lyn compiler
+ * 
+ * This file implements the template system that enables generic programming
+ * in the Lyn language. It provides:
+ * - Template registration and management
+ * - Template instantiation with type arguments
+ * - Type constraint validation
+ * - Template specialization and optimization
+ * - AST node cloning and manipulation
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "templates.h"
@@ -6,12 +19,26 @@
 #include <string.h>
 #include <stdlib.h>
 
+/** Maximum number of templates that can be registered */
 #define MAX_TEMPLATES 1024
 
-// Template registry
+/** Registry of all template definitions */
 static TemplateDefinition templates[MAX_TEMPLATES];
+/** Current number of registered templates */
 static int templateCount = 0;
 
+/**
+ * @brief Registers a new template definition
+ * 
+ * Adds a new template to the registry with its parameters and body.
+ * The template can later be instantiated with specific type arguments.
+ * 
+ * @param name Name of the template
+ * @param params Array of template parameters
+ * @param paramCount Number of parameters
+ * @param body AST node representing the template body
+ * @return bool true if registration successful, false if limit reached
+ */
 bool register_template(const char* name, TemplateParam** params, int paramCount, AstNode* body) {
     if (templateCount >= MAX_TEMPLATES) {
         error_report("Template", 0, 0, "Maximum number of templates exceeded", ERROR_LIMIT);
@@ -27,6 +54,22 @@ bool register_template(const char* name, TemplateParam** params, int paramCount,
     return true;
 }
 
+/**
+ * @brief Instantiates a template with specific type arguments
+ * 
+ * Creates a new instance of a template by substituting type parameters
+ * with concrete types. The process includes:
+ * - Finding the template definition
+ * - Validating type arguments
+ * - Substituting type parameters
+ * - Specializing the code
+ * - Optimizing the result
+ * 
+ * @param name Name of the template to instantiate
+ * @param typeArgs Array of type arguments
+ * @param typeArgCount Number of type arguments
+ * @return AstNode* Instantiated template AST, or NULL on error
+ */
 AstNode* instantiate_template(const char* name, Type** typeArgs, int typeArgCount) {
     // Find template definition
     TemplateDefinition* template = NULL;
@@ -82,6 +125,15 @@ AstNode* instantiate_template(const char* name, Type** typeArgs, int typeArgCoun
     return instantiated;
 }
 
+/**
+ * @brief Validates type arguments against template constraints
+ * 
+ * Checks if each type argument satisfies its corresponding template parameter
+ * constraint. This ensures type safety during template instantiation.
+ * 
+ * @param instance The template instance to validate
+ * @return bool true if all constraints are satisfied, false otherwise
+ */
 bool validate_template_constraints(TemplateInstance* instance) {
     TemplateDefinition* template = NULL;
     for (int i = 0; i < templateCount; i++) {
@@ -112,6 +164,15 @@ bool validate_template_constraints(TemplateInstance* instance) {
     return true;
 }
 
+/**
+ * @brief Creates a deep copy of an AST node
+ * 
+ * Recursively clones an AST node and all its children, including
+ * type information and node-specific data.
+ * 
+ * @param node The AST node to clone
+ * @return AstNode* A deep copy of the node, or NULL if input is NULL
+ */
 AstNode* clone_ast_node(AstNode* node) {
     if (!node) return NULL;
 
@@ -148,6 +209,18 @@ AstNode* clone_ast_node(AstNode* node) {
     return clone;
 }
 
+/**
+ * @brief Substitutes type parameters in an AST with concrete types
+ * 
+ * Replaces template parameter names with their corresponding concrete type
+ * names throughout the AST. This is part of the template instantiation process.
+ * 
+ * @param node The AST node to process
+ * @param paramNames Array of parameter names to replace
+ * @param typeArgs Array of concrete types to substitute
+ * @param count Number of parameters/types
+ * @return AstNode* Modified AST with type parameters substituted
+ */
 AstNode* substitute_type_params(AstNode* node, const char** paramNames, Type** typeArgs, int count) {
     if (!node) return NULL;
 
@@ -180,6 +253,16 @@ AstNode* substitute_type_params(AstNode* node, const char** paramNames, Type** t
     return node;
 }
 
+/**
+ * @brief Specializes generic code for specific types
+ * 
+ * Performs type-specific optimizations and transformations on the AST
+ * based on the concrete types used in template instantiation.
+ * 
+ * @param node The AST node to specialize
+ * @param typeArgs Array of concrete types
+ * @param typeArgCount Number of type arguments
+ */
 void specialize_generic_code(AstNode* node, Type** typeArgs, int typeArgCount) {
     if (!node) return;
 
@@ -219,6 +302,16 @@ void specialize_generic_code(AstNode* node, Type** typeArgs, int typeArgCount) {
     }
 }
 
+/**
+ * @brief Optimizes template-instantiated code
+ * 
+ * Performs template-specific optimizations on the AST, such as:
+ * - Converting generic operations to type-specific implementations
+ * - Optimizing known template functions
+ * - Removing unnecessary type checks
+ * 
+ * @param node The AST node to optimize
+ */
 void optimize_template(AstNode* node) {
     if (!node) return;
 

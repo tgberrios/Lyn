@@ -1,107 +1,187 @@
-Lyn – Lenguaje de Alto Rendimiento y Versátil
+# Lyn – Lenguaje de Alto Rendimiento y Versátil
 
-Lyn es un compilador de alto rendimiento diseñado para abarcar desde aplicaciones de software de bajo nivel (como sistemas operativos y drivers) hasta aplicaciones de alto nivel con interfaces gráficas y comunicación nativa con otros lenguajes. El compilador genera código nativo para múltiples arquitecturas (x86, ARM, RISC-V) y también soporta la compilación a WebAssembly.
-Roadmap del Proyecto
-Fase 1: Construcción del Compilador (lync) – COMPLETADA
+Lyn es un lenguaje de programación moderno que combina la legibilidad de Python con un sistema de tipos estático y características avanzadas de lenguajes como C++, JavaScript y AspectJ. Su compilación a código C permite un alto rendimiento y excelente portabilidad.
 
-    Objetivo: Crear el compilador mínimo capaz de procesar variables, funciones y expresiones matemáticas, generando código máquina nativo.
+## Características Principales
 
-    Tareas realizadas:
-        Diseño del lexing y parsing para generar un AST a partir del código Lyn.
-        Implementación del análisis semántico (verificación de tipos y coherencia en las operaciones).
-        Desarrollo de un backend que genera código ensamblador optimizado para la arquitectura x86 (con posibilidad de extender a ARM y RISC-V).
-        Soporte opcional para compilar a WebAssembly (en fase prototipo).
-        Integración de optimizaciones básicas equivalentes a los niveles -O2 y -O3.
+- **Sintaxis limpia y expresiva**: Diseñada para ser fácil de leer y escribir
+- **Tipado estático con inferencia**: Seguridad de tipos sin sintaxis excesiva
+- **Orientación a objetos**: Soporte completo para clases y herencia
+- **Funciones como ciudadanos de primera clase**: Lambdas y funciones de orden superior
+- **Gestión de errores robusta**: Sistema de excepciones try-catch-finally
+- **Programación orientada a aspectos**: Soporta aspectos, pointcuts y advice
+- **Compilación a C**: Rendimiento óptimo y compatibilidad con código existente
 
-    Ejemplo mínimo de código Lyn:
+## Estado Actual del Proyecto
 
-    x: int = 10
-    y: int = 20
-    z = x + y
-    print(z) // Debería mostrar 30
+### Características Implementadas ✅
 
-Fase 2: Gestión de Memoria y Optimización para Software de Bajo Nivel – COMPLETADA
+1. **Sistema de Tipos**
 
-    Objetivo: Implementar un modelo de memoria robusto y adaptable, apto para sistemas con recursos limitados y entornos de alto rendimiento.
-    Tareas desarrolladas:
-        Sistema de memoria híbrido:
-            Implementación de asignación en pila para estructuras pequeñas y de acceso rápido.
-            Optimización de asignación en el montón para grandes volúmenes de datos.
-            Gestión manual de memoria mediante alloc/free para control detallado.
-            Incorporación de un Garbage Collector (GC) opcional para facilitar el desarrollo en niveles más altos.
-            Modo Embedded activado con flag --embedded que desactiva el GC y utiliza memory pooling para dispositivos de recursos limitados.
-        Optimización en la generación de código nativo:
-            Backend de código ensamblador optimizado para x86, con posibilidad de extender a ARM y RISC-V.
-            Soporte básico para compilación cruzada y generación de módulos WebAssembly.
-            Integración de opciones de optimización avanzadas en el proceso de generación de código.
-    Resultados:
-        El sistema de gestión de memoria híbrido funciona de forma profesional.
-        Se han incorporado optimizaciones en el backend y se ha validado la ejecución cruzada mediante un script que compila para distintos targets (x86, ARM, RISCV y WASM).
+   - Tipos primitivos (int, float, string, bool)
+   - Inferencia de tipos
+   - Verificación de tipos estática
+   - Compatibilidad de tipos
 
-Fase 3: Interoperabilidad y Desarrollo de Software de Alto Nivel
+2. **Estructuras de Control**
 
-    Objetivo: Facilitar la integración de Lyn con otros ecosistemas y permitir la creación de aplicaciones modernas.
+   - If-else y switch
+   - Bucles while, do-while y for
+   - Break y continue
+   - Pattern matching básico
 
-    Tareas planificadas:
-        Integración con JavaScript y CSS:
-            Crear bindings nativos para invocar funciones JavaScript desde Lyn.
-            Desarrollar un motor de renderizado gráfico (usando OpenGL/Vulkan) que procese CSS y dibuje directamente en pantalla, sin necesidad de WebView/Electron.
-            Implementar un sistema de eventos interactivo.
-        Integración con Python y NPM:
-            Desarrollar una Interfaz de Funciones Externas (FFI) para comunicarse con código Python y paquetes NPM.
-            Permitir la conversión automática de fragmentos de código Python/JS a llamadas nativas en Lyn.
+3. **Programación Orientada a Objetos**
 
-    Ejemplo de código previsto:
+   - Clases y objetos
+   - Métodos y constructores
+   - Atributos y encapsulamiento
+   - Herencia básica
 
-    ui "index.html"
-    css "styles.css"
+4. **Programación Orientada a Aspectos**
 
-    func onButtonClick():
-        print("Botón presionado")
+   - Aspectos y pointcuts
+   - Advice (before, after, around)
+   - Weaving de aspectos
+   - Interceptación de métodos
+
+5. **Sistema de Memoria**
+   - Gestión automática de memoria
+   - Garbage collection opcional
+   - Modo embedded con memory pooling
+   - Control manual de memoria
+
+### Características en Desarrollo 🚧
+
+1. **Características Avanzadas**
+
+   - Herencia múltiple
+   - Interfaces y traits
+   - Generics y templates
+   - Macros avanzadas
+
+2. **Interoperabilidad**
+
+   - Integración con JavaScript
+   - Bindings para Python
+   - Soporte para NPM
+   - FFI para C/C++
+
+3. **Sistema de Módulos**
+   - Importación de módulos
+   - Gestión de dependencias
+   - Namespaces
+   - Módulos estándar
+
+### Características Planificadas 📅
+
+1. **Paralelización**
+
+   - Hilos y procesos
+   - SIMD y vectorización
+   - Programación asíncrona
+   - Corrutinas
+
+2. **Ecosistema**
+   - Gestor de paquetes (lyn_pm)
+   - Repositorio central (lyn_hub)
+   - Herramientas de desarrollo
+   - Debugger integrado
+
+## Ejemplos de Código
+
+### Sintaxis Básica
+
+```lyn
+// Variables y tipos
+x: int = 10
+y = 20  // Inferencia de tipo
+texto = "Hola, Lyn!"
+
+// Funciones
+func suma(a: int, b: int) -> int
+    return a + b;
+end
+
+// Clases
+class Persona
+    nombre: string
+    edad: int
+
+    func init(nombre: string, edad: int)
+        this.nombre = nombre
+        this.edad = edad
     end
+end
 
-    register_event("btnSubmit", "click", onButtonClick)
+// Aspectos
+aspect LoggingAspect
+    pointcut loggedFunctions "test_*"
 
-    import python "numpy"
+    advice before loggedFunctions
+        print("Antes de ejecutar la función")
+    end
+end
+```
 
-    arr = numpy.array([1, 2, 3])
-    print(arr)
+### Características Avanzadas
 
-Fase 4: Paralelización y Rendimiento
+```lyn
+// Pattern Matching
+match valor
+    when 0:
+        print("Cero")
+    when n if n > 0:
+        print("Positivo")
+    otherwise:
+        print("Otro caso")
+end
 
-    Objetivo: Optimizar el uso de recursos modernos mediante programación concurrente y paralelización.
-    Tareas planificadas:
-        Soporte nativo para hilos y procesos ligeros.
-        Ejecución paralela en CPU/GPU con optimizaciones de SIMD y vectorización.
-        Abstracción sencilla para facilitar la programación paralela.
+// Manejo de Excepciones
+try
+    resultado = dividir(a, b)
+catch (error)
+    print("Error: " + error.message)
+end
 
-Fase 5: Herramientas y Ecosistema
+// Composición de Funciones
+composed = add_one >> multiply_by_two
+result = composed(5)
+```
 
-    Objetivo: Construir un ecosistema robusto que fomente la adopción y facilite el desarrollo profesional en Lyn.
-    Tareas planificadas:
-        Compilador avanzado (lync):
-            Integrar optimización en tiempo real con técnicas de Machine Learning para autotuning.
-            Soporte para múltiples niveles de optimización.
-        Debugger (lyn_debug):
-            Desarrollar un depurador integrado con análisis estático y dinámico, trazado de ejecución y análisis de rendimiento.
-        Gestor de paquetes y Ecosistema (lyn_pm y lyn_hub):
-            Crear un gestor de paquetes que resuelva dependencias y facilite la instalación/actualización de librerías.
-            Establecer un repositorio central de documentación, foros y librerías estándar, compatible con NPM y PyPI.
+## Documentación
 
-Fase 6: Compatibilidad y Compilación Cruzada
+- [Documentación Técnica](docs.md): Detalles técnicos y especificaciones
+- [Ejemplos de Código](examples.md): Guía práctica con ejemplos
+- [TODO](TODO.md): Estado detallado de características
 
-    Objetivo: Asegurar que Lyn se pueda compilar y ejecutar en diversas plataformas y arquitecturas.
-    Tareas planificadas:
-        Compilación directa a WebAssembly optimizado para la ejecución en navegadores.
-        Soporte para compilación cruzada para x86, ARM y RISC-V, con optimizaciones específicas para cada plataforma.
+## Requisitos del Sistema
 
-Resumen Final
+- Compilador C (gcc/clang)
+- Sistema operativo compatible (Linux, macOS, Windows)
+- 4GB RAM mínimo
+- 1GB espacio en disco
 
-Lyn es un lenguaje compilado de alto rendimiento que combina la eficiencia de C con optimizaciones avanzadas y generación de código nativo. Posee una dualidad en niveles que permite el desarrollo tanto de software de bajo nivel como de aplicaciones modernas con interfaces nativas, integrando además interoperabilidad con Python, JavaScript y otros ecosistemas.
+## Instalación
 
-    Fase 1: Construcción del compilador mínimo – COMPLETADA
-    Fase 2: Gestión de memoria y optimización – COMPLETADA
-    Fase 3: Interoperabilidad y desarrollo de software de alto nivel – En progreso
-    Fase 4: Paralelización y rendimiento – Planificada
-    Fase 5: Herramientas y ecosistema – Planificada
-    Fase 6: Compatibilidad y compilación cruzada – Planificada
+```bash
+git clone https://github.com/tu-usuario/lyn.git
+cd lyn
+make
+sudo make install
+```
+
+## Uso Básico
+
+```bash
+# Compilar un archivo
+lync programa.lyn
+
+# Ejecutar el programa
+./programa
+
+# Compilar con optimizaciones
+lync -O3 programa.lyn
+
+# Modo embedded
+lync --embedded programa.lyn
+```

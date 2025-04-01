@@ -8,7 +8,16 @@
 // Forward declaration for ast_infer_type
 Type* ast_infer_type(AstNode* node);
 
-// Asignar un tipo a un nodo AST
+/**
+ * @brief Assigns a type to an AST node
+ * 
+ * This function sets the inferred type for a given AST node.
+ * In this context, we simply store the type in an auxiliary structure.
+ * This is a simplification; in a real compiler, more complex type handling would be needed.
+ * 
+ * @param node The AST node to set the type for
+ * @param type The type to assign to the node
+ */
 void ast_set_type(AstNode* node, Type* type) {
     if (!node) {
         logger_log(LOG_WARNING, "Attempted to set type on NULL AST node");
@@ -17,14 +26,22 @@ void ast_set_type(AstNode* node, Type* type) {
     
     error_push_debug(__func__, __FILE__, __LINE__, (void*)ast_set_type);
     
-    // En este contexto, simplemente guardamos el tipo en una estructura auxiliar
-    // Esto es una simplificación, en un compilador real habría que hacer más
+    // In this context, we simply store the type in an auxiliary structure
+    // This is a simplification; in a real compiler, more complex handling would be needed
     node->inferredType = type;
     
     logger_log(LOG_DEBUG, "Set AST node type: %s", typeToString(type));
 }
 
-// Enhanced type checking for binary operations
+/**
+ * @brief Enhanced type checking for binary operations
+ * 
+ * This function performs type checking for binary operations, ensuring
+ * type compatibility between operands and determining the result type.
+ * 
+ * @param node The binary operation AST node to check
+ * @return Type* The inferred type of the operation result
+ */
 Type* check_binary_op_types(AstNode* node) {
     if (!node || node->type != AST_BINARY_OP) {
         logger_log(LOG_WARNING, "Invalid node in binary op type check");
@@ -56,7 +73,15 @@ Type* check_binary_op_types(AstNode* node) {
     return result;
 }
 
-// Enhanced AST type inference function
+/**
+ * @brief Enhanced AST type inference function
+ * 
+ * This function performs type inference on AST nodes, determining
+ * the appropriate type based on the node's content and context.
+ * 
+ * @param node The AST node to infer the type for
+ * @return Type* The inferred type of the node
+ */
 Type* ast_infer_type(AstNode* node) {
     if (!node) {
         logger_log(LOG_WARNING, "Attempted to infer type of NULL AST node");
@@ -125,7 +150,15 @@ Type* ast_infer_type(AstNode* node) {
     return result;
 }
 
-// Enhanced function to validate entire AST for type errors
+/**
+ * @brief Enhanced function to validate entire AST for type errors
+ * 
+ * This function performs a comprehensive type check on the AST,
+ * ensuring type compatibility across all operations and assignments.
+ * 
+ * @param node The root AST node to validate
+ * @return bool true if all types are valid, false if any type errors are found
+ */
 bool validate_ast_types(AstNode* node) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)validate_ast_types);
     

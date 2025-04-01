@@ -1,18 +1,29 @@
+/**
+ * Comprehensive test suite for the Lyn programming language
+ * This file contains various tests demonstrating the language's features including:
+ * - Variables and type system
+ * - Control flow structures
+ * - Functions and aspects
+ * - Classes and objects
+ * - Loops and iterations
+ * - Switch statements
+ */
+
 main
     // ===================================================================
     // Variables and Type Tests
     // ===================================================================
     
     // Basic variable assignments
-    entero = 42               // Integer value
+    integer = 42               // Integer value
     decimal = 3.14            // Floating point value
-    texto = "Hola, Lyn!"      // String value
+    text = "Hello, Lyn!"      // String value
     
     // Print variable values
     print("\n=== Variables and their values ===")
-    print("entero = " + entero)
+    print("integer = " + integer)
     print("decimal = " + decimal)
-    print("texto = " + texto)
+    print("text = " + text)
 
     // Remove or comment out the unused sayHello function to avoid the warning
     // func sayHello()
@@ -50,8 +61,8 @@ main
     print("\n--- Type Compatibility ---")
     
     // Valid assignments (compatible types)
-    int_to_int = entero       // int to int (same type)
-    int_to_float = entero     // int to float (int can be assigned to float)
+    int_to_int = integer       // int to int (same type)
+    int_to_float = integer     // int to float (int can be assigned to float)
     
     print("int_to_int: " + int_to_int)
     print("int_to_float: " + int_to_float)
@@ -60,16 +71,16 @@ main
     print("\n--- Mixed Type Operations ---")
     
     // Integer operations
-    sum_int = entero + 10
-    print("entero + 10 = " + sum_int)
+    sum_int = integer + 10
+    print("integer + 10 = " + sum_int)
     
     // Float operations
     product_float = decimal * 2
     print("decimal * 2 = " + product_float)
     
     // Mixed int and float (should promote to float)
-    mixed_result = entero + decimal
-    print("entero + decimal = " + mixed_result)
+    mixed_result = integer + decimal
+    print("integer + decimal = " + mixed_result)
     
     // Simple variables without string concatenation
     greeting = "Hello World"  // Direct string assignment without concatenation
@@ -112,16 +123,16 @@ main
     print("\n=== Arithmetic operations ===")
     
     // Addition
-    suma = 5 + 3
-    print("5 + 3 = " + suma)
+    sum = 5 + 3
+    print("5 + 3 = " + sum)
     
     // Subtraction
-    resta = 10 - 4
-    print("10 - 4 = " + resta)
+    subtraction = 10 - 4
+    print("10 - 4 = " + subtraction)
     
     // Multiplication
-    producto = 3 * 7
-    print("3 * 7 = " + producto)
+    product = 3 * 7
+    print("3 * 7 = " + product)
     
     // Division
     division = 20 / 4
@@ -134,17 +145,17 @@ main
     print("\n=== Control flow statements ===")
     
     // If-else statement
-    valor = 42
+    value = 42
     
-    if (valor > 10)
-        print("valor is greater than 10")
+    if (value > 10)
+        print("value is greater than 10")
     else
-        print("valor is less than or equal to 10")
+        print("value is less than or equal to 10")
     end
     
     // Another if-else with a different condition
-    edad = 25
-    if (edad >= 18)
+    age = 25
+    if (age >= 18)
         print("You are an adult")
     else
         print("You are not yet an adult")
@@ -262,86 +273,83 @@ main
     
     print("\n=== Test completed successfully! ===")
     
-    // Test de switch statements
-    print("===== Test de Switch Statements =====")
+    // Switch statements tests
+    print("===== Switch Statements Tests =====")
 
-    // Test 1: Switch básico
+    // Test 1: Basic switch
     x1 = 2
-    result1 = "desconocido"
+    result1 = "unknown"
     switch (x1) 
         case 1:
-            result1 = "uno"
+            result1 = "one"
             break
         case 2:
-            result1 = "dos"
+            result1 = "two"
             break
         case 3:
-            result1 = "tres"
+            result1 = "three"
             break
     end
     
     print("Test 1: " + result1)
     
-    // Test 2: Switch con caso default
+    // Test 2: Switch with default case
     x2 = 10
-    result2 = "desconocido"
+    result2 = "unknown"
     switch (x2) 
         case 1:
-            result2 = "uno"
+            result2 = "one"
             break
         case 2:
-            result2 = "dos"
+            result2 = "two"
             break
         default:
-            result2 = "otro"
+            result2 = "other"
     end
     
     print("Test 2: " + result2)
     
-    // Test 3: Comportamiento de fall-through (cuando no hay break)
+    // Test 3: Fall-through behavior (when no break)
     x3 = 1
     result3 = ""
     switch (x3) 
         case 1:
-            result3 = result3 + "uno, "
-            // Sin break, debería continuar al siguiente caso
+            result3 = result3 + "one, "
+            // No break, should continue to next case
         case 2:
-            result3 = result3 + "dos, "
-            // Sin break, debería continuar al siguiente caso
+            result3 = result3 + "two, "
+            // No break, should continue to next case
         case 3:
-            result3 = result3 + "tres"
+            result3 = result3 + "three"
             break
         default:
-            result3 = "otro"
+            result3 = "other"
     end
     
     print("Test 3: " + result3)
     
-    // Test 4: Expresiones en switch
-    // Originalmente se usaba:
-    // a = 5, b = 10, switch (a*2) con case b, b-1 y b+1
-    // Se reemplaza usando literales: a*2 es 10, b-1=9 y b+1=11
+    // Test 4: Expressions in switch
     a = 5
     b = 10
     result4 = ""
     
     switch (a * 2)
         case 10:
-            result4 = "a*2 es igual a b"
+            result4 = "a*2 equals b"
             break
         case 9:
-            result4 = "a*2 es igual a b-1"
+            result4 = "a*2 equals b-1"
             break
         case 11:
-            result4 = "a*2 es igual a b+1"
+            result4 = "a*2 equals b+1"
             break
         default:
-            result4 = "ninguna coincidencia"
+            result4 = "no match"
     end
     
     print("Test 4: " + result4)
     
-    // Test 5: Switch anidado
+    // Test 5: Nested switch
     outer = 1
     inner = 2
     result5 = ""
@@ -358,7 +366,7 @@ main
                     result5 = result5 + "inner:2"
                     break
                 default:
-                    result5 = result5 + "inner:otro"
+                    result5 = result5 + "inner:other"
             end
             
             break
@@ -366,32 +374,29 @@ main
             result5 = "outer:2"
             break
         default:
-            result5 = "outer:otro"
+            result5 = "outer:other"
     end
     
     print("Test 5: " + result5)
     
-    // Test 6: Switch con break temprano
+    // Test 6: Switch with early break
     x6 = 2
     result6 = ""
     ran_after_break = false
     
     switch (x6) 
         case 2:
-            result6 = "caso 2"
+            result6 = "case 2"
             break
-            ran_after_break = true // Esto no debería ejecutarse
+            ran_after_break = true // This should not execute
         case 3:
-            result6 = "caso 3"
+            result6 = "case 3"
             break
     end
     
-    // Replace problematic line with a simple print statement
     print("Test 6: " + result6)
     
-    // Test 7: Switch con valores calculados en los casos
-    // Con a7 = 5 y b7 = 10, se reemplazan:
-    // a7+b7 = 15, a7*b7 = 50, b7-a7 = 5
+    // Test 7: Switch with calculated values in cases
     x7 = 15
     a7 = 5
     b7 = 10
@@ -399,101 +404,104 @@ main
     
     switch (x7)
         case 15:
-            result7 = "igual a a+b"
+            result7 = "equals a+b"
             break
         case 50:
-            result7 = "igual a a*b"
+            result7 = "equals a*b"
             break
         case 5:
-            result7 = "igual a b-a"
+            result7 = "equals b-a"
             break
         default:
-            result7 = "sin coincidencia"
+            result7 = "no match"
     end
     
     print("Test 7: " + result7)
     
-    // Test 8: Switch con caso vacío (no ocurre nada)
+    // Test 8: Switch with empty case (nothing happens)
     x8 = 3
-    result8 = "inicial"
+    result8 = "initial"
     
     switch (x8) 
         case 1:
-            result8 = "uno"
+            result8 = "one"
             break
         case 2:
-            result8 = "dos"
+            result8 = "two"
             break
         case 3:
-            // Caso vacío intencional, no hace nada
+            // Intentional empty case, does nothing
             break
         default:
-            result8 = "otro"
+            result8 = "other"
     end
     
     print("Test 8: " + result8)
 
-    print("===== Todos los tests de Switch completados =====")
+    print("===== All Switch Tests Completed =====")
     
-    print("Mensaje random: ¡Recuerda revisar la documentación de Lyn!")
+    print("Random message: Remember to check the Lyn documentation!")
 end
 
-// Tests para los diferentes tipos de bucles for
+/**
+ * Tests for different types of for loops
+ * Demonstrates various for loop syntaxes and use cases
+ */
 main
-    print("=== Tests de bucles for ampliados ===")
+    print("=== Extended For Loop Tests ===")
     
-    // Test 1: Bucle for con range básico
-    print("Test 1: For con range básico")
+    // Test 1: Basic range for loop
+    print("Test 1: For with basic range")
     for i in range(1, 6)
         print(i)
     end
     
-    // Test 2: Bucle for con range y paso
-    print("Test 2: For con range y paso")
+    // Test 2: For loop with range and step
+    print("Test 2: For with range and step")
     for i in range(0, 10, 2)
         print(i)
     end
     
-    // Test 3: Bucle for con colección (array)
-    print("Test 3: For con colección")
-    numeros = [10, 20, 30, 40, 50]
-    for num in numeros
+    // Test 3: For loop with collection (array)
+    print("Test 3: For with collection")
+    numbers = [10, 20, 30, 40, 50]
+    for num in numbers
         print(num)
     end
     
-    // Test 4: Bucle for tradicional estilo C
-    print("Test 4: For tradicional estilo C")
+    // Test 4: Traditional C-style for loop
+    print("Test 4: Traditional C-style for")
     for (i = 0; i < 5; i = i + 1)
         print(i)
     end
     
-    // Test 5: Bucle for tradicional con múltiples operaciones
-    print("Test 5: For tradicional con múltiples operaciones")
+    // Test 5: Traditional for loop with multiple operations
+    print("Test 5: Traditional for with multiple operations")
     for (i = 0, sum = 0; i < 5; i = i + 1, sum = sum + i)
-        print("Iteración " + i + ", suma = " + sum)
+        print("Iteration " + i + ", sum = " + sum)
     end
     
-    // Test 6: Bucles for anidados
-    print("Test 6: Bucles for anidados")
+    // Test 6: Nested for loops
+    print("Test 6: Nested for loops")
     for i in range(1, 4)
         for j in range(1, 4)
             print("i = " + i + ", j = " + j)
         end
     end
     
-    // Test 7: Bucle for con colección de strings
-    print("Test 7: For con colección de strings")
-    nombres = ["Ana", "Luis", "María", "Carlos"]
-    for nombre in nombres
-        print("Hola, " + nombre)
+    // Test 7: For loop with string collection
+    print("Test 7: For with string collection")
+    names = ["Ana", "Luis", "Maria", "Carlos"]
+    for name in names
+        print("Hello, " + name)
     end
     
-    // Test 8: For tradicional con partes opcionales
-    print("Test 8: For tradicional con condición solamente")
+    // Test 8: Traditional for with optional parts
+    print("Test 8: Traditional for with condition only")
     j = 0
     for (; j < 3; j = j + 1)
         print("j = " + j)
     end
     
-    print("Pruebas de bucles for completadas")
+    print("For loop tests completed")
 end

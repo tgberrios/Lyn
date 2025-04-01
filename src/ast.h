@@ -1,24 +1,44 @@
 #ifndef AST_H
 #define AST_H
 
-#include <stddef.h>  // Para size_t
-#include <stdbool.h> // Para bool
+#include <stddef.h>  // For size_t
+#include <stdbool.h> // For bool
+
+/**
+ * @file ast.h
+ * @brief Header file for the Abstract Syntax Tree (AST) system
+ * 
+ * This header file defines the core structures and functions for managing
+ * Abstract Syntax Trees in the Lyn compiler. It includes definitions for
+ * all AST node types, their associated data structures, and the functions
+ * for manipulating these trees.
+ */
 
 // Forward declarations
 struct Type;
 
-// Tipos de nodos AST
+/**
+ * @brief Enumeration of all possible AST node types
+ * 
+ * This enumeration defines all the different types of nodes that can appear
+ * in the Abstract Syntax Tree. The types are organized into categories:
+ * - Top-level declarations
+ * - Statements
+ * - Expressions
+ * - Aspect-oriented programming constructs
+ * - Pattern matching constructs
+ */
 typedef enum {
-    // Declaraciones de nivel superior
+    // Top-level declarations
     AST_PROGRAM,
     AST_FUNC_DEF,
     AST_CLASS_DEF,
     AST_VAR_DECL,
     AST_IMPORT,
     AST_MODULE_DECL,
-    AST_ASPECT_DEF,    // Se agregó para definir aspectos
+    AST_ASPECT_DEF,    // Added for aspect definitions
     
-    // Sentencias
+    // Statements
     AST_BLOCK,
     AST_IF_STMT,
     AST_FOR_STMT,
@@ -34,7 +54,7 @@ typedef enum {
     AST_TRY_CATCH_STMT,
     AST_THROW_STMT,
     
-    // Expresiones
+    // Expressions
     AST_BINARY_OP,
     AST_UNARY_OP,
     AST_NUMBER_LITERAL,
@@ -49,38 +69,56 @@ typedef enum {
     AST_LAMBDA,
     AST_FUNC_COMPOSE,
     AST_CURRY_EXPR,
-    AST_NEW_EXPR,     // Nodo para instanciación de objetos (new)
-    AST_THIS_EXPR,    // Nodo para la palabra clave "this"
+    AST_NEW_EXPR,     // Node for object instantiation (new)
+    AST_THIS_EXPR,    // Node for the "this" keyword
     
-    // Para programación orientada a aspectos
+    // Aspect-oriented programming
     AST_POINTCUT,
     AST_ADVICE,
     
-    // Para pattern matching
+    // Pattern matching
     AST_PATTERN_MATCH,
     AST_PATTERN_CASE
 } AstNodeType;
 
-// Tipos de advice para programación orientada a aspectos
+/**
+ * @brief Types of advice in aspect-oriented programming
+ * 
+ * Defines the different types of advice that can be applied in aspect-oriented
+ * programming: before, after, or around a join point.
+ */
 typedef enum {
-    ADVICE_BEFORE = 0,
-    ADVICE_AFTER  = 1,
-    ADVICE_AROUND = 2
+    ADVICE_BEFORE = 0,  // Advice executed before the join point
+    ADVICE_AFTER  = 1,  // Advice executed after the join point
+    ADVICE_AROUND = 2   // Advice that can control the execution of the join point
 } AdviceType;
 
-// Tipo de bucle for
+/**
+ * @brief Types of for loops supported by the language
+ * 
+ * Defines the different styles of for loops that can be used:
+ * - Range-based iteration
+ * - Collection-based iteration
+ * - Traditional C-style iteration
+ */
 typedef enum {
-    FOR_RANGE = 0,     // for i in range(start, end)
+    FOR_RANGE = 0,      // for i in range(start, end)
     FOR_COLLECTION = 1, // for elem in collection
     FOR_TRADITIONAL = 2 // for (init; condition; update)
 } ForLoopType;
 
-// Estructura base para todos los nodos AST
+/**
+ * @brief Base structure for all AST nodes
+ * 
+ * This structure represents a node in the Abstract Syntax Tree. It uses
+ * a discriminated union to store the specific data for each type of node.
+ * All nodes share common fields for type, location, and inferred type.
+ */
 typedef struct AstNode {
-    AstNodeType type;
-    int line;  // Línea donde inicia el nodo
-    int col;   // Columna donde inicia el nodo
-    struct Type* inferredType;  // Para anotaciones de tipo inferido
+    AstNodeType type;           // Type of the AST node
+    int line;                   // Line number where the node begins
+    int col;                    // Column number where the node begins
+    struct Type* inferredType;  // For type inference annotations
     
     union {
         // AST_PROGRAM
@@ -153,15 +191,15 @@ typedef struct AstNode {
         
         // AST_FOR_STMT
         struct {
-            ForLoopType forType;    // Tipo de bucle for
-            char iterator[256];     // Nombre del iterador (para range y collection)
-            struct AstNode* rangeStart; // Para range
-            struct AstNode* rangeEnd;   // Para range
-            struct AstNode* rangeStep;  // Paso para range (opcional)
-            struct AstNode* collection; // Para iterar sobre colecciones
-            struct AstNode* init;       // Para bucle tradicional
-            struct AstNode* condition;  // Para bucle tradicional
-            struct AstNode* update;     // Para bucle tradicional
+            ForLoopType forType;    // Type of for loop
+            char iterator[256];     // Iterator name (for range and collection)
+            struct AstNode* rangeStart; // For range
+            struct AstNode* rangeEnd;   // For range
+            struct AstNode* rangeStep;  // Step for range (optional)
+            struct AstNode* collection; // For collection iteration
+            struct AstNode* init;       // For traditional loop
+            struct AstNode* condition;  // For traditional loop
+            struct AstNode* update;     // For traditional loop
             struct AstNode** body;
             int bodyCount;
         } forStmt;
@@ -214,12 +252,12 @@ typedef struct AstNode {
         
         // AST_BREAK_STMT
         struct {
-            int dummy;  // C no permite struct vacía
+            int dummy;  // C doesn't allow empty structs
         } breakStmt;
         
         // AST_CONTINUE_STMT
         struct {
-            int dummy;  // C no permite struct vacía
+            int dummy;  // C doesn't allow empty structs
         } continueStmt;
         
         // AST_TRY_CATCH_STMT
@@ -268,7 +306,7 @@ typedef struct AstNode {
         
         // AST_NULL_LITERAL
         struct {
-            int dummy;  // C no permite struct vacía
+            int dummy;  // C doesn't allow empty structs
         } nullLiteral;
         
         // AST_IDENTIFIER
@@ -323,16 +361,16 @@ typedef struct AstNode {
             int totalArgCount;
         } curryExpr;
         
-        // AST_NEW_EXPR (nueva: instanciación de objetos)
+        // AST_NEW_EXPR (new: object instantiation)
         struct {
             char className[256];
             struct AstNode** arguments;
             int argCount;
         } newExpr;
         
-        // AST_THIS_EXPR (nueva: referencia a la instancia actual)
+        // AST_THIS_EXPR (new: reference to current instance)
         struct {
-            // No se requieren campos adicionales para 'this'
+            // No additional fields required for 'this'
         } thisExpr;
         
         // AST_POINTCUT
@@ -366,53 +404,113 @@ typedef struct AstNode {
     };
 } AstNode;
 
-/* Funciones para trabajar con el AST */
-
-// Inicializa el sistema AST
-void ast_init(void);
-
-// Limpia y libera recursos del sistema AST
-void ast_cleanup(void);
-
-// Establece el nivel de depuración para el sistema AST
-void ast_set_debug_level(int level);
-
-// Obtiene el nivel de depuración actual
-int ast_get_debug_level(void);
-
-// Crea un nuevo nodo AST del tipo especificado
-AstNode* createAstNode(AstNodeType type);
-
-// Libera un nodo AST y todos sus hijos
-void freeAstNode(AstNode* node);
-
-// Libera un programa AST completo
-void freeAstProgram(AstNode* program);
-
-// Imprime un AST para depuración
-void printAst(AstNode* node, int indent);
-
-// Copia un nodo AST (y todos sus hijos)
-AstNode* copyAstNode(AstNode* node);
-
-// Devuelve un string con el tipo de nodo AST
-const char* astNodeTypeToString(AstNodeType type);
-
-// Devuelve el número de hijos que tiene un nodo
-int astNodeChildCount(AstNode* node);
-
-// Devuelve el nº hijo de un nodo (0-based)
-AstNode* astNodeGetChild(AstNode* node, int index);
-
-// Estadísticas de uso de AST
+/**
+ * @brief Statistics about AST usage
+ * 
+ * This structure keeps track of various metrics about AST usage,
+ * including node creation, memory usage, and tree depth.
+ */
 typedef struct {
-    int nodes_created;
-    int nodes_freed;
-    int max_depth;
-    size_t memory_used;
+    int nodes_created;    // Number of nodes created
+    int nodes_freed;      // Number of nodes freed
+    int max_depth;        // Maximum depth of any AST tree
+    size_t memory_used;   // Total memory used by AST nodes
 } AstStats;
 
-// Obtiene estadísticas de uso de nodos AST
+/* AST manipulation functions */
+
+/**
+ * @brief Initializes the AST system
+ */
+void ast_init(void);
+
+/**
+ * @brief Cleans up and frees resources from the AST system
+ */
+void ast_cleanup(void);
+
+/**
+ * @brief Sets the debug level for the AST system
+ * 
+ * @param level The new debug level (0=minimum, 3=maximum)
+ */
+void ast_set_debug_level(int level);
+
+/**
+ * @brief Gets the current debug level
+ * 
+ * @return int The current debug level
+ */
+int ast_get_debug_level(void);
+
+/**
+ * @brief Creates a new AST node of the specified type
+ * 
+ * @param type The type of AST node to create
+ * @return AstNode* The newly created node, or NULL if allocation fails
+ */
+AstNode* createAstNode(AstNodeType type);
+
+/**
+ * @brief Frees an AST node and all its children
+ * 
+ * @param node The AST node to free
+ */
+void freeAstNode(AstNode* node);
+
+/**
+ * @brief Frees a complete AST program
+ * 
+ * @param program The program node to free
+ */
+void freeAstProgram(AstNode* program);
+
+/**
+ * @brief Prints an AST for debugging purposes
+ * 
+ * @param node The AST node to print
+ * @param indent The current indentation level
+ */
+void printAst(AstNode* node, int indent);
+
+/**
+ * @brief Creates a copy of an AST node
+ * 
+ * @param node The AST node to copy
+ * @return AstNode* A copy of the node, or NULL if allocation fails
+ */
+AstNode* copyAstNode(AstNode* node);
+
+/**
+ * @brief Converts an AST node type to its string representation
+ * 
+ * @param type The AST node type to convert
+ * @return const char* String representation of the node type
+ */
+const char* astNodeTypeToString(AstNodeType type);
+
+/**
+ * @brief Gets the number of children a node has
+ * 
+ * @param node The AST node to check
+ * @return int The number of children
+ */
+int astNodeChildCount(AstNode* node);
+
+/**
+ * @brief Gets a specific child of a node
+ * 
+ * @param node The parent AST node
+ * @param index The index of the child to get (0-based)
+ * @return AstNode* The requested child node, or NULL if index is invalid
+ */
+AstNode* astNodeGetChild(AstNode* node, int index);
+
+/**
+ * @brief Gets statistics about AST usage
+ * 
+ * @return AstStats Current statistics about AST usage
+ */
 AstStats ast_get_stats(void);
 
 #endif /* AST_H */

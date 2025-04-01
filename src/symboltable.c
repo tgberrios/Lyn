@@ -1,3 +1,19 @@
+/**
+ * @file symboltable.c
+ * @brief Implementation of the symbol table for the Lyn compiler
+ * 
+ * This file implements a symbol table that manages variable and function
+ * declarations during compilation. It provides:
+ * - Scope management (enter/exit scopes)
+ * - Symbol lookup and insertion
+ * - Type checking and validation
+ * - Debug information and logging
+ * 
+ * The symbol table is implemented as a linked list of symbols, with each
+ * symbol containing its name, type, and scope level. The current scope
+ * is tracked to support nested scopes.
+ */
+
 #include "symboltable.h"
 #include "error.h"
 #include "logger.h"
@@ -5,15 +21,34 @@
 #include <string.h>
 #include <stdio.h>
 
-// Nivel de depuración (0=mínimo, 3=máximo)
+/** Debug level for symbol table operations (0=minimal, 3=verbose) */
 static int debug_level = 1;
 
+/**
+ * @brief Sets the debug level for symbol table operations
+ * 
+ * Controls the verbosity of logging for symbol table operations:
+ * - 0: Minimal logging
+ * - 1: Basic operations
+ * - 2: Detailed operations
+ * - 3: Verbose debugging
+ * 
+ * @param level New debug level (0-3)
+ */
 void symbolTable_set_debug_level(int level) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)symbolTable_set_debug_level);
     debug_level = level;
     logger_log(LOG_INFO, "Symbol table debug level set to %d", level);
 }
 
+/**
+ * @brief Creates a new symbol table
+ * 
+ * Allocates and initializes a new symbol table with an empty symbol list
+ * and scope level 0 (global scope).
+ * 
+ * @return SymbolTable* Newly created symbol table, or NULL on allocation failure
+ */
 SymbolTable* symbolTable_create(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)symbolTable_create);
     
@@ -31,6 +66,14 @@ SymbolTable* symbolTable_create(void) {
     return table;
 }
 
+/**
+ * @brief Frees all memory associated with a symbol table
+ * 
+ * Recursively frees all symbols in the table and their associated types,
+ * then frees the table structure itself.
+ * 
+ * @param table The symbol table to free
+ */
 void symbolTable_free(SymbolTable* table) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)symbolTable_free);
     
@@ -55,6 +98,14 @@ void symbolTable_free(SymbolTable* table) {
     free(table);
 }
 
+/**
+ * @brief Enters a new scope level
+ * 
+ * Increments the current scope level. All symbols added after this call
+ * will be associated with the new scope level.
+ * 
+ * @param table The symbol table to modify
+ */
 void symbolTable_enterScope(SymbolTable* table) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)symbolTable_enterScope);
     
@@ -70,6 +121,14 @@ void symbolTable_enterScope(SymbolTable* table) {
     }
 }
 
+/**
+ * @brief Exits the current scope level
+ * 
+ * Removes all symbols from the current scope and decrements the scope level.
+ * Cannot exit the global scope (level 0).
+ * 
+ * @param table The symbol table to modify
+ */
 void symbolTable_exitScope(SymbolTable* table) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)symbolTable_exitScope);
     
@@ -84,7 +143,7 @@ void symbolTable_exitScope(SymbolTable* table) {
         return;
     }
     
-    // Eliminar todos los símbolos del ámbito actual
+    // Remove all symbols from current scope
     Symbol* current = table->head;
     Symbol* prev = NULL;
     int removed = 0;
@@ -123,6 +182,16 @@ void symbolTable_exitScope(SymbolTable* table) {
     }
 }
 
+/**
+ * @brief Adds a new symbol to the current scope
+ * 
+ * Creates and adds a new symbol with the given name and type to the current scope.
+ * Checks for duplicate symbols in the current scope and validates input parameters.
+ * 
+ * @param table The symbol table to modify
+ * @param name The name of the new symbol
+ * @param type The type of the new symbol
+ */
 void symbolTable_add(SymbolTable* table, const char* name, Type* type) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)symbolTable_add);
     
@@ -143,7 +212,7 @@ void symbolTable_add(SymbolTable* table, const char* name, Type* type) {
         return;
     }
     
-    // Verificar si ya existe en el ámbito actual
+    // Check for existing symbol in current scope
     Symbol* existing = symbolTable_lookupCurrentScope(table, name);
     if (existing) {
         char errorMsg[512];
@@ -154,7 +223,7 @@ void symbolTable_add(SymbolTable* table, const char* name, Type* type) {
         return;
     }
     
-    // Crear nuevo símbolo
+    // Create new symbol
     Symbol* symbol = malloc(sizeof(Symbol));
     if (!symbol) {
         error_report("SymbolTable", __LINE__, 0, "Memory allocation failed for symbol", ERROR_MEMORY);
@@ -167,7 +236,7 @@ void symbolTable_add(SymbolTable* table, const char* name, Type* type) {
     symbol->type = clone_type(type);
     symbol->scope = table->currentScope;
     
-    // Insertar al principio de la lista
+    // Insert at beginning of list
     symbol->next = table->head;
     table->head = symbol;
     
@@ -177,6 +246,16 @@ void symbolTable_add(SymbolTable* table, const char* name, Type* type) {
     }
 }
 
+/**
+ * @brief Looks up a symbol in all scopes
+ * 
+ * Searches for a symbol with the given name in all scopes, starting from
+ * the current scope and moving outward to the global scope.
+ * 
+ * @param table The symbol table to search
+ * @param name The name of the symbol to find
+ * @return Symbol* The found symbol, or NULL if not found
+ */
 Symbol* symbolTable_lookup(SymbolTable* table, const char* name) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)symbolTable_lookup);
     
@@ -208,6 +287,15 @@ Symbol* symbolTable_lookup(SymbolTable* table, const char* name) {
     return NULL;
 }
 
+/**
+ * @brief Looks up a symbol in the current scope only
+ * 
+ * Searches for a symbol with the given name only in the current scope.
+ * 
+ * @param table The symbol table to search
+ * @param name The name of the symbol to find
+ * @return Symbol* The found symbol, or NULL if not found
+ */
 Symbol* symbolTable_lookupCurrentScope(SymbolTable* table, const char* name) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)symbolTable_lookupCurrentScope);
     
@@ -240,6 +328,12 @@ Symbol* symbolTable_lookupCurrentScope(SymbolTable* table, const char* name) {
     return NULL;
 }
 
+/**
+ * @brief Gets the total number of symbols in the table
+ * 
+ * @param table The symbol table to count symbols in
+ * @return int The total number of symbols
+ */
 int symbolTable_get_count(SymbolTable* table) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)symbolTable_get_count);
     
@@ -258,6 +352,14 @@ int symbolTable_get_count(SymbolTable* table) {
     return count;
 }
 
+/**
+ * @brief Prints a detailed dump of the symbol table
+ * 
+ * Outputs all symbols in the table with their names, types, and scope levels.
+ * The output is sent to both the logger and stdout (if debug level is high enough).
+ * 
+ * @param table The symbol table to dump
+ */
 void symbolTable_dump(SymbolTable* table) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)symbolTable_dump);
     
@@ -284,7 +386,7 @@ void symbolTable_dump(SymbolTable* table) {
     logger_log(LOG_INFO, "---------------------------------------");
     logger_log(LOG_INFO, "Total symbols: %d", count);
     
-    // Si el nivel de debug es alto, también imprimimos en stdout para consola
+    // If debug level is high, also print to stdout for console
     if (debug_level >= 2) {
         printf("Symbol Table Dump (current scope: %d)\n", table->currentScope);
         printf("---------------------------------------\n");

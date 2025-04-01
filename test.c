@@ -150,13 +150,13 @@ int main() {
     float* float_array __attribute__((unused)) = NULL;
     double* mixed_array __attribute__((unused)) = NULL;
     const char* day_name __attribute__((unused)) = "";
-    int entero __attribute__((unused)) = 42;
+    int integer __attribute__((unused)) = 42;
     double decimal __attribute__((unused)) = 3.14;
-    const char* texto __attribute__((unused)) =     "Hola, Lyn!"    ;
+    const char* text __attribute__((unused)) =     "Hello, Lyn!"    ;
     printf("%s\n", "\n=== Variables and their values ===");
     {
         char _print_buffer[1024];
-        sprintf(_print_buffer, "%s%d",         "entero = "        ,         entero        );
+        sprintf(_print_buffer, "%s%d",         "integer = "        ,         integer        );
         printf("%s\n", _print_buffer);
     }
     {
@@ -166,7 +166,7 @@ int main() {
     }
     {
         char _print_buffer[1024];
-        sprintf(_print_buffer, "%s%s",         "texto = "        ,         texto        );
+        sprintf(_print_buffer, "%s%s",         "text = "        ,         text        );
         printf("%s\n", _print_buffer);
     }
     printf("%s\n", "\n=== Type System Tests ===");
@@ -204,8 +204,8 @@ int main() {
         printf("%s\n", _print_buffer);
     }
     printf("%s\n", "\n--- Type Compatibility ---");
-    int int_to_int __attribute__((unused)) =     entero    ;
-    int int_to_float __attribute__((unused)) =     entero    ;
+    int int_to_int __attribute__((unused)) =     integer    ;
+    int int_to_float __attribute__((unused)) =     integer    ;
     {
         char _print_buffer[1024];
         sprintf(_print_buffer, "%s%d",         "int_to_int: "        ,         int_to_int        );
@@ -218,10 +218,10 @@ int main() {
     }
     printf("%s\n", "\n--- Mixed Type Operations ---");
     double sum_int __attribute__((unused));
-    sum_int =     (    entero     +     10    )    ;
+    sum_int =     (    integer     +     10    )    ;
     {
         char _print_buffer[1024];
-        sprintf(_print_buffer, "%s%g",         "entero + 10 = "        ,         sum_int        );
+        sprintf(_print_buffer, "%s%g",         "integer + 10 = "        ,         sum_int        );
         printf("%s\n", _print_buffer);
     }
     double product_float __attribute__((unused));
@@ -232,10 +232,10 @@ int main() {
         printf("%s\n", _print_buffer);
     }
     double mixed_result __attribute__((unused));
-    mixed_result =     (    entero     +     decimal    )    ;
+    mixed_result =     (    integer     +     decimal    )    ;
     {
         char _print_buffer[1024];
-        sprintf(_print_buffer, "%s%g",         "entero + decimal = "        ,         mixed_result        );
+        sprintf(_print_buffer, "%s%g",         "integer + decimal = "        ,         mixed_result        );
         printf("%s\n", _print_buffer);
     }
     const char* greeting __attribute__((unused)) =     "Hello World"    ;
@@ -270,25 +270,23 @@ int main() {
         printf("%s\n", _print_buffer);
     }
     printf("%s\n", "\n=== Arithmetic operations ===");
-    double suma __attribute__((unused));
-    suma =     (    5     +     3    )    ;
+    sum =     (    5     +     3    )    ;
     {
         char _print_buffer[1024];
-        sprintf(_print_buffer, "%s%g",         "5 + 3 = "        ,         suma        );
+        sprintf(_print_buffer, "%s%g",         "5 + 3 = "        ,         sum        );
         printf("%s\n", _print_buffer);
     }
-    double resta __attribute__((unused));
-    resta =     (    10     -     4    )    ;
+    double subtraction __attribute__((unused));
+    subtraction =     (    10     -     4    )    ;
     {
         char _print_buffer[1024];
-        sprintf(_print_buffer, "%s%g",         "10 - 4 = "        ,         resta        );
+        sprintf(_print_buffer, "%s%g",         "10 - 4 = "        ,         subtraction        );
         printf("%s\n", _print_buffer);
     }
-    double producto __attribute__((unused));
-    producto =     (    3     *     7    )    ;
+    product =     (    3     *     7    )    ;
     {
         char _print_buffer[1024];
-        sprintf(_print_buffer, "%s%g",         "3 * 7 = "        ,         producto        );
+        sprintf(_print_buffer, "%s%g",         "3 * 7 = "        ,         product        );
         printf("%s\n", _print_buffer);
     }
     double division __attribute__((unused));
@@ -299,15 +297,15 @@ int main() {
         printf("%s\n", _print_buffer);
     }
     printf("%s\n", "\n=== Control flow statements ===");
-    int valor __attribute__((unused)) = 42;
-    if (    (    valor     >     10    )    ) {
-        printf("%s\n", "valor is greater than 10");
+    int value __attribute__((unused)) = 42;
+    if (    (    value     >     10    )    ) {
+        printf("%s\n", "value is greater than 10");
     }
     else {
-        printf("%s\n", "valor is less than or equal to 10");
+        printf("%s\n", "value is less than or equal to 10");
     }
-    int edad __attribute__((unused)) = 25;
-    if (    (    edad     >=     18    )    ) {
+    int age __attribute__((unused)) = 25;
+    if (    (    age     >=     18    )    ) {
         printf("%s\n", "You are an adult");
     }
     else {
@@ -387,18 +385,18 @@ int main() {
     sprintf(str_numeric, "The answer is: %d", int_val);
     printf("%s\n", str_numeric);
     printf("%s\n", "\n=== Test completed successfully! ===");
-    printf("%s\n", "===== Test de Switch Statements =====");
+    printf("%s\n", "===== Switch Statements Tests =====");
     int x1 __attribute__((unused)) = 2;
-    const char* result1 __attribute__((unused)) =     "desconocido"    ;
+    const char* result1 __attribute__((unused)) =     "unknown"    ;
     switch (    x1    ) {
         case         1        :
-            result1 =             "uno"            ;
+            result1 =             "one"            ;
             break;
         case         2        :
-            result1 =             "dos"            ;
+            result1 =             "two"            ;
             break;
         case         3        :
-            result1 =             "tres"            ;
+            result1 =             "three"            ;
             break;
     }
     {
@@ -407,16 +405,16 @@ int main() {
         printf("%s\n", _print_buffer);
     }
     int x2 __attribute__((unused)) = 10;
-    const char* result2 __attribute__((unused)) =     "desconocido"    ;
+    const char* result2 __attribute__((unused)) =     "unknown"    ;
     switch (    x2    ) {
         case         1        :
-            result2 =             "uno"            ;
+            result2 =             "one"            ;
             break;
         case         2        :
-            result2 =             "dos"            ;
+            result2 =             "two"            ;
             break;
         default:
-            result2 =             "otro"            ;
+            result2 =             "other"            ;
             break;
     }
     {
@@ -428,16 +426,16 @@ int main() {
     const char* result3 __attribute__((unused)) =     ""    ;
     switch (    x3    ) {
         case         1        :
-            result3 =             concat_any(            result3            ,             "uno, "            )            ;
+            result3 =             concat_any(            result3            ,             "one, "            )            ;
             break;
         case         2        :
-            result3 =             concat_any(            result3            ,             "dos, "            )            ;
+            result3 =             concat_any(            result3            ,             "two, "            )            ;
             break;
         case         3        :
-            result3 =             concat_any(            result3            ,             "tres"            )            ;
+            result3 =             concat_any(            result3            ,             "three"            )            ;
             break;
         default:
-            result3 =             "otro"            ;
+            result3 =             "other"            ;
             break;
     }
     {
@@ -450,16 +448,16 @@ int main() {
     const char* result4 __attribute__((unused)) =     ""    ;
     switch (    (    a     *     2    )    ) {
         case         10        :
-            result4 =             "a*2 es igual a b"            ;
+            result4 =             "a*2 equals b"            ;
             break;
         case         9        :
-            result4 =             "a*2 es igual a b-1"            ;
+            result4 =             "a*2 equals b-1"            ;
             break;
         case         11        :
-            result4 =             "a*2 es igual a b+1"            ;
+            result4 =             "a*2 equals b+1"            ;
             break;
         default:
-            result4 =             "ninguna coincidencia"            ;
+            result4 =             "no match"            ;
             break;
     }
     {
@@ -481,7 +479,7 @@ int main() {
                     result5 =                     concat_any(                    result5                    ,                     "inner:2"                    )                    ;
                     break;
                 default:
-                    result5 =                     concat_any(                    result5                    ,                     "inner:otro"                    )                    ;
+                    result5 =                     concat_any(                    result5                    ,                     "inner:other"                    )                    ;
                     break;
             }
             break;
@@ -489,7 +487,7 @@ int main() {
             result5 =             "outer:2"            ;
             break;
         default:
-            result5 =             "outer:otro"            ;
+            result5 =             "outer:other"            ;
             break;
     }
     {
@@ -502,11 +500,11 @@ int main() {
     bool ran_after_break __attribute__((unused)) =     false    ;
     switch (    x6    ) {
         case         2        :
-            result6 =             "caso 2"            ;
+            result6 =             "case 2"            ;
             ran_after_break =             true            ;
             break;
         case         3        :
-            result6 =             "caso 3"            ;
+            result6 =             "case 3"            ;
             break;
     }
     {
@@ -520,16 +518,16 @@ int main() {
     const char* result7 __attribute__((unused)) =     ""    ;
     switch (    x7    ) {
         case         15        :
-            result7 =             "igual a a+b"            ;
+            result7 =             "equals a+b"            ;
             break;
         case         50        :
-            result7 =             "igual a a*b"            ;
+            result7 =             "equals a*b"            ;
             break;
         case         5        :
-            result7 =             "igual a b-a"            ;
+            result7 =             "equals b-a"            ;
             break;
         default:
-            result7 =             "sin coincidencia"            ;
+            result7 =             "no match"            ;
             break;
     }
     {
@@ -538,18 +536,18 @@ int main() {
         printf("%s\n", _print_buffer);
     }
     int x8 __attribute__((unused)) = 3;
-    const char* result8 __attribute__((unused)) =     "inicial"    ;
+    const char* result8 __attribute__((unused)) =     "initial"    ;
     switch (    x8    ) {
         case         1        :
-            result8 =             "uno"            ;
+            result8 =             "one"            ;
             break;
         case         2        :
-            result8 =             "dos"            ;
+            result8 =             "two"            ;
             break;
         case         3        :
             break;
         default:
-            result8 =             "otro"            ;
+            result8 =             "other"            ;
             break;
     }
     {
@@ -557,8 +555,8 @@ int main() {
         sprintf(_print_buffer, "%s%s",         "Test 8: "        ,         result8        );
         printf("%s\n", _print_buffer);
     }
-    printf("%s\n", "===== Todos los tests de Switch completados =====");
-    printf("%s\n", "Mensaje random: ¡Recuerda revisar la documentación de Lyn!");
+    printf("%s\n", "===== All Switch Tests Completed =====");
+    printf("%s\n", "Random message: Remember to check the Lyn documentation!");
     // Ensure test function is called
     test_function();
     return 0;

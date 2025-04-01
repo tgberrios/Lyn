@@ -1,3 +1,14 @@
+/**
+ * @file memory.c
+ * @brief Memory management system implementation for the Lyn compiler
+ * 
+ * This file implements a comprehensive memory management system that includes:
+ * - Basic memory allocation wrappers with tracking
+ * - Memory pooling for efficient allocation of fixed-size blocks
+ * - Optional garbage collection with reference counting
+ * - Memory statistics tracking and reporting
+ */
+
 #define _POSIX_C_SOURCE 200112L
 #include "memory.h"
 #include "error.h"
@@ -12,26 +23,42 @@
 #include <stdatomic.h>
 #endif
 
-// Nivel de depuración para memoria (0=mínimo, 3=máximo)
-static int debug_level = 1;
+static int debug_level = 1;  ///< Memory debug level (0=minimum, 3=maximum)
 
-// Estadísticas de memoria
+/**
+ * @brief Memory statistics structure
+ */
 static struct {
-    size_t totalAllocated;
-    size_t currentAllocated;
-    size_t allocCount;
-    size_t freeCount;
+    size_t totalAllocated;   ///< Total bytes allocated over time
+    size_t currentAllocated; ///< Currently allocated bytes
+    size_t allocCount;       ///< Total number of allocations
+    size_t freeCount;        ///< Total number of frees
 } memStats;
 
+/**
+ * @brief Sets the debug level for the memory system
+ * 
+ * @param level The new debug level (0-3)
+ */
 void memory_set_debug_level(int level) {
     debug_level = level;
     logger_log(LOG_INFO, "Memory debug level set to %d", level);
 }
 
+/**
+ * @brief Gets the current debug level for the memory system
+ * 
+ * @return int Current debug level (0-3)
+ */
 int memory_get_debug_level(void) {
     return debug_level;
 }
 
+/**
+ * @brief Initializes the memory management system
+ * 
+ * Resets all memory statistics and prepares the system for use.
+ */
 void memory_init(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_init);
     
@@ -42,6 +69,11 @@ void memory_init(void) {
     logger_log(LOG_INFO, "Memory system initialized");
 }
 
+/**
+ * @brief Cleans up the memory management system
+ * 
+ * Checks for potential memory leaks and reports statistics.
+ */
 void memory_cleanup(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_cleanup);
     
@@ -57,6 +89,12 @@ void memory_cleanup(void) {
     logger_log(LOG_INFO, "Memory system cleanup complete");
 }
 
+/**
+ * @brief Prints current memory statistics
+ * 
+ * Displays detailed memory usage statistics including total allocations,
+ * current allocations, and allocation/free counts.
+ */
 void memory_stats(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_stats);
     
@@ -67,7 +105,7 @@ void memory_stats(void) {
     logger_log(LOG_INFO, "Number of frees: %zu", memStats.freeCount);
     
     if (debug_level >= 2) {
-        // Imprimir a stderr para compatibilidad con herramientas existentes
+        // Print to stderr for compatibility with existing tools
         printf("=== Memory Statistics ===\n");
         printf("Total allocated: %zu bytes\n", memStats.totalAllocated);
         printf("Currently allocated: %zu bytes\n", memStats.currentAllocated);
@@ -78,12 +116,20 @@ void memory_stats(void) {
 }
 
 /* ============================
-   Wrappers Básicos de Memoria
+   Basic Memory Wrappers
    ============================ */
 
-static size_t globalAllocCount = 0;
-static size_t globalFreeCount  = 0;
+static size_t globalAllocCount = 0;  ///< Global allocation counter
+static size_t globalFreeCount  = 0;  ///< Global free counter
 
+/**
+ * @brief Allocates memory with tracking
+ * 
+ * Wrapper for malloc that tracks allocation statistics and handles errors.
+ * 
+ * @param size Number of bytes to allocate
+ * @return void* Pointer to allocated memory, or NULL if allocation failed
+ */
 void* memory_alloc(size_t size) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_alloc);
     
@@ -107,10 +153,19 @@ void* memory_alloc(size_t size) {
     return ptr;
 }
 
+/**
+ * @brief Reallocates memory with tracking
+ * 
+ * Wrapper for realloc that handles NULL pointers and tracks statistics.
+ * 
+ * @param ptr Pointer to memory to reallocate
+ * @param new_size New size in bytes
+ * @return void* Pointer to reallocated memory, or NULL if reallocation failed
+ */
 void* memory_realloc(void* ptr, size_t new_size) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_realloc);
     
-    // Si es NULL, equivale a una asignación nueva
+    // If NULL, equivalent to new allocation
     if (!ptr) {
         return memory_alloc(new_size);
     }
@@ -130,6 +185,13 @@ void* memory_realloc(void* ptr, size_t new_size) {
     return new_ptr;
 }
 
+/**
+ * @brief Frees memory with tracking
+ * 
+ * Wrapper for free that tracks deallocation statistics.
+ * 
+ * @param ptr Pointer to memory to free
+ */
 void memory_free(void* ptr) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_free);
     
@@ -145,7 +207,7 @@ void memory_free(void* ptr) {
 }
 
 /**
- * @brief Duplicate a string with tracked memory
+ * @brief Duplicates a string with tracked memory
  * 
  * @param str String to duplicate
  * @return char* New allocated string or NULL on failure
@@ -162,23 +224,39 @@ char* memory_strdup(const char* str) {
 }
 
 /* ============================
-   Implementación del Memory Pooling
+   Memory Pool Implementation
    ============================ */
 
+/**
+ * @brief Structure representing a memory pool
+ */
 struct MemoryPool {
-    size_t blockSize;         /* Tamaño de cada bloque */
-    size_t poolSize;          /* Número total de bloques */
-    void *poolMemory;         /* Bloque contiguo de memoria asignado */
-    void *freeList;           /* Lista enlazada de bloques libres */
-    size_t totalAllocs;       /* Número total de asignaciones realizadas */
-    size_t totalFrees;        /* Número total de liberaciones realizadas */
-    pthread_mutex_t mutex;    /* Mutex para thread-safety */
+    size_t blockSize;         ///< Size of each block in the pool
+    size_t poolSize;          ///< Total number of blocks in the pool
+    void *poolMemory;         ///< Contiguous block of allocated memory
+    void *freeList;           ///< Linked list of free blocks
+    size_t totalAllocs;       ///< Total number of allocations from this pool
+    size_t totalFrees;        ///< Total number of frees to this pool
+    pthread_mutex_t mutex;    ///< Mutex for thread safety
 };
 
+/**
+ * @brief Structure for free block management
+ */
 typedef struct FreeBlock {
-    struct FreeBlock *next;
+    struct FreeBlock *next;   ///< Pointer to next free block
 } FreeBlock;
 
+/**
+ * @brief Creates a new memory pool
+ * 
+ * Allocates and initializes a memory pool with the specified block size and count.
+ * 
+ * @param blockSize Size of each block in the pool
+ * @param poolSize Number of blocks in the pool
+ * @param alignment Memory alignment requirement
+ * @return MemoryPool* Pointer to the created pool, or NULL if creation failed
+ */
 MemoryPool *memory_pool_create(size_t blockSize, size_t poolSize, size_t alignment) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_pool_create);
     
@@ -229,6 +307,12 @@ MemoryPool *memory_pool_create(size_t blockSize, size_t poolSize, size_t alignme
     return pool;
 }
 
+/**
+ * @brief Allocates a block from a memory pool
+ * 
+ * @param pool The memory pool to allocate from
+ * @return void* Pointer to allocated block, or NULL if pool is empty
+ */
 void *memory_pool_alloc(MemoryPool *pool) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_pool_alloc);
     
@@ -256,6 +340,12 @@ void *memory_pool_alloc(MemoryPool *pool) {
     return block;
 }
 
+/**
+ * @brief Returns a block to a memory pool
+ * 
+ * @param pool The memory pool to return the block to
+ * @param ptr Pointer to the block to return
+ */
 void memory_pool_free(MemoryPool *pool, void *ptr) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_pool_free);
     
@@ -264,7 +354,7 @@ void memory_pool_free(MemoryPool *pool, void *ptr) {
         return;
     }
     
-    // Validación básica: confirmar que ptr está dentro del bloque de memoria del pool
+    // Basic validation: confirm ptr is within pool's memory block
     if (ptr < pool->poolMemory || 
         ptr >= (void*)((char*)pool->poolMemory + pool->blockSize * pool->poolSize)) {
         char errorMsg[256];
@@ -287,12 +377,19 @@ void memory_pool_free(MemoryPool *pool, void *ptr) {
     pthread_mutex_unlock(&pool->mutex);
 }
 
+/**
+ * @brief Destroys a memory pool
+ * 
+ * Frees all memory associated with the pool and checks for memory leaks.
+ * 
+ * @param pool The memory pool to destroy
+ */
 void memory_pool_destroy(MemoryPool *pool) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_pool_destroy);
     
     if (!pool) return;
     
-    // Verificar si hay fugas de memoria en este pool
+    // Check for memory leaks in this pool
     if (pool->totalAllocs > pool->totalFrees) {
         char warnMsg[256];
         snprintf(warnMsg, sizeof(warnMsg), 
@@ -308,16 +405,33 @@ void memory_pool_destroy(MemoryPool *pool) {
     logger_log(LOG_INFO, "Memory pool %p destroyed", pool);
 }
 
+/**
+ * @brief Gets the total number of allocations from a pool
+ * 
+ * @param pool The memory pool to query
+ * @return size_t Total number of allocations
+ */
 size_t memory_pool_get_total_allocs(MemoryPool *pool) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_pool_get_total_allocs);
     return pool ? pool->totalAllocs : 0;
 }
 
+/**
+ * @brief Gets the total number of frees to a pool
+ * 
+ * @param pool The memory pool to query
+ * @return size_t Total number of frees
+ */
 size_t memory_pool_get_total_frees(MemoryPool *pool) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_pool_get_total_frees);
     return pool ? pool->totalFrees : 0;
 }
 
+/**
+ * @brief Prints statistics for a memory pool
+ * 
+ * @param pool The memory pool to print statistics for
+ */
 void memory_pool_dumpStats(MemoryPool *pool) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_pool_dumpStats);
     
@@ -337,7 +451,7 @@ void memory_pool_dumpStats(MemoryPool *pool) {
     logger_log(LOG_INFO, "  Frees        : %zu", pool->totalFrees);
     logger_log(LOG_INFO, "  Blocks in use: %zu", inUse);
     
-    // Imprimir también a stdout para compatibilidad con herramientas existentes
+    // Also print to stdout for compatibility with existing tools
     if (debug_level >= 1) {
         printf("Memory Pool Stats:\n");
         printf("  Block size   : %zu\n", pool->blockSize);
@@ -350,24 +464,42 @@ void memory_pool_dumpStats(MemoryPool *pool) {
 }
 
 /* ============================
-   Tracking Global de Memoria
+   Global Memory Tracking
    ============================ */
 
+/**
+ * @brief Gets the global allocation count
+ * 
+ * @return size_t Total number of allocations across all memory operations
+ */
 size_t memory_get_global_alloc_count(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_get_global_alloc_count);
     return globalAllocCount;
 }
 
+/**
+ * @brief Gets the global free count
+ * 
+ * @return size_t Total number of frees across all memory operations
+ */
 size_t memory_get_global_free_count(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_get_global_free_count);
     return globalFreeCount;
 }
 
 /* ============================
-   Garbage Collection Opcional
+   Optional Garbage Collection
    ============================ */
 #ifdef USE_GC
 
+/**
+ * @brief Allocates memory with garbage collection
+ * 
+ * Allocates memory with reference counting for garbage collection.
+ * 
+ * @param size Number of bytes to allocate
+ * @return void* Pointer to allocated memory
+ */
 void* memory_alloc_gc(size_t size) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_alloc_gc);
     
@@ -390,6 +522,11 @@ void* memory_alloc_gc(size_t size) {
     return (void*)(header + 1);
 }
 
+/**
+ * @brief Increments the reference count of a GC object
+ * 
+ * @param ptr Pointer to the GC object
+ */
 void memory_inc_ref(void *ptr) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_inc_ref);
     
@@ -403,6 +540,13 @@ void memory_inc_ref(void *ptr) {
     }
 }
 
+/**
+ * @brief Decrements the reference count of a GC object
+ * 
+ * Frees the object if its reference count reaches zero.
+ * 
+ * @param ptr Pointer to the GC object
+ */
 void memory_dec_ref(void *ptr) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)memory_dec_ref);
     
@@ -426,7 +570,7 @@ void memory_dec_ref(void *ptr) {
             }
             return;
         }
-        // Si falla, 'expected' se actualiza; repetir el ciclo.
+        // If failed, 'expected' is updated; repeat the cycle.
     }
     
     char errorMsg[256];

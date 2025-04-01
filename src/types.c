@@ -1,3 +1,15 @@
+/**
+ * @file types.c
+ * @brief Implementation of the Lyn compiler's type system
+ * 
+ * This file implements the core type system functionality, including:
+ * - Type creation and management
+ * - Type checking and compatibility verification
+ * - Type inference
+ * - Type system statistics tracking
+ * - Debug and logging capabilities
+ */
+
 #include "types.h"
 #include "ast.h"
 #include "error.h"
@@ -7,13 +19,40 @@
 #include <string.h>
 #include <stdbool.h>
 
-// Nivel de depuración (0=mínimo, 3=máximo)
+/**
+ * @brief Debug level for the type system
+ * 
+ * Controls the verbosity of type system logging:
+ * - 0: Minimal logging
+ * - 1: Basic type system info
+ * - 2: Detailed type checking info
+ * - 3: Verbose debugging output
+ */
 static int debug_level = 1;
 
-// Estadísticas del sistema de tipos
+/**
+ * @brief Statistics tracking structure for the type system
+ * 
+ * Keeps track of various type system metrics:
+ * - Number of types created
+ * - Number of types freed
+ * - Number of type errors detected
+ * - Number of classes declared
+ * - Number of functions with assigned types
+ */
 static TypeSystemStats stats = {0};
 
-// Definiciones estáticas para los tipos predefinidos
+/**
+ * @brief Predefined type definitions
+ * 
+ * Static type objects for the basic types in the language:
+ * - Integer type
+ * - Float type
+ * - Boolean type
+ * - String type
+ * - Void type
+ * - Unknown type (for type inference)
+ */
 static Type INTEGER_TYPE = { TYPE_INT, "int" };
 static Type FLOAT_TYPE   = { TYPE_FLOAT, "float" };
 static Type BOOLEAN_TYPE = { TYPE_BOOL, "bool" };
@@ -21,22 +60,51 @@ static Type STRING_TYPE  = { TYPE_STRING, "string" };
 static Type VOID_TYPE    = { TYPE_VOID, "void" };
 static Type UNKNOWN_TYPE = { TYPE_UNKNOWN, "unknown" };
 
+/**
+ * @brief Sets the debug level for the type system
+ * 
+ * Controls the verbosity of type system logging and error reporting.
+ * 
+ * @param level New debug level (0-3)
+ */
 void types_set_debug_level(int level) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)types_set_debug_level);
     debug_level = level;
     logger_log(LOG_INFO, "Type system debug level set to %d", level);
 }
 
+/**
+ * @brief Gets the current debug level for the type system
+ * 
+ * @return int Current debug level (0-3)
+ */
 int types_get_debug_level(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)types_get_debug_level);
     return debug_level;
 }
 
+/**
+ * @brief Gets the current type system statistics
+ * 
+ * Returns statistics about type system operations performed during
+ * compilation.
+ * 
+ * @return TypeSystemStats Current type system statistics
+ */
 TypeSystemStats types_get_stats(void) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)types_get_stats);
     return stats;
 }
 
+/**
+ * @brief Creates a new basic type
+ * 
+ * Allocates and initializes a new type of the specified kind.
+ * Basic types include primitive types like integers, floats, booleans, etc.
+ * 
+ * @param kind The kind of type to create
+ * @return Type* Newly created type, or NULL if allocation fails
+ */
 Type* createBasicType(TypeKind kind) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)createBasicType);
     
@@ -66,6 +134,15 @@ Type* createBasicType(TypeKind kind) {
     return type;
 }
 
+/**
+ * @brief Creates a new array type
+ * 
+ * Allocates and initializes a new array type with the specified element type.
+ * Array types are used to represent sequences of values of the same type.
+ * 
+ * @param elementType The type of elements in the array
+ * @return Type* Newly created array type, or NULL if allocation fails
+ */
 Type* createArrayType(Type* elementType) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)createArrayType);
     
@@ -94,6 +171,16 @@ Type* createArrayType(Type* elementType) {
     return type;
 }
 
+/**
+ * @brief Creates a new class type
+ * 
+ * Allocates and initializes a new class type with the specified name and optional base class.
+ * Class types are used to represent user-defined types with their own members and methods.
+ * 
+ * @param name The name of the class
+ * @param baseClass Optional base class for inheritance (can be NULL)
+ * @return Type* Newly created class type, or NULL if allocation fails
+ */
 Type* createClassType(const char* name, Type* baseClass) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)createClassType);
     
@@ -113,7 +200,6 @@ Type* createClassType(const char* name, Type* baseClass) {
     type->kind = TYPE_CLASS;
     strncpy(type->classType.name, name, sizeof(type->classType.name) - 1);
     type->classType.name[sizeof(type->classType.name)-1] = '\0';
-    // Usamos el nombre de la clase como representación en C
     strcpy(type->typeName, name);
     type->classType.baseClass = baseClass;
     
@@ -132,6 +218,18 @@ Type* createClassType(const char* name, Type* baseClass) {
     return type;
 }
 
+/**
+ * @brief Creates a new function type
+ * 
+ * Allocates and initializes a new function type with the specified return type
+ * and parameter types. Function types are used to represent both regular functions
+ * and lambda expressions.
+ * 
+ * @param returnType The type returned by the function
+ * @param paramTypes Array of parameter types
+ * @param paramCount Number of parameters
+ * @return Type* Newly created function type, or NULL if allocation fails
+ */
 Type* createFunctionType(Type* returnType, Type** paramTypes, int paramCount) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)createFunctionType);
     
@@ -174,7 +272,17 @@ Type* createFunctionType(Type* returnType, Type** paramTypes, int paramCount) {
     return type;
 }
 
-// Create a curried function type
+/**
+ * @brief Creates a new curried function type
+ * 
+ * Allocates and initializes a new curried function type, which represents
+ * a partially applied function. Curried functions are used to support
+ * functional programming features like partial application.
+ * 
+ * @param baseType The original function type being curried
+ * @param appliedArgCount Number of arguments already applied
+ * @return Type* Newly created curried function type, or NULL if allocation fails
+ */
 Type* create_curried_type(Type* baseType, int appliedArgCount) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)create_curried_type);
     
@@ -213,6 +321,15 @@ Type* create_curried_type(Type* baseType, int appliedArgCount) {
     return type;
 }
 
+/**
+ * @brief Converts a type to its string representation
+ * 
+ * Generates a human-readable string representation of a type.
+ * This is used for debugging, error messages, and type name generation.
+ * 
+ * @param type The type to convert to string
+ * @return const char* String representation of the type
+ */
 const char* typeToString(Type* type) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)typeToString);
     
@@ -270,6 +387,16 @@ const char* typeToString(Type* type) {
     return "unknown";
 }
 
+/**
+ * @brief Converts a type to its C language representation
+ * 
+ * Generates a C language type string representation of a type.
+ * This is used for code generation and C interop.
+ * 
+ * @param type The type to convert
+ * @param buffer Buffer to store the C type string
+ * @param bufferSize Size of the buffer
+ */
 void typeToC(Type* type, char* buffer, int bufferSize) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)typeToC);
     
@@ -327,7 +454,6 @@ void typeToC(Type* type, char* buffer, int bufferSize) {
             break;
         }
         case TYPE_CURRIED: {
-            // Handle curried type similar to function type but with applied arguments
             char baseTypeStr[128];
             typeToC(type->curriedType.baseType, baseTypeStr, sizeof(baseTypeStr));
             snprintf(buffer, bufferSize, "%s", baseTypeStr);
@@ -340,12 +466,20 @@ void typeToC(Type* type, char* buffer, int bufferSize) {
     }
 }
 
+/**
+ * @brief Frees memory allocated for a type
+ * 
+ * Properly deallocates memory for a type and all its nested types.
+ * Handles recursive deallocation for complex types like arrays and functions.
+ * 
+ * @param type The type to free
+ */
 void freeType(Type* type) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)freeType);
     
     if (!type) return;
     
-    // No necesitamos liberar los tipos estáticos predefinidos
+    // Don't free predefined static types
     if (type == &INTEGER_TYPE || type == &FLOAT_TYPE || type == &BOOLEAN_TYPE ||
         type == &STRING_TYPE || type == &VOID_TYPE || type == &UNKNOWN_TYPE) {
         return;
@@ -358,7 +492,7 @@ void freeType(Type* type) {
             }
             break;
         case TYPE_CLASS:
-            // No liberamos baseClass aquí para evitar liberación recursiva
+            // Don't free baseClass here to avoid recursive freeing
             break;
         case TYPE_FUNCTION:
         case TYPE_LAMBDA:
@@ -389,12 +523,21 @@ void freeType(Type* type) {
     stats.types_freed++;
 }
 
+/**
+ * @brief Creates a deep copy of a type
+ * 
+ * Creates a complete copy of a type and all its nested types.
+ * This is used when types need to be modified independently.
+ * 
+ * @param type The type to clone
+ * @return Type* New copy of the type, or NULL if allocation fails
+ */
 Type* clone_type(Type* type) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)clone_type);
     
     if (!type) return NULL;
     
-    // Los tipos predefinidos pueden retornarse directamente
+    // Return predefined types directly
     if (type == &INTEGER_TYPE) return &INTEGER_TYPE;
     if (type == &FLOAT_TYPE) return &FLOAT_TYPE;
     if (type == &BOOLEAN_TYPE) return &BOOLEAN_TYPE;
@@ -437,6 +580,15 @@ Type* clone_type(Type* type) {
     return NULL;
 }
 
+/**
+ * @brief Creates a primitive type instance
+ * 
+ * Returns a reference to a predefined primitive type or creates a new one
+ * if the kind is not a primitive type.
+ * 
+ * @param kind The kind of primitive type to create
+ * @return Type* Reference to the primitive type
+ */
 Type* create_primitive_type(TypeKind kind) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)create_primitive_type);
     
@@ -453,18 +605,14 @@ Type* create_primitive_type(TypeKind kind) {
     }
 }
 
-Type* create_function_type(Type* returnType, Type** paramTypes, int paramCount) {
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)create_function_type);
-    return createFunctionType(returnType, paramTypes, paramCount);
-}
-
-Type* create_class_type(const char* name, Type* baseClass) {
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)create_class_type);
-    return createClassType(name, baseClass);
-}
-
 /**
- * Returns string representation of a TypeKind
+ * @brief Converts a TypeKind to its string representation
+ * 
+ * Returns a human-readable string representation of a TypeKind.
+ * Used for debugging and error reporting.
+ * 
+ * @param kind The TypeKind to convert
+ * @return const char* String representation of the type kind
  */
 const char* type_kind_to_string(TypeKind kind) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)type_kind_to_string);
@@ -488,7 +636,15 @@ const char* type_kind_to_string(TypeKind kind) {
 }
 
 /**
- * Checks if two types are equal (exact same type)
+ * @brief Checks if two types are exactly equal
+ * 
+ * Performs a deep comparison of two types to determine if they are
+ * structurally identical. This includes checking all nested types
+ * for complex types like arrays and functions.
+ * 
+ * @param type1 First type to compare
+ * @param type2 Second type to compare
+ * @return bool True if types are exactly equal, false otherwise
  */
 bool are_types_equal(Type* type1, Type* type2) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)are_types_equal);
@@ -551,7 +707,15 @@ bool are_types_equal(Type* type1, Type* type2) {
 }
 
 /**
- * Checks if type is a subtype of supertype (inheritance relationship)
+ * @brief Checks if a type is a subtype of another type
+ * 
+ * Implements type inheritance checking, determining if one type
+ * can be used where another type is expected. This includes
+ * class inheritance and primitive type promotions.
+ * 
+ * @param type The type to check
+ * @param supertype The potential supertype
+ * @return bool True if type is a subtype of supertype, false otherwise
  */
 bool is_subtype_of(Type* type, Type* supertype) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)is_subtype_of);
@@ -594,7 +758,14 @@ bool is_subtype_of(Type* type, Type* supertype) {
 }
 
 /**
- * Get the type of a member of a class
+ * @brief Gets the type of a class member
+ * 
+ * Looks up the type of a member (field or method) in a class type.
+ * This includes checking the class hierarchy for inherited members.
+ * 
+ * @param classType The class type to search in
+ * @param memberName The name of the member to look up
+ * @return Type* The type of the member, or TYPE_UNKNOWN if not found
  */
 Type* get_member_type(Type* classType, const char* memberName) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)get_member_type);
@@ -707,7 +878,14 @@ bool are_types_compatible(Type* type1, Type* type2) {
 }
 
 /**
- * Infers the type of an AST node
+ * @brief Infers the type of an AST node
+ * 
+ * Recursively infers the type of an AST node and its children.
+ * This is the main type inference function that handles all AST node types.
+ * The inferred type is cached in the node for future use.
+ * 
+ * @param node The AST node to infer types for
+ * @return Type* The inferred type, or TYPE_UNKNOWN if inference fails
  */
 Type* infer_type(struct AstNode* node) {
     if (!node) return create_primitive_type(TYPE_UNKNOWN);
