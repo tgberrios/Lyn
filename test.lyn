@@ -502,6 +502,5 @@ main
     for (; j < 3; j = j + 1)
         print("j = " + j)
     end
-    
     print("For loop tests completed")
 end

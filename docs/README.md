@@ -1,187 +1,233 @@
-# Lyn – Lenguaje de Alto Rendimiento y Versátil
+# Lyn – High-Performance and Versatile Language
 
-Lyn es un lenguaje de programación moderno que combina la legibilidad de Python con un sistema de tipos estático y características avanzadas de lenguajes como C++, JavaScript y AspectJ. Su compilación a código C permite un alto rendimiento y excelente portabilidad.
+Lyn is a modern programming language that combines Python's readability with static typing and advanced features from languages like C++, JavaScript, and AspectJ. Its compilation to C code enables high performance and excellent portability.
 
-## Características Principales
+## Main Features
 
-- **Sintaxis limpia y expresiva**: Diseñada para ser fácil de leer y escribir
-- **Tipado estático con inferencia**: Seguridad de tipos sin sintaxis excesiva
-- **Orientación a objetos**: Soporte completo para clases y herencia
-- **Funciones como ciudadanos de primera clase**: Lambdas y funciones de orden superior
-- **Gestión de errores robusta**: Sistema de excepciones try-catch-finally
-- **Programación orientada a aspectos**: Soporta aspectos, pointcuts y advice
-- **Compilación a C**: Rendimiento óptimo y compatibilidad con código existente
+- **Clean and expressive syntax**: Designed to be easy to read and write
+- **Static typing with inference**: Type safety without excessive syntax
+- **Object-oriented**: Full support for classes and inheritance
+- **First-class functions**: Lambdas and higher-order functions
+- **Robust error handling**: Try-catch-finally exception system
+- **Aspect-oriented programming**: Supports aspects, pointcuts, and advice
+- **C compilation**: Optimal performance and compatibility with existing code
 
-## Estado Actual del Proyecto
+## Current Project Status
 
-### Características Implementadas ✅
+### Implemented Features ✅
 
-1. **Sistema de Tipos**
+1. **Type System**
 
-   - Tipos primitivos (int, float, string, bool)
-   - Inferencia de tipos
-   - Verificación de tipos estática
-   - Compatibilidad de tipos
+   - Primitive types (int, float, string, bool)
+   - Type inference
+   - Static type checking
+   - Type compatibility
 
-2. **Estructuras de Control**
+2. **Control Structures**
 
-   - If-else y switch
-   - Bucles while, do-while y for
-   - Break y continue
-   - Pattern matching básico
+   - If-else and switch
+   - While, do-while, and for loops
+   - Break and continue
+   - Basic pattern matching
 
-3. **Programación Orientada a Objetos**
+3. **Object-Oriented Programming**
 
-   - Clases y objetos
-   - Métodos y constructores
-   - Atributos y encapsulamiento
-   - Herencia básica
+   - Classes and objects
+   - Methods and constructors
+   - Attributes and encapsulation
+   - Basic inheritance
 
-4. **Programación Orientada a Aspectos**
+4. **Aspect-Oriented Programming**
 
-   - Aspectos y pointcuts
+   - Aspects and pointcuts
    - Advice (before, after, around)
-   - Weaving de aspectos
-   - Interceptación de métodos
+   - Aspect weaving
+   - Method interception
 
-5. **Sistema de Memoria**
-   - Gestión automática de memoria
-   - Garbage collection opcional
-   - Modo embedded con memory pooling
-   - Control manual de memoria
+5. **Memory System**
+   - Automatic memory management
+   - Optional garbage collection
+   - Embedded mode with memory pooling
+   - Manual memory control
 
-### Características en Desarrollo 🚧
+### Features in Development 🚧
 
-1. **Características Avanzadas**
+1. **Advanced Features**
 
-   - Herencia múltiple
-   - Interfaces y traits
-   - Generics y templates
-   - Macros avanzadas
+   - Multiple inheritance
+   - Interfaces and traits
+   - Generics and templates
+   - Advanced macros
 
-2. **Interoperabilidad**
+2. **Interoperability**
 
-   - Integración con JavaScript
-   - Bindings para Python
-   - Soporte para NPM
-   - FFI para C/C++
+   - JavaScript integration
+   - Python bindings
+   - NPM support
+   - C/C++ FFI
 
-3. **Sistema de Módulos**
-   - Importación de módulos
-   - Gestión de dependencias
+3. **Module System**
+   - Module importing
+   - Dependency management
    - Namespaces
-   - Módulos estándar
+   - Standard modules
 
-### Características Planificadas 📅
+### Planned Features 📅
 
-1. **Paralelización**
+1. **Parallelization**
 
-   - Hilos y procesos
-   - SIMD y vectorización
-   - Programación asíncrona
-   - Corrutinas
+   - Threads and processes
+   - SIMD and vectorization
+   - Asynchronous programming
+   - Coroutines
 
-2. **Ecosistema**
-   - Gestor de paquetes (lyn_pm)
-   - Repositorio central (lyn_hub)
-   - Herramientas de desarrollo
-   - Debugger integrado
+2. **Ecosystem**
+   - Package manager (lyn_pm)
+   - Central repository (lyn_hub)
+   - Development tools
+   - Integrated debugger
 
-## Ejemplos de Código
+## Code Examples
 
-### Sintaxis Básica
+### Basic Syntax
 
 ```lyn
-// Variables y tipos
-x: int = 10
-y = 20  // Inferencia de tipo
-texto = "Hola, Lyn!"
+// Hello World
+print("Hello, World!")
 
-// Funciones
-func suma(a: int, b: int) -> int
+// Variables and types
+x: int = 10
+y = 20  // Type inference
+text = "Hello, Lyn!"
+
+// Functions
+func add(a: int, b: int) -> int
     return a + b;
 end
 
-// Clases
-class Persona
-    nombre: string
-    edad: int
+// Classes
+class Person
+    name: string
+    age: int
 
-    func init(nombre: string, edad: int)
-        this.nombre = nombre
-        this.edad = edad
+    func init(name: string, age: int)
+        this.name = name
+        this.age = age
     end
 end
 
-// Aspectos
-aspect LoggingAspect
-    pointcut loggedFunctions "test_*"
+// Simple loop
+for i in range(1, 6)
+    print(i)
+end
 
-    advice before loggedFunctions
-        print("Antes de ejecutar la función")
-    end
+// If statement
+if (age >= 18)
+    print("You are an adult")
+else
+    print("You are not yet an adult")
 end
 ```
 
-### Características Avanzadas
+### Advanced Features
 
 ```lyn
 // Pattern Matching
-match valor
+match value
     when 0:
-        print("Cero")
+        print("Zero")
     when n if n > 0:
-        print("Positivo")
+        print("Positive")
     otherwise:
-        print("Otro caso")
+        print("Other case")
 end
 
-// Manejo de Excepciones
+// Exception Handling
 try
-    resultado = dividir(a, b)
+    result = divide(a, b)
 catch (error)
     print("Error: " + error.message)
 end
 
-// Composición de Funciones
+// Function Composition
 composed = add_one >> multiply_by_two
 result = composed(5)
 ```
 
-## Documentación
+## Documentation
 
-- [Documentación Técnica](docs.md): Detalles técnicos y especificaciones
-- [Ejemplos de Código](examples.md): Guía práctica con ejemplos
-- [TODO](TODO.md): Estado detallado de características
+- [Technical Documentation](docs.md): Technical details and specifications
+- [Code Examples](examples.md): Practical guide with examples
+- [TODO](TODO.md): Detailed feature status
 
-## Requisitos del Sistema
+## System Requirements
 
-- Compilador C (gcc/clang)
-- Sistema operativo compatible (Linux, macOS, Windows)
-- 4GB RAM mínimo
-- 1GB espacio en disco
+- C compiler (gcc/clang)
+- Compatible operating system (Linux, macOS, Windows)
+- 4GB RAM minimum
+- 1GB disk space
 
-## Instalación
+## Installation
+
+You can install Lyn in two ways:
+
+### Using build.sh (Recommended)
 
 ```bash
-git clone https://github.com/tu-usuario/lyn.git
+# Clone the repository
+git clone https://github.com/your-username/lyn.git
+cd lyn
+
+# Run the build script
+./build.sh
+```
+
+### Manual Installation
+
+```bash
+git clone https://github.com/your-username/lyn.git
 cd lyn
 make
 sudo make install
 ```
 
-## Uso Básico
+## Basic Usage
 
 ```bash
-# Compilar un archivo
-lync programa.lyn
+# Compile a file
+lync program.lyn
 
-# Ejecutar el programa
-./programa
+# Run the program
+./program
 
-# Compilar con optimizaciones
-lync -O3 programa.lyn
+# Compile with optimizations
+lync -O3 program.lyn
 
-# Modo embedded
-lync --embedded programa.lyn
+# Embedded mode
+lync --embedded program.lyn
 ```
+
+## Quick Start Guide
+
+1. Create a new file `hello.lyn`:
+
+```lyn
+main
+    print("Hello, World!")
+end
+```
+
+2. Compile and run:
+
+```bash
+lync hello.lyn
+./hello
+```
+
+3. For more complex projects, use the build script:
+
+```bash
+./build.sh
+```
+
+The build script will handle all necessary dependencies and compilation steps automatically.

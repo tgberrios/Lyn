@@ -334,6 +334,7 @@ int main() {
     }
     printf("%s\n", "Calling advised function:");
     printf("%s\n", "\n=== Class and Object Test ===");
+    printf("%s\n", "Today i make a loooooot!");
     double myCar __attribute__((unused)) =     0    ;
     printf("%s\n", "Car instance created.");
     {
