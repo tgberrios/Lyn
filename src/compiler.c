@@ -806,29 +806,29 @@ static void compileNode(AstNode* node) {
             indent();
             emitLine("jmp_buf _env;");
             emitLine("char _error_message[256] = \"\";");
+            emitLine("const char* error = NULL;  // Declare error variable at block scope");
+            addVariable("error", "const char*");
+            markVariableDeclared("error");
+            
             emitLine("if (setjmp(_env) == 0) {");
             indent();
-            // Genera el código del bloque try
+            // Generate try block code
             for (int i = 0; i < node->tryCatchStmt.tryCount; i++) {
                 compileNode(node->tryCatchStmt.tryBody[i]);
             }
             outdent();
             emitLine("} else {");
             indent();
-            // Si se ha definido un nombre para la variable de error, declárala aquí
-            if (strlen(node->tryCatchStmt.errorVarName) > 0) {
-                emitLine("const char* %s = _error_message;", node->tryCatchStmt.errorVarName);
-            }
-            // Genera el código del bloque catch
+            emitLine("error = _error_message;  // Assign error message");
+            // Generate catch block code
             for (int i = 0; i < node->tryCatchStmt.catchCount; i++) {
                 compileNode(node->tryCatchStmt.catchBody[i]);
             }
             outdent();
             emitLine("}");
             
-            // Código del bloque finally (si existe)
+            // Finally block code (if it exists)
             if (node->tryCatchStmt.finallyCount > 0) {
-                // Aquí actualizamos la variable finally_executed
                 emitLine("finally_executed = true;");
                 for (int i = 0; i < node->tryCatchStmt.finallyCount; i++) {
                     compileNode(node->tryCatchStmt.finallyBody[i]);
@@ -1011,64 +1011,60 @@ static void compilePrintStmt(AstNode* node) {
         node->printStmt.expr->binaryOp.op == '+') {
         // Special case for error message concatenation
         if (node->printStmt.expr->binaryOp.left->type == AST_STRING_LITERAL &&
-            strcmp(node->printStmt.expr->binaryOp.left->stringLiteral.value, "Error capturado: ") == 0) {
+            strstr(node->printStmt.expr->binaryOp.left->stringLiteral.value, "Error") != NULL &&
+            node->printStmt.expr->binaryOp.right->type == AST_IDENTIFIER) {
             emitLine("{");
             indent();
             emitLine("char _print_buffer[1024];");
-            emitLine("sprintf(_print_buffer, \"%%s%%s\", \"Error capturado: \", error);");
+            const char* errorVarName = node->printStmt.expr->binaryOp.right->identifier.name;
+            emitLine("snprintf(_print_buffer, sizeof(_print_buffer), \"%%s%%s\", \"%s\", %s);", 
+                    node->printStmt.expr->binaryOp.left->stringLiteral.value,
+                    errorVarName);
             emitLine("printf(\"%%s\\n\", _print_buffer);");
             outdent();
             emitLine("}");
             return;
         }
-        // Determine format specifiers for left operand
+
+        // Determine format specifiers based on operand types
         const char* left_format = "%s";
+        const char* right_format = "%s";
+        
+        // Check left operand type
         if (node->printStmt.expr->binaryOp.left->type == AST_NUMBER_LITERAL) {
             double leftVal = node->printStmt.expr->binaryOp.left->numberLiteral.value;
             left_format = (leftVal == (int)leftVal) ? "%d" : "%g";
-        }
-        else if (node->printStmt.expr->binaryOp.left->type == AST_IDENTIFIER) {
-            const char* varType = getVariableType(node->printStmt.expr->binaryOp.left->identifier.name);
-            if (strcmp(varType, "int") == 0) {
+        } else if (node->printStmt.expr->binaryOp.left->type == AST_IDENTIFIER) {
+            const char* leftType = getVariableType(node->printStmt.expr->binaryOp.left->identifier.name);
+            if (strcmp(leftType, "int") == 0) {
                 left_format = "%d";
-            } else if (strcmp(varType, "bool") == 0) {
-                left_format = "%s";
-            } else if (strcmp(varType, "const char*") == 0 || strcmp(varType, "char*") == 0) {
-                left_format = "%s";
-            } else {
+            } else if (strcmp(leftType, "double") == 0 || strcmp(leftType, "float") == 0) {
                 left_format = "%g";
             }
         }
-        // Determine format specifier for right operand
-        const char* right_format = "%s";
+        
+        // Check right operand type
         if (node->printStmt.expr->binaryOp.right->type == AST_NUMBER_LITERAL) {
             double rightVal = node->printStmt.expr->binaryOp.right->numberLiteral.value;
             right_format = (rightVal == (int)rightVal) ? "%d" : "%g";
-        }
-        else if (node->printStmt.expr->binaryOp.right->type == AST_IDENTIFIER) {
-            const char* id = node->printStmt.expr->binaryOp.right->identifier.name;
-            const char* varType = getVariableType(id);
-            // For known variable "explicit_int", force integer format.
-            if (strcmp(id, "explicit_int") == 0 || strcmp(varType, "int") == 0) {
+        } else if (node->printStmt.expr->binaryOp.right->type == AST_IDENTIFIER) {
+            const char* rightType = getVariableType(node->printStmt.expr->binaryOp.right->identifier.name);
+            if (strcmp(rightType, "int") == 0) {
                 right_format = "%d";
-            } else if (strcmp(varType, "bool") == 0) {
-                right_format = "%s";
-            } else if (strcmp(varType, "const char*") == 0 || strcmp(varType, "char*") == 0) {
-                right_format = "%s";
-            } else {
+            } else if (strcmp(rightType, "double") == 0 || strcmp(rightType, "float") == 0) {
                 right_format = "%g";
             }
         }
+        
         char combined_format[32];
         snprintf(combined_format, sizeof(combined_format), "%s%s", left_format, right_format);
         
         emitLine("{");
         indent();
         emitLine("char _print_buffer[1024];");
-        // Use the dynamically built format string
         emit("sprintf(_print_buffer, \"%s\", ", combined_format);
         
-        // Handle left operand expression
+        // Handle left operand
         if (node->printStmt.expr->binaryOp.left->type == AST_STRING_LITERAL) {
             emit("\"%s\"", node->printStmt.expr->binaryOp.left->stringLiteral.value);
         } else {
@@ -1076,7 +1072,7 @@ static void compilePrintStmt(AstNode* node) {
         }
         emit(", ");
         
-        // Handle right operand expression
+        // Handle right operand
         if (node->printStmt.expr->binaryOp.right->type == AST_STRING_LITERAL) {
             emit("\"%s\"", node->printStmt.expr->binaryOp.right->stringLiteral.value);
         } else {
@@ -1135,14 +1131,10 @@ static void compilePrintStmt(AstNode* node) {
             emitLine("printf(\"%%d\\n\", %s);", varName);
         } else if (strcmp(varType, "bool") == 0) {
             emitLine("printf(\"%%s\\n\", %s ? \"true\" : \"false\");", varName);
+        } else if (strcmp(varType, "double") == 0 || strcmp(varType, "float") == 0) {
+            emitLine("printf(\"%%g\\n\", %s);", varName);
         } else {
-            if (strcmp(varName, "str_numeric") == 0) {
-                emitLine("printf(\"%%s\\n\", %s);", varName);
-            } else if (strcmp(varName, "explicit_int") == 0) {
-                emitLine("printf(\"%%d\\n\", %s);", varName);
-            } else {
-                emitLine("printf(\"%%g\\n\", %s);", varName);
-            }
+            emitLine("printf(\"%%g\\n\", %s);", varName);
         }
         return;
     }

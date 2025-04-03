@@ -267,6 +267,7 @@ typedef struct AstNode {
             struct AstNode** catchBody;
             int catchCount;
             char errorVarName[256];
+            char errorType[64];  // Added for error type checking
             struct AstNode** finallyBody;
             int finallyCount;
         } tryCatchStmt;

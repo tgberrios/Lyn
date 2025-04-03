@@ -1284,7 +1284,7 @@ static AstNode *parseBreakStmt(void) {
     return createAstNode(AST_BREAK_STMT);
 }
 
-/* parseTryCatchStmt: try ... catch err ... [finally ...] end */
+/* parseTryCatchStmt: try ... catch [type] err ... [finally ...] end */
 static AstNode *parseTryCatchStmt(void) {
     advanceToken(); // consume 'try'
     skipStatementSeparators();
@@ -1306,13 +1306,28 @@ static AstNode *parseTryCatchStmt(void) {
     AstNode **catchBody = NULL;
     int catchCount = 0;
     char errorVarName[256] = "";
+    char errorType[64] = "";  // Default empty type
     
     if (currentToken.type == TOKEN_CATCH) {
         advanceToken(); // consume 'catch'
+        
+        // Check for error type specification
         if (currentToken.type == TOKEN_IDENTIFIER) {
+            // Store the type name
+            strncpy(errorType, currentToken.lexeme, sizeof(errorType) - 1);
+            advanceToken();
+            
+            // Check for error variable name
+            if (currentToken.type == TOKEN_IDENTIFIER) {
+                strncpy(errorVarName, currentToken.lexeme, sizeof(errorVarName) - 1);
+                advanceToken();
+            }
+        } else if (currentToken.type == TOKEN_IDENTIFIER) {
+            // Only error variable name provided
             strncpy(errorVarName, currentToken.lexeme, sizeof(errorVarName) - 1);
             advanceToken();
         }
+        
         skipStatementSeparators();
         while (currentToken.type != TOKEN_FINALLY && 
                currentToken.type != TOKEN_END && 
@@ -1350,6 +1365,7 @@ static AstNode *parseTryCatchStmt(void) {
     tryCatchNode->tryCatchStmt.catchBody = catchBody;
     tryCatchNode->tryCatchStmt.catchCount = catchCount;
     strncpy(tryCatchNode->tryCatchStmt.errorVarName, errorVarName, sizeof(tryCatchNode->tryCatchStmt.errorVarName) - 1);
+    strncpy(tryCatchNode->tryCatchStmt.errorType, errorType, sizeof(tryCatchNode->tryCatchStmt.errorType) - 1);
     tryCatchNode->tryCatchStmt.finallyBody = finallyBody;
     tryCatchNode->tryCatchStmt.finallyCount = finallyCount;
     

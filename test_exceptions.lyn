@@ -1,10 +1,39 @@
 main
-    print("Test básico de try-catch")
+    print("Test básico de try-catch con type checking")
+    
+    // Test 1: Capturar un error específico
     try
-        print("Intentando lanzar error...")
-        throw "Error de prueba"
+        print("Intentando lanzar ValidationError...")
+        throw "ValidationError"
     catch error
-        print("Error capturado: " + error)
+        if error == "ValidationError"
+            print("Error de validación capturado: " + error)
+        end
     end
-    print("Continuando después del try-catch")
+    
+    // Test 2: Capturar múltiples tipos de error
+    try
+        print("Intentando lanzar DatabaseError...")
+        throw "DatabaseError"
+    catch error
+        if error == "DatabaseError"
+            print("Error de base de datos capturado: " + error)
+        else
+            print("Error genérico capturado: " + error)
+        end
+    end
+    
+    // Test 3: Error type mismatch
+    try
+        print("Intentando lanzar NetworkError...")
+        throw "NetworkError"
+    catch error
+        if error == "DatabaseError"
+            print("Error de base de datos capturado: " + error)
+        else
+            print("Error genérico capturado: " + error)
+        end
+    end
+    
+    print("Continuando después de los try-catch")
 end 

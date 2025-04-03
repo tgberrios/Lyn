@@ -180,7 +180,7 @@ int main() {
     printf("%s\n", "Values with explicit types:");
     {
         char _print_buffer[1024];
-        sprintf(_print_buffer, "%s%d",         "explicit_int: "        ,         explicit_int        );
+        sprintf(_print_buffer, "%s%g",         "explicit_int: "        ,         explicit_int        );
         printf("%s\n", _print_buffer);
     }
     {

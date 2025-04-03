@@ -151,26 +151,87 @@ int main() {
     float* float_array __attribute__((unused)) = NULL;
     double* mixed_array __attribute__((unused)) = NULL;
     const char* day_name __attribute__((unused)) = "";
-    printf("%s\n", "Test básico de try-catch");
+    printf("%s\n", "Test básico de try-catch con type checking");
     {
         jmp_buf _env;
         char _error_message[256] = "";
+        const char* error = NULL;  // Declare error variable at block scope
         if (setjmp(_env) == 0) {
-            printf("%s\n", "Intentando lanzar error...");
+            printf("%s\n", "Intentando lanzar ValidationError...");
             {
-                strncpy(_error_message,                 "Error de prueba"                , sizeof(_error_message) - 1);
+                strncpy(_error_message,                 "ValidationError"                , sizeof(_error_message) - 1);
                 _error_message[sizeof(_error_message) - 1] = '\0';
                 longjmp(_env, 1);
             }
         } else {
-            const char* error = _error_message;
-            {
-                char _print_buffer[1024];
-                sprintf(_print_buffer, "%s%s", "Error capturado: ", error);
-                printf("%s\n", _print_buffer);
+            error = _error_message;  // Assign error message
+            if (            strcmp(            error            ,             "ValidationError"            ) == 0            ) {
+                {
+                    char _print_buffer[1024];
+                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error de validación capturado: ", error);
+                    printf("%s\n", _print_buffer);
+                }
             }
         }
     }
-    printf("%s\n", "Continuando después del try-catch");
+    {
+        jmp_buf _env;
+        char _error_message[256] = "";
+        const char* error = NULL;  // Declare error variable at block scope
+        if (setjmp(_env) == 0) {
+            printf("%s\n", "Intentando lanzar DatabaseError...");
+            {
+                strncpy(_error_message,                 "DatabaseError"                , sizeof(_error_message) - 1);
+                _error_message[sizeof(_error_message) - 1] = '\0';
+                longjmp(_env, 1);
+            }
+        } else {
+            error = _error_message;  // Assign error message
+            if (            strcmp(            error            ,             "DatabaseError"            ) == 0            ) {
+                {
+                    char _print_buffer[1024];
+                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error de base de datos capturado: ", error);
+                    printf("%s\n", _print_buffer);
+                }
+            }
+            else {
+                {
+                    char _print_buffer[1024];
+                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error genérico capturado: ", error);
+                    printf("%s\n", _print_buffer);
+                }
+            }
+        }
+    }
+    {
+        jmp_buf _env;
+        char _error_message[256] = "";
+        const char* error = NULL;  // Declare error variable at block scope
+        if (setjmp(_env) == 0) {
+            printf("%s\n", "Intentando lanzar NetworkError...");
+            {
+                strncpy(_error_message,                 "NetworkError"                , sizeof(_error_message) - 1);
+                _error_message[sizeof(_error_message) - 1] = '\0';
+                longjmp(_env, 1);
+            }
+        } else {
+            error = _error_message;  // Assign error message
+            if (            strcmp(            error            ,             "DatabaseError"            ) == 0            ) {
+                {
+                    char _print_buffer[1024];
+                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error de base de datos capturado: ", error);
+                    printf("%s\n", _print_buffer);
+                }
+            }
+            else {
+                {
+                    char _print_buffer[1024];
+                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error genérico capturado: ", error);
+                    printf("%s\n", _print_buffer);
+                }
+            }
+        }
+    }
+    printf("%s\n", "Continuando después de los try-catch");
     return 0;
 }
