@@ -131,6 +131,8 @@ void Circle_scale(Circle* self, double factor) {
 
 int main() {
     // Initialize required variables
+    jmp_buf try_catch_stack[32];
+    char _error_message[1024] = "";  // Global error message buffer
     bool error_caught __attribute__((unused)) = false;
     bool finally_executed __attribute__((unused)) = false;
     double sum __attribute__((unused)) = 0.0;

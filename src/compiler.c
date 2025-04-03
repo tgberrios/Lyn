@@ -31,6 +31,11 @@
 // Definition of MAX_VARIABLES
 #define MAX_VARIABLES 256
 
+// Add at the top with other global variables
+#define MAX_NESTED_TRY_CATCH 32
+static jmp_buf try_catch_stack[MAX_NESTED_TRY_CATCH];
+static int try_catch_stack_top = -1;
+
 /**
  * @brief Structure to store information about variables during compilation
  */
@@ -288,6 +293,9 @@ static void initializeGlobalVariables(void) {
     logger_log(LOG_DEBUG, "Initializing global variables");
     
     emitLine("// Initialize required variables");
+    
+    emitLine("jmp_buf try_catch_stack[%d];", MAX_NESTED_TRY_CATCH);
+    emitLine("char _error_message[1024] = \"\";  // Global error message buffer");
     
     emitLine("bool error_caught __attribute__((unused)) = false;");
     addVariable("error_caught", "bool");
@@ -788,9 +796,9 @@ static void compileNode(AstNode* node) {
             break;
             
         case AST_THROW_STMT:
+        {
             emitLine("{");
             indent();
-            emitLine("char _error_message[1024];  // Buffer for error message");
             if (node->throwStmt.expr->type == AST_STRING_LITERAL) {
                 emitLine("strncpy(_error_message, \"%s\", sizeof(_error_message) - 1);", 
                         node->throwStmt.expr->stringLiteral.value);
@@ -800,23 +808,40 @@ static void compileNode(AstNode* node) {
                 emitLine(");");
             }
             emitLine("_error_message[sizeof(_error_message) - 1] = '\\0';");
-            emitLine("longjmp(_env, 1);");
+            
+            // Use the topmost environment in the stack
+            if (try_catch_stack_top >= 0) {
+                emitLine("longjmp(try_catch_stack[%d], 1);", try_catch_stack_top);
+            } else {
+                logger_log(LOG_ERROR, "Throw statement outside of try-catch block");
+                emitLine("fprintf(stderr, \"Uncaught error: %%s\\n\", _error_message);");
+                emitLine("exit(1);"); // Exit if no try-catch block is active
+            }
+            
             outdent();
             emitLine("}");
-            break;
+        }
+        break;
         
         case AST_TRY_CATCH_STMT:
         {
             logger_log(LOG_DEBUG, "Compiling try-catch statement");
             emitLine("{");
             indent();
-            emitLine("jmp_buf _env;");
-            emitLine("char _error_message[1024] = \"\";");
+            
+            // Push new environment to stack
+            try_catch_stack_top++;
+            if (try_catch_stack_top >= MAX_NESTED_TRY_CATCH) {
+                logger_log(LOG_ERROR, "Too many nested try-catch blocks");
+                error_report("Compiler", __LINE__, 0, "Maximum nested try-catch depth exceeded", ERROR_RUNTIME);
+                return;
+            }
+            
             emitLine("const char* error = NULL;");
             addVariable("error", "const char*");
             markVariableDeclared("error");
             
-            emitLine("if (setjmp(_env) == 0) {");
+            emitLine("if (setjmp(try_catch_stack[%d]) == 0) {", try_catch_stack_top);
             indent();
             // Generate try block code
             for (int i = 0; i < node->tryCatchStmt.tryCount; i++) {
@@ -825,7 +850,22 @@ static void compileNode(AstNode* node) {
             outdent();
             emitLine("} else {");
             indent();
+            // Extract error type from error message for comparison
+            emitLine("char _error_type[256] = \"\";");
+            emitLine("const char* colon = strchr(_error_message, ':');");
+            emitLine("if (colon) {");
+            indent();
+            emitLine("size_t type_len = colon - _error_message;");
+            emitLine("strncpy(_error_type, _error_message, type_len);");
+            emitLine("_error_type[type_len] = '\\0';");
+            emitLine("error = _error_type;");
+            outdent();
+            emitLine("} else {");
+            indent();
             emitLine("error = _error_message;");
+            outdent();
+            emitLine("}");
+            
             // Generate catch block code
             for (int i = 0; i < node->tryCatchStmt.catchCount; i++) {
                 compileNode(node->tryCatchStmt.catchBody[i]);
@@ -840,6 +880,10 @@ static void compileNode(AstNode* node) {
                     compileNode(node->tryCatchStmt.finallyBody[i]);
                 }
             }
+            
+            // Pop environment from stack
+            try_catch_stack_top--;
+            
             outdent();
             emitLine("}");
         }

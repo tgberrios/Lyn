@@ -11,28 +11,50 @@ main
         end
     end
     
-    // Test 2: Error con detalles
+    // Test 2: Error con detalles y try-catch anidado
     try
-        print("Intentando lanzar DatabaseError...")
-        throw "DatabaseError: No se pudo conectar a la base de datos 'users' en localhost:5432"
+        print("Intentando operación que puede fallar...")
+        try
+            print("Intentando lanzar DatabaseError...")
+            throw "DatabaseError: No se pudo conectar a la base de datos 'users' en localhost:5432"
+        catch error
+            if error == "DatabaseError"
+                print("Error de base de datos capturado en bloque interno: " + error)
+                // Re-throw para probar el bloque externo
+                throw error
+            end
+        end
     catch error
         if error == "DatabaseError"
-            print("Error de base de datos capturado: " + error)
+            print("Error de base de datos capturado en bloque externo: " + error)
         else
-            print("Error genérico capturado: " + error)
+            print("Error genérico capturado en bloque externo: " + error)
         end
     end
     
-    // Test 3: Error con múltiples líneas
+    // Test 3: Error con múltiples líneas y try-catch anidado con finally
     try
-        print("Intentando lanzar NetworkError...")
-        throw "NetworkError: Timeout al intentar conectar\nDetalles: host=api.example.com, puerto=443, timeout=5s"
-    catch error
-        if error == "DatabaseError"
-            print("Error de base de datos capturado: " + error)
-        else
-            print("Error genérico capturado: " + error)
+        print("Iniciando operación de red...")
+        try
+            print("Intentando lanzar NetworkError...")
+            throw "NetworkError: Timeout al intentar conectar\nDetalles: host=api.example.com, puerto=443, timeout=5s"
+        catch error
+            if error == "NetworkError"
+                print("Error de red capturado en bloque interno: " + error)
+                // Re-throw para probar el bloque externo
+                throw error
+            end
+        finally
+            print("Limpiando recursos del bloque interno...")
         end
+    catch error
+        if error == "NetworkError"
+            print("Error de red capturado en bloque externo: " + error)
+        else
+            print("Error genérico capturado en bloque externo: " + error)
+        end
+    finally
+        print("Limpiando recursos del bloque externo...")
     end
     
     print("Continuando después de los try-catch")

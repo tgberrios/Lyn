@@ -131,6 +131,8 @@ void Circle_scale(Circle* self, double factor) {
 
 int main() {
     // Initialize required variables
+    jmp_buf try_catch_stack[32];
+    char _error_message[1024] = "";  // Global error message buffer
     bool error_caught __attribute__((unused)) = false;
     bool finally_executed __attribute__((unused)) = false;
     double sum __attribute__((unused)) = 0.0;
@@ -153,19 +155,25 @@ int main() {
     const char* day_name __attribute__((unused)) = "";
     printf("%s\n", "Test de formateo de mensajes de error");
     {
-        jmp_buf _env;
-        char _error_message[1024] = "";
         const char* error = NULL;
-        if (setjmp(_env) == 0) {
+        if (setjmp(try_catch_stack[0]) == 0) {
             printf("%s\n", "Intentando lanzar ValidationError...");
             {
-                char _error_message[1024];  // Buffer for error message
                 strncpy(_error_message, "ValidationError: El valor debe ser mayor que 0", sizeof(_error_message) - 1);
                 _error_message[sizeof(_error_message) - 1] = '\0';
-                longjmp(_env, 1);
+                longjmp(try_catch_stack[0], 1);
             }
         } else {
-            error = _error_message;
+            char _error_type[256] = "";
+            const char* colon = strchr(_error_message, ':');
+            if (colon) {
+                size_t type_len = colon - _error_message;
+                strncpy(_error_type, _error_message, type_len);
+                _error_type[type_len] = '\0';
+                error = _error_type;
+            } else {
+                error = _error_message;
+            }
             if (            strcmp(            error            ,             "ValidationError"            ) == 0            ) {
                 {
                     char _print_buffer[2048];  // Buffer for formatted error message
@@ -176,64 +184,138 @@ int main() {
         }
     }
     {
-        jmp_buf _env;
-        char _error_message[1024] = "";
         const char* error = NULL;
-        if (setjmp(_env) == 0) {
-            printf("%s\n", "Intentando lanzar DatabaseError...");
+        if (setjmp(try_catch_stack[0]) == 0) {
+            printf("%s\n", "Intentando operación que puede fallar...");
             {
-                char _error_message[1024];  // Buffer for error message
-                strncpy(_error_message, "DatabaseError: No se pudo conectar a la base de datos 'users' en localhost:5432", sizeof(_error_message) - 1);
-                _error_message[sizeof(_error_message) - 1] = '\0';
-                longjmp(_env, 1);
+                const char* error = NULL;
+                if (setjmp(try_catch_stack[1]) == 0) {
+                    printf("%s\n", "Intentando lanzar DatabaseError...");
+                    {
+                        strncpy(_error_message, "DatabaseError: No se pudo conectar a la base de datos 'users' en localhost:5432", sizeof(_error_message) - 1);
+                        _error_message[sizeof(_error_message) - 1] = '\0';
+                        longjmp(try_catch_stack[1], 1);
+                    }
+                } else {
+                    char _error_type[256] = "";
+                    const char* colon = strchr(_error_message, ':');
+                    if (colon) {
+                        size_t type_len = colon - _error_message;
+                        strncpy(_error_type, _error_message, type_len);
+                        _error_type[type_len] = '\0';
+                        error = _error_type;
+                    } else {
+                        error = _error_message;
+                    }
+                    if (                    strcmp(                    error                    ,                     "DatabaseError"                    ) == 0                    ) {
+                        {
+                            char _print_buffer[2048];  // Buffer for formatted error message
+                            snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error de base de datos capturado en bloque interno: ", error);
+                            printf("%s\n", _print_buffer);
+                        }
+                        {
+                            snprintf(_error_message, sizeof(_error_message),                             error                            );
+                            _error_message[sizeof(_error_message) - 1] = '\0';
+                            longjmp(try_catch_stack[1], 1);
+                        }
+                    }
+                }
             }
         } else {
-            error = _error_message;
+            char _error_type[256] = "";
+            const char* colon = strchr(_error_message, ':');
+            if (colon) {
+                size_t type_len = colon - _error_message;
+                strncpy(_error_type, _error_message, type_len);
+                _error_type[type_len] = '\0';
+                error = _error_type;
+            } else {
+                error = _error_message;
+            }
             if (            strcmp(            error            ,             "DatabaseError"            ) == 0            ) {
                 {
                     char _print_buffer[2048];  // Buffer for formatted error message
-                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error de base de datos capturado: ", error);
+                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error de base de datos capturado en bloque externo: ", error);
                     printf("%s\n", _print_buffer);
                 }
             }
             else {
                 {
                     char _print_buffer[2048];  // Buffer for formatted error message
-                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error genérico capturado: ", error);
+                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error genérico capturado en bloque externo: ", error);
                     printf("%s\n", _print_buffer);
                 }
             }
         }
     }
     {
-        jmp_buf _env;
-        char _error_message[1024] = "";
         const char* error = NULL;
-        if (setjmp(_env) == 0) {
-            printf("%s\n", "Intentando lanzar NetworkError...");
+        if (setjmp(try_catch_stack[0]) == 0) {
+            printf("%s\n", "Iniciando operación de red...");
             {
-                char _error_message[1024];  // Buffer for error message
-                strncpy(_error_message, "NetworkError: Timeout al intentar conectar\nDetalles: host=api.example.com, puerto=443, timeout=5s", sizeof(_error_message) - 1);
-                _error_message[sizeof(_error_message) - 1] = '\0';
-                longjmp(_env, 1);
+                const char* error = NULL;
+                if (setjmp(try_catch_stack[1]) == 0) {
+                    printf("%s\n", "Intentando lanzar NetworkError...");
+                    {
+                        strncpy(_error_message, "NetworkError: Timeout al intentar conectar\nDetalles: host=api.example.com, puerto=443, timeout=5s", sizeof(_error_message) - 1);
+                        _error_message[sizeof(_error_message) - 1] = '\0';
+                        longjmp(try_catch_stack[1], 1);
+                    }
+                } else {
+                    char _error_type[256] = "";
+                    const char* colon = strchr(_error_message, ':');
+                    if (colon) {
+                        size_t type_len = colon - _error_message;
+                        strncpy(_error_type, _error_message, type_len);
+                        _error_type[type_len] = '\0';
+                        error = _error_type;
+                    } else {
+                        error = _error_message;
+                    }
+                    if (                    strcmp(                    error                    ,                     "NetworkError"                    ) == 0                    ) {
+                        {
+                            char _print_buffer[2048];  // Buffer for formatted error message
+                            snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error de red capturado en bloque interno: ", error);
+                            printf("%s\n", _print_buffer);
+                        }
+                        {
+                            snprintf(_error_message, sizeof(_error_message),                             error                            );
+                            _error_message[sizeof(_error_message) - 1] = '\0';
+                            longjmp(try_catch_stack[1], 1);
+                        }
+                    }
+                }
+                finally_executed = true;
+                printf("%s\n", "Limpiando recursos del bloque interno...");
             }
         } else {
-            error = _error_message;
-            if (            strcmp(            error            ,             "DatabaseError"            ) == 0            ) {
+            char _error_type[256] = "";
+            const char* colon = strchr(_error_message, ':');
+            if (colon) {
+                size_t type_len = colon - _error_message;
+                strncpy(_error_type, _error_message, type_len);
+                _error_type[type_len] = '\0';
+                error = _error_type;
+            } else {
+                error = _error_message;
+            }
+            if (            strcmp(            error            ,             "NetworkError"            ) == 0            ) {
                 {
                     char _print_buffer[2048];  // Buffer for formatted error message
-                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error de base de datos capturado: ", error);
+                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error de red capturado en bloque externo: ", error);
                     printf("%s\n", _print_buffer);
                 }
             }
             else {
                 {
                     char _print_buffer[2048];  // Buffer for formatted error message
-                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error genérico capturado: ", error);
+                    snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error genérico capturado en bloque externo: ", error);
                     printf("%s\n", _print_buffer);
                 }
             }
         }
+        finally_executed = true;
+        printf("%s\n", "Limpiando recursos del bloque externo...");
     }
     printf("%s\n", "Continuando después de los try-catch");
     return 0;
