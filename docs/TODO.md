@@ -13,23 +13,31 @@
 9. ✅ Lexer and parser for the core syntax
 10. ✅ Compilation to C
 11. ✅ Loop constructs (while, do-while)
-12. ✅ Aspect-oriented programming basics (aspects, pointcuts, advice)
-13. ✅ Classes and objects
-14. ✅ Function definitions and calls
-15. ✅ Type system (inference, checking, and compatibility)
-16. ✅ For loops (syntax exists but might have issues with complex cases)
-17. ✅ Switch statements
+12. ✅ Exception handling (try/catch blocks)
+13. ✅ Type system (basic types and inference)
+14. ✅ Switch statements
+15. ✅ Basic error handling and reporting
+
+## Características Parcialmente Implementadas
+
+1. 🔄 Classes and objects (basic implementation)
+2. 🔄 Function definitions and calls (basic implementation)
+3. 🔄 For loops (basic implementation, needs improvement)
+4. 🔄 Aspect-oriented programming (basic structure)
+5. 🔄 Modules and imports (basic structure)
+6. 🔄 Arrays and collections (basic implementation)
+7. 🔄 Pattern matching (basic structure)
 
 ## Características Pendientes
 
 1. ❌ Advanced OOP features (inheritance, polymorphism)
 2. ❌ Advanced function features (lambdas, higher-order functions)
-3. ❌ Exception handling (try/catch blocks)
-4. ❌ Modules and imports
-5. ❌ Arrays and collections
-6. ❌ Pattern matching
-7. ❌ UI and CSS integration
-8. ❌ Standard library
+3. ❌ UI and CSS integration
+4. ❌ Standard library
+5. ❌ Advanced pattern matching
+6. ❌ Advanced aspect-oriented features
+7. ❌ Advanced module system
+8. ❌ Advanced type system features
 
 ## Hoja de Ruta
 

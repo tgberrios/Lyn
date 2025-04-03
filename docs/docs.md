@@ -47,6 +47,7 @@
 
 8. [Sistema de Errores](#sistema-de-errores)
 
+   - [Manejo de Excepciones (Try/Catch)](#manejo-de-excepciones-trycatch)
    - [Tipos de Errores](#tipos-de-errores)
    - [Manejo de Errores](#manejo-de-errores)
    - [Reporte de Errores](#reporte-de-errores)
@@ -66,7 +67,7 @@
 
 11. [Sistema de Aspectos](#sistema-de-aspectos)
 
-    - [Aspectos](#aspectos)
+    - [Descripción General](#descripción-general)
     - [Pointcuts](#pointcuts)
     - [Advice](#advice)
 
@@ -788,6 +789,97 @@ El sistema se integra con:
 
 El sistema de manejo de errores implementa un mecanismo robusto para la detección, reporte y seguimiento de errores en el compilador. El sistema está diseñado para proporcionar información detallada sobre los errores, incluyendo su ubicación, contexto y tipo.
 
+### Manejo de Excepciones (Try/Catch)
+
+El sistema implementa un mecanismo completo de manejo de excepciones con las siguientes características:
+
+1. **Estructura Básica**
+
+   ```lyn
+   try {
+       // Código que puede lanzar excepciones
+   } catch (TipoError e) {
+       // Manejo del error
+   } finally {
+       // Código de limpieza
+   }
+   ```
+
+2. **Características Principales**
+
+   - Soporte para múltiples bloques catch con diferentes tipos de error
+   - Bloques finally opcionales para limpieza de recursos
+   - Propagación de errores entre bloques anidados
+   - Extracción y comparación de tipos de error
+   - Mensajes de error personalizables
+
+3. **Tipos de Error**
+
+   ```lyn
+   class ValidationError {
+       message: string;
+   }
+
+   class DatabaseError {
+       message: string;
+       code: int;
+   }
+
+   class NetworkError {
+       message: string;
+       status: int;
+   }
+   ```
+
+4. **Ejemplo de Uso**
+
+   ```lyn
+   try {
+       // Operación que puede fallar
+       if (error) {
+           throw ValidationError("Datos inválidos");
+       }
+   } catch (ValidationError e) {
+       print("Error de validación: " + e.message);
+   } catch (DatabaseError e) {
+       print("Error de base de datos: " + e.message);
+   } finally {
+       // Limpieza de recursos
+       cleanup();
+   }
+   ```
+
+5. **Bloques Anidados**
+
+   ```lyn
+   try {
+       try {
+           // Operación que puede fallar
+           if (error) {
+               throw DatabaseError("Error de conexión");
+           }
+       } catch (DatabaseError e) {
+           print("Error de base de datos: " + e.message);
+           throw; // Re-lanzar el error
+       }
+   } catch (DatabaseError e) {
+       print("Error capturado en el bloque exterior: " + e.message);
+   }
+   ```
+
+6. **Implementación Técnica**
+
+   - Uso de `setjmp` y `longjmp` para el manejo de saltos
+   - Pila de buffers de salto para bloques anidados
+   - Sistema de tipos para verificación de errores
+   - Gestión de memoria para mensajes de error
+
+7. **Mejores Prácticas**
+   - Usar bloques try/catch específicos para cada tipo de error
+   - Implementar bloques finally para limpieza de recursos
+   - Proporcionar mensajes de error descriptivos
+   - Manejar la propagación de errores de manera controlada
+
 ### Tipos de Errores
 
 El sistema clasifica los errores en las siguientes categorías:
@@ -1046,17 +1138,55 @@ El sistema se integra con:
 
 ## Sistema de Aspectos
 
-### Aspectos
+### Descripción General
 
-(Se completará con los aspectos)
+El sistema de aspectos implementa una versión básica de programación orientada a aspectos, inspirada en AspectJ. Actualmente soporta:
+
+1. **Estructuras Básicas**
+
+   - Aspectos simples
+   - Pointcuts básicos
+   - Advice básico (before/after)
+
+2. **Limitaciones Actuales**
+
+   - No soporta pointcuts complejos
+   - No soporta introducciones
+   - No soporta aspectos dinámicos
+   - No soporta composición de aspectos
+
+3. **Ejemplo de Uso**
+
+   ```lyn
+   aspect LoggingAspect {
+       pointcut methodCall() : call(* *.*(..));
+
+       before() : methodCall() {
+           print("Before method call");
+       }
+
+       after() : methodCall() {
+           print("After method call");
+       }
+   }
+   ```
 
 ### Pointcuts
 
-(Se completará con los pointcuts)
+Los pointcuts actualmente soportados son:
+
+- Llamadas a métodos
+- Ejecución de métodos
+- Acceso a campos
+- Manejo de excepciones
 
 ### Advice
 
-(Se completará con el advice)
+Tipos de advice soportados:
+
+- `before`: Se ejecuta antes del pointcut
+- `after`: Se ejecuta después del pointcut
+- `around`: Se ejecuta alrededor del pointcut (parcialmente implementado)
 
 ## Sistema de Macros
 
@@ -1239,75 +1369,60 @@ El sistema de tabla de símbolos implementa un mecanismo para el seguimiento y g
 
 ### Descripción General
 
-El sistema de templates implementa un mecanismo de programación genérica que permite la creación de código reutilizable con tipos parametrizados. El sistema soporta restricciones de tipo y especialización de código genérico.
+El sistema de templates implementa un mecanismo básico de programación genérica. Actualmente soporta:
 
-### Estructuras Principales
+1. **Estructuras Básicas**
 
-1. **Parámetro de Template**
+   - Templates de clase
+   - Templates de función
+   - Parámetros de tipo básicos
 
-   ```c
-   typedef struct {
-       char name[256];         // Nombre del parámetro
-       Type* constraint;       // Restricción de tipo (opcional)
-   } TemplateParam;
+2. **Limitaciones Actuales**
+
+   - No soporta restricciones de tipo complejas
+   - No soporta especialización parcial
+   - No soporta templates variádicos
+   - No soporta conceptos
+
+3. **Ejemplo de Uso**
+
+   ```lyn
+   template<T> class Container {
+       value: T;
+
+       init(value: T) {
+           this.value = value;
+       }
+
+       get(): T {
+           return this.value;
+       }
+   }
    ```
 
-2. **Definición de Template**
+### Plantillas
 
-   ```c
-   typedef struct {
-       char name[256];         // Nombre del template
-       TemplateParam** params; // Lista de parámetros
-       int paramCount;        // Número de parámetros
-       AstNode* body;         // Cuerpo del template
-   } TemplateDefinition;
-   ```
+Tipos de plantillas soportados:
 
-3. **Instancia de Template**
-   ```c
-   typedef struct {
-       const char* templateName; // Nombre del template
-       Type** typeArgs;         // Argumentos de tipo
-       int typeArgCount;        // Número de argumentos
-   } TemplateInstance;
-   ```
+- Plantillas de clase
+- Plantillas de función
+- Plantillas de método
 
-### Funcionalidades
+### Instanciación
 
-1. **Gestión de Templates**
+El sistema de instanciación actual:
 
-   - `register_template()`: Registro de nuevos templates
-   - `instantiate_template()`: Instanciación de templates
-   - `optimize_template()`: Optimización de código genérico
-   - `validate_template_constraints()`: Validación de restricciones
+- Instanciación básica de templates
+- Verificación de tipos básica
+- Generación de código C
 
-2. **Manipulación de AST**
-   - `clone_ast_node()`: Clonación de nodos AST
-   - `substitute_type_params()`: Sustitución de parámetros
-   - `inline_template_calls()`: Inline de llamadas a template
-   - `specialize_generic_code()`: Especialización de código
+### Configuración
 
-### Características
+Opciones de configuración disponibles:
 
-1. **Programación Genérica**
-
-   - Parámetros de tipo
-   - Restricciones de tipo
-   - Instanciación de templates
-   - Especialización de código
-
-2. **Optimización**
-
-   - Inline de llamadas
-   - Especialización de código
-   - Validación de restricciones
-   - Optimización de código genérico
-
-3. **Integración**
-   - Sistema de AST
-   - Sistema de tipos
-   - Sistema de optimización
-   - Sistema de logging
+- Nivel de optimización
+- Nivel de depuración
+- Generación de código
 
 ## Sistema de Árbol de Sintaxis Abstracta (AST)
 
