@@ -10,13 +10,14 @@
 const bool TRUE = 1;
 const bool FALSE = 0;
 
-static const char* to_string(double value) {
+static inline const char* to_string(double value) {
     static char buf[64];
-    sprintf(buf, "0", value);
+    snprintf(buf, sizeof(buf), "%g", value);
     return buf;
 }
 
-static char* concat_any(const char* s1, const char* s2) {
+static inline char* concat_any(const char* s1, const char* s2) {
+    if (!s1 || !s2) return NULL;
     int len = strlen(s1) + strlen(s2) + 1;
     char* result = (char*)malloc(len);
     if (result) {
@@ -334,7 +335,6 @@ int main() {
     }
     printf("%s\n", "Calling advised function:");
     printf("%s\n", "\n=== Class and Object Test ===");
-    printf("%s\n", "Today i make a loooooot!");
     double myCar __attribute__((unused)) =     0    ;
     printf("%s\n", "Car instance created.");
     {

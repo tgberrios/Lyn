@@ -229,8 +229,15 @@ bool validate_ast_types(AstNode* node) {
                 if (op == '+' && 
                     ((left_type->kind == TYPE_STRING && right_type->kind != TYPE_STRING) ||
                      (left_type->kind != TYPE_STRING && right_type->kind == TYPE_STRING))) {
-                    logger_log(LOG_ERROR, "Type error: Cannot mix string and non-string types with '+'");
-                    valid = false;
+                    // Permitir la concatenación de strings con números
+                    if ((left_type->kind == TYPE_INT || left_type->kind == TYPE_FLOAT) ||
+                        (right_type->kind == TYPE_INT || right_type->kind == TYPE_FLOAT)) {
+                        logger_log(LOG_DEBUG, "Allowing string concatenation with numbers");
+                        valid = true;
+                    } else {
+                        logger_log(LOG_ERROR, "Type error: Cannot mix string and non-string types with '+'");
+                        valid = false;
+                    }
                 }
                 
                 // Comparison operators (<, >, <=, >=) require comparable types

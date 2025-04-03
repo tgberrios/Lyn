@@ -1,0 +1,48 @@
+/**
+ * Calculadora básica en Lyn
+ * Realiza operaciones aritméticas simples
+ */
+
+main
+    print("=== Calculadora Lyn ===")
+    print("Operaciones disponibles:")
+    print("1. Suma (+)")
+    print("2. Resta (-)")
+    print("3. Multiplicación (*)")
+    print("4. División (/)")
+    
+    // Ejemplos de operaciones
+    num1 = 10
+    num2 = 5
+    
+    // Suma
+    resultado = num1 + num2
+    print("\nSuma:")
+    print("10 + 5 = " + resultado)
+    
+    // Resta
+    resultado = num1 - num2
+    print("\nResta:")
+    print("10 - 5 = " + resultado)
+    
+    // Multiplicación
+    resultado = num1 * num2
+    print("\nMultiplicación:")
+    print("10 * 5 = " + resultado)
+    
+    // División
+    resultado = num1 / num2
+    print("\nDivisión:")
+    print("10 / 5 = " + resultado)
+    
+    // Ejemplo con números decimales
+    decimal1 = 3.14
+    decimal2 = 2.0
+    
+    print("\nOperaciones con decimales:")
+    suma_decimal = decimal1 + decimal2
+    print("3.14 + 2.0 = " + suma_decimal)
+    
+    multiplicacion_decimal = decimal1 * decimal2
+    print("3.14 * 2.0 = " + multiplicacion_decimal)
+end 

@@ -145,17 +145,18 @@ static void generatePreamble(void) {
     emitConstants();
     
     // Insert helper function definitions for string concatenation
-    emitLine("static const char* to_string(double value) {");
+    emitLine("static inline const char* to_string(double value) {");
     indent();
     emitLine("static char buf[64];");
-    emitLine("sprintf(buf, \"%g\", value);");
+    emitLine("snprintf(buf, sizeof(buf), \"%%g\", value);");
     emitLine("return buf;");
     outdent();
     emitLine("}");
     emitLine("");
     
-    emitLine("static char* concat_any(const char* s1, const char* s2) {");
+    emitLine("static inline char* concat_any(const char* s1, const char* s2) {");
     indent();
+    emitLine("if (!s1 || !s2) return NULL;");
     emitLine("int len = strlen(s1) + strlen(s2) + 1;");
     emitLine("char* result = (char*)malloc(len);");
     emitLine("if (result) {");
@@ -1449,23 +1450,6 @@ static void compileClass(AstNode* node) {
             strcpy(member->funcDef.name, newName);
         }
     }
-}
-
-// Add helper functions for proper string concatenation
-static const char* to_string(double value) {
-    static char buf[64];
-    sprintf(buf, "%g", value);
-    return buf;
-}
-
-static char* concat_any(const char* s1, const char* s2) {
-    int len = strlen(s1) + strlen(s2) + 1;
-    char* result = (char*)malloc(len);
-    if (result) {
-        strcpy(result, s1);
-        strcat(result, s2);
-    }
-    return result;
 }
 
 static void compileExpression(AstNode* node) {
