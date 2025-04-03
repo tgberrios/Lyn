@@ -17,16 +17,16 @@
 13. ✅ Type system (basic types and inference)
 14. ✅ Switch statements
 15. ✅ Basic error handling and reporting
+16. ✅ For loops (completed with multiple styles and optimizations)
 
 ## Características Parcialmente Implementadas
 
 1. 🔄 Classes and objects (basic implementation)
 2. 🔄 Function definitions and calls (basic implementation)
-3. 🔄 For loops (basic implementation, needs improvement)
-4. 🔄 Aspect-oriented programming (basic structure)
-5. 🔄 Modules and imports (basic structure)
-6. 🔄 Arrays and collections (basic implementation)
-7. 🔄 Pattern matching (basic structure)
+3. 🔄 Aspect-oriented programming (basic structure)
+4. 🔄 Modules and imports (basic structure)
+5. 🔄 Arrays and collections (basic implementation)
+6. 🔄 Pattern matching (basic structure)
 
 ## Características Pendientes
 
