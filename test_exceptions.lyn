@@ -1,0 +1,10 @@
+main
+    print("Test básico de try-catch")
+    try
+        print("Intentando lanzar error...")
+        throw "Error de prueba"
+    catch error
+        print("Error capturado: " + error)
+    end
+    print("Continuando después del try-catch")
+end 

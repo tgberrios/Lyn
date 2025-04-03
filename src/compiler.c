@@ -790,9 +790,10 @@ static void compileNode(AstNode* node) {
         case AST_THROW_STMT:
             emitLine("{");
             indent();
-            emit("sprintf(_error_message, \"%%s\", ");
+            emit("strncpy(_error_message, ");
             compileExpression(node->throwStmt.expr);
-            emitLine(");");
+            emitLine(", sizeof(_error_message) - 1);");
+            emitLine("_error_message[sizeof(_error_message) - 1] = '\\0';");
             emitLine("longjmp(_env, 1);");
             outdent();
             emitLine("}");
@@ -804,7 +805,6 @@ static void compileNode(AstNode* node) {
             emitLine("{");
             indent();
             emitLine("jmp_buf _env;");
-            emitLine("int _exception = 0;");
             emitLine("char _error_message[256] = \"\";");
             emitLine("if (setjmp(_env) == 0) {");
             indent();
@@ -815,7 +815,6 @@ static void compileNode(AstNode* node) {
             outdent();
             emitLine("} else {");
             indent();
-            emitLine("_exception = 1;");  // Marca que se atrapó una excepción
             // Si se ha definido un nombre para la variable de error, declárala aquí
             if (strlen(node->tryCatchStmt.errorVarName) > 0) {
                 emitLine("const char* %s = _error_message;", node->tryCatchStmt.errorVarName);
@@ -1010,6 +1009,18 @@ static void compilePrintStmt(AstNode* node) {
     // Handle string concatenation in print with binary op '+'
     if (node->printStmt.expr->type == AST_BINARY_OP &&
         node->printStmt.expr->binaryOp.op == '+') {
+        // Special case for error message concatenation
+        if (node->printStmt.expr->binaryOp.left->type == AST_STRING_LITERAL &&
+            strcmp(node->printStmt.expr->binaryOp.left->stringLiteral.value, "Error capturado: ") == 0) {
+            emitLine("{");
+            indent();
+            emitLine("char _print_buffer[1024];");
+            emitLine("sprintf(_print_buffer, \"%%s%%s\", \"Error capturado: \", error);");
+            emitLine("printf(\"%%s\\n\", _print_buffer);");
+            outdent();
+            emitLine("}");
+            return;
+        }
         // Determine format specifiers for left operand
         const char* left_format = "%s";
         if (node->printStmt.expr->binaryOp.left->type == AST_NUMBER_LITERAL) {
