@@ -149,7 +149,7 @@ bool validate_template_constraints(TemplateInstance* instance) {
     for (int i = 0; i < instance->typeArgCount; i++) {
         Type* constraint = template->params[i]->constraint;
         if (constraint) {
-            if (!are_types_compatible(instance->typeArgs[i], constraint)) {
+            if (!types_are_compatible(instance->typeArgs[i], constraint)) {
                 char error[512];
                 snprintf(error, sizeof(error), 
                         "Type argument %s does not satisfy constraint %s",

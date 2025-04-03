@@ -187,7 +187,7 @@ bool is_instance_of(AstNode* expr, Type* type) {
     Type* exprType = expr->inferredType;
     if (!exprType) return false;
 
-    return are_types_compatible(exprType, type);
+    return types_are_compatible(exprType, type);
 }
 
 /**

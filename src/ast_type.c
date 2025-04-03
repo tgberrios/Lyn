@@ -208,56 +208,54 @@ bool validate_ast_types(AstNode* node) {
                 // Check operation compatibility based on operator and operand types
                 char op = node->binaryOp.op;
                 
-                // Arithmetic operators require numeric operands
-                if ((op == '+' || op == '-' || op == '*' || op == '/') && 
-                    (left_type->kind != TYPE_INT && left_type->kind != TYPE_FLOAT) &&
-                    (op != '+' || left_type->kind != TYPE_STRING)) {
-                    logger_log(LOG_ERROR, "Type error: Left operand of '%c' must be numeric%s", 
-                               op, (op == '+') ? " or string" : "");
-                    valid = false;
-                }
-                
-                if ((op == '+' || op == '-' || op == '*' || op == '/') && 
-                    (right_type->kind != TYPE_INT && right_type->kind != TYPE_FLOAT) &&
-                    (op != '+' || right_type->kind != TYPE_STRING)) {
-                    logger_log(LOG_ERROR, "Type error: Right operand of '%c' must be numeric%s", 
-                               op, (op == '+') ? " or string" : "");
-                    valid = false;
-                }
-                
-                // String concatenation special case
-                if (op == '+' && 
-                    ((left_type->kind == TYPE_STRING && right_type->kind != TYPE_STRING) ||
-                     (left_type->kind != TYPE_STRING && right_type->kind == TYPE_STRING))) {
-                    // Permitir la concatenación de strings con números
-                    if ((left_type->kind == TYPE_INT || left_type->kind == TYPE_FLOAT) ||
-                        (right_type->kind == TYPE_INT || right_type->kind == TYPE_FLOAT)) {
+                // Handle string concatenation first
+                if (op == '+') {
+                    // Allow string concatenation with numbers
+                    if ((left_type->kind == TYPE_STRING && (right_type->kind == TYPE_INT || right_type->kind == TYPE_FLOAT)) ||
+                        (right_type->kind == TYPE_STRING && (left_type->kind == TYPE_INT || left_type->kind == TYPE_FLOAT))) {
                         logger_log(LOG_DEBUG, "Allowing string concatenation with numbers");
                         valid = true;
+                    } else if ((left_type->kind == TYPE_INT || left_type->kind == TYPE_FLOAT) &&
+                              (right_type->kind == TYPE_INT || right_type->kind == TYPE_FLOAT)) {
+                        // Allow numeric addition
+                        valid = true;
                     } else {
-                        logger_log(LOG_ERROR, "Type error: Cannot mix string and non-string types with '+'");
+                        logger_log(LOG_ERROR, "Type error: Addition requires numeric operands or string concatenation");
                         valid = false;
                     }
-                }
-                
-                // Comparison operators (<, >, <=, >=) require comparable types
-                if ((op == '<' || op == '>' || op == 'L' || op == 'G') && 
-                    (left_type->kind != right_type->kind)) {
-                    logger_log(LOG_ERROR, "Type error: Operands of comparison must be of the same type");
-                    valid = false;
-                }
-                
-                // Equality operators (==, !=) work on any type, but types should match
-                if ((op == 'E' || op == 'N') && !types_are_compatible(left_type, right_type)) {
-                    logger_log(LOG_ERROR, "Type error: Incompatible types in equality comparison");
-                    valid = false;
-                }
-                
-                // Logical operators (and, or) require boolean operands
-                if ((op == 'A' || op == 'O') && 
-                    (left_type->kind != TYPE_BOOL || right_type->kind != TYPE_BOOL)) {
-                    logger_log(LOG_ERROR, "Type error: Logical operators require boolean operands");
-                    valid = false;
+                } else if (strchr("-*/", op) != NULL) {
+                    // For other arithmetic operations
+                    if ((left_type->kind == TYPE_INT || left_type->kind == TYPE_FLOAT) &&
+                        (right_type->kind == TYPE_INT || right_type->kind == TYPE_FLOAT)) {
+                        valid = true;
+                    } else {
+                        logger_log(LOG_ERROR, "Type error: Arithmetic operation requires numeric operands");
+                        valid = false;
+                    }
+                } else if (strchr("<>LE", op) != NULL) {
+                    // For comparison operations
+                    if (left_type->kind == right_type->kind) {
+                        valid = true;
+                    } else {
+                        logger_log(LOG_ERROR, "Type error: Comparison requires operands of the same type");
+                        valid = false;
+                    }
+                } else if (op == 'A' || op == 'O') {
+                    // For logical operations
+                    if (left_type->kind == TYPE_BOOL && right_type->kind == TYPE_BOOL) {
+                        valid = true;
+                    } else {
+                        logger_log(LOG_ERROR, "Type error: Logical operation requires boolean operands");
+                        valid = false;
+                    }
+                } else if (op == 'E' || op == 'N') {
+                    // For equality operations
+                    if (types_are_compatible(left_type, right_type)) {
+                        valid = true;
+                    } else {
+                        logger_log(LOG_ERROR, "Type error: Equality comparison requires compatible types");
+                        valid = false;
+                    }
                 }
             }
             break;
