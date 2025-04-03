@@ -790,9 +790,15 @@ static void compileNode(AstNode* node) {
         case AST_THROW_STMT:
             emitLine("{");
             indent();
-            emit("strncpy(_error_message, ");
-            compileExpression(node->throwStmt.expr);
-            emitLine(", sizeof(_error_message) - 1);");
+            emitLine("char _error_message[1024];  // Buffer for error message");
+            if (node->throwStmt.expr->type == AST_STRING_LITERAL) {
+                emitLine("strncpy(_error_message, \"%s\", sizeof(_error_message) - 1);", 
+                        node->throwStmt.expr->stringLiteral.value);
+            } else {
+                emit("snprintf(_error_message, sizeof(_error_message), ");
+                compileExpression(node->throwStmt.expr);
+                emitLine(");");
+            }
             emitLine("_error_message[sizeof(_error_message) - 1] = '\\0';");
             emitLine("longjmp(_env, 1);");
             outdent();
@@ -805,8 +811,8 @@ static void compileNode(AstNode* node) {
             emitLine("{");
             indent();
             emitLine("jmp_buf _env;");
-            emitLine("char _error_message[256] = \"\";");
-            emitLine("const char* error = NULL;  // Declare error variable at block scope");
+            emitLine("char _error_message[1024] = \"\";");
+            emitLine("const char* error = NULL;");
             addVariable("error", "const char*");
             markVariableDeclared("error");
             
@@ -819,7 +825,7 @@ static void compileNode(AstNode* node) {
             outdent();
             emitLine("} else {");
             indent();
-            emitLine("error = _error_message;  // Assign error message");
+            emitLine("error = _error_message;");
             // Generate catch block code
             for (int i = 0; i < node->tryCatchStmt.catchCount; i++) {
                 compileNode(node->tryCatchStmt.catchBody[i]);
@@ -1015,7 +1021,7 @@ static void compilePrintStmt(AstNode* node) {
             node->printStmt.expr->binaryOp.right->type == AST_IDENTIFIER) {
             emitLine("{");
             indent();
-            emitLine("char _print_buffer[1024];");
+            emitLine("char _print_buffer[2048];  // Buffer for formatted error message");
             const char* errorVarName = node->printStmt.expr->binaryOp.right->identifier.name;
             emitLine("snprintf(_print_buffer, sizeof(_print_buffer), \"%%s%%s\", \"%s\", %s);", 
                     node->printStmt.expr->binaryOp.left->stringLiteral.value,

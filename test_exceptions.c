@@ -151,23 +151,24 @@ int main() {
     float* float_array __attribute__((unused)) = NULL;
     double* mixed_array __attribute__((unused)) = NULL;
     const char* day_name __attribute__((unused)) = "";
-    printf("%s\n", "Test básico de try-catch con type checking");
+    printf("%s\n", "Test de formateo de mensajes de error");
     {
         jmp_buf _env;
-        char _error_message[256] = "";
-        const char* error = NULL;  // Declare error variable at block scope
+        char _error_message[1024] = "";
+        const char* error = NULL;
         if (setjmp(_env) == 0) {
             printf("%s\n", "Intentando lanzar ValidationError...");
             {
-                strncpy(_error_message,                 "ValidationError"                , sizeof(_error_message) - 1);
+                char _error_message[1024];  // Buffer for error message
+                strncpy(_error_message, "ValidationError: El valor debe ser mayor que 0", sizeof(_error_message) - 1);
                 _error_message[sizeof(_error_message) - 1] = '\0';
                 longjmp(_env, 1);
             }
         } else {
-            error = _error_message;  // Assign error message
+            error = _error_message;
             if (            strcmp(            error            ,             "ValidationError"            ) == 0            ) {
                 {
-                    char _print_buffer[1024];
+                    char _print_buffer[2048];  // Buffer for formatted error message
                     snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error de validación capturado: ", error);
                     printf("%s\n", _print_buffer);
                 }
@@ -176,27 +177,28 @@ int main() {
     }
     {
         jmp_buf _env;
-        char _error_message[256] = "";
-        const char* error = NULL;  // Declare error variable at block scope
+        char _error_message[1024] = "";
+        const char* error = NULL;
         if (setjmp(_env) == 0) {
             printf("%s\n", "Intentando lanzar DatabaseError...");
             {
-                strncpy(_error_message,                 "DatabaseError"                , sizeof(_error_message) - 1);
+                char _error_message[1024];  // Buffer for error message
+                strncpy(_error_message, "DatabaseError: No se pudo conectar a la base de datos 'users' en localhost:5432", sizeof(_error_message) - 1);
                 _error_message[sizeof(_error_message) - 1] = '\0';
                 longjmp(_env, 1);
             }
         } else {
-            error = _error_message;  // Assign error message
+            error = _error_message;
             if (            strcmp(            error            ,             "DatabaseError"            ) == 0            ) {
                 {
-                    char _print_buffer[1024];
+                    char _print_buffer[2048];  // Buffer for formatted error message
                     snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error de base de datos capturado: ", error);
                     printf("%s\n", _print_buffer);
                 }
             }
             else {
                 {
-                    char _print_buffer[1024];
+                    char _print_buffer[2048];  // Buffer for formatted error message
                     snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error genérico capturado: ", error);
                     printf("%s\n", _print_buffer);
                 }
@@ -205,27 +207,28 @@ int main() {
     }
     {
         jmp_buf _env;
-        char _error_message[256] = "";
-        const char* error = NULL;  // Declare error variable at block scope
+        char _error_message[1024] = "";
+        const char* error = NULL;
         if (setjmp(_env) == 0) {
             printf("%s\n", "Intentando lanzar NetworkError...");
             {
-                strncpy(_error_message,                 "NetworkError"                , sizeof(_error_message) - 1);
+                char _error_message[1024];  // Buffer for error message
+                strncpy(_error_message, "NetworkError: Timeout al intentar conectar\nDetalles: host=api.example.com, puerto=443, timeout=5s", sizeof(_error_message) - 1);
                 _error_message[sizeof(_error_message) - 1] = '\0';
                 longjmp(_env, 1);
             }
         } else {
-            error = _error_message;  // Assign error message
+            error = _error_message;
             if (            strcmp(            error            ,             "DatabaseError"            ) == 0            ) {
                 {
-                    char _print_buffer[1024];
+                    char _print_buffer[2048];  // Buffer for formatted error message
                     snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error de base de datos capturado: ", error);
                     printf("%s\n", _print_buffer);
                 }
             }
             else {
                 {
-                    char _print_buffer[1024];
+                    char _print_buffer[2048];  // Buffer for formatted error message
                     snprintf(_print_buffer, sizeof(_print_buffer), "%s%s", "Error genérico capturado: ", error);
                     printf("%s\n", _print_buffer);
                 }

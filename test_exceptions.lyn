@@ -1,20 +1,20 @@
 main
-    print("Test básico de try-catch con type checking")
+    print("Test de formateo de mensajes de error")
     
-    // Test 1: Capturar un error específico
+    // Test 1: Error simple con mensaje
     try
         print("Intentando lanzar ValidationError...")
-        throw "ValidationError"
+        throw "ValidationError: El valor debe ser mayor que 0"
     catch error
         if error == "ValidationError"
             print("Error de validación capturado: " + error)
         end
     end
     
-    // Test 2: Capturar múltiples tipos de error
+    // Test 2: Error con detalles
     try
         print("Intentando lanzar DatabaseError...")
-        throw "DatabaseError"
+        throw "DatabaseError: No se pudo conectar a la base de datos 'users' en localhost:5432"
     catch error
         if error == "DatabaseError"
             print("Error de base de datos capturado: " + error)
@@ -23,10 +23,10 @@ main
         end
     end
     
-    // Test 3: Error type mismatch
+    // Test 3: Error con múltiples líneas
     try
         print("Intentando lanzar NetworkError...")
-        throw "NetworkError"
+        throw "NetworkError: Timeout al intentar conectar\nDetalles: host=api.example.com, puerto=443, timeout=5s"
     catch error
         if error == "DatabaseError"
             print("Error de base de datos capturado: " + error)
