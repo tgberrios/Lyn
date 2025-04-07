@@ -16,6 +16,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+
+// Forward declarations
+static Module* module_load_impl(const char* name, Module* module);
 
 // External declaration of lexerInit
 extern void lexerInit(const char* source);
@@ -250,16 +254,14 @@ void module_add_dependency(Module* module, const char* dependencyName) {
 }
 
 /**
- * @brief Loads a module from disk
- * 
- * Searches for the module in the configured search paths, loads its content,
- * parses it, and processes its exports and imports.
+ * @brief Loads a module with caching
  * 
  * @param name Name of the module to load
+ * @param forceFresh Whether to force a fresh load ignoring cache
  * @return Module* Pointer to the loaded module, or NULL if loading failed
  */
-Module* module_load(const char* name) {
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)module_load);
+Module* module_load_cached(const char* name, bool forceFresh) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)module_load_cached);
     
     if (!name) {
         logger_log(LOG_ERROR, "Attempted to load module with NULL name");
@@ -271,8 +273,87 @@ Module* module_load(const char* name) {
     Module* existing = find_loaded_module(name);
     if (existing) {
         if (existing->isLoaded) {
-            logger_log(LOG_DEBUG, "Module '%s' already loaded, reusing instance", name);
-            return existing;
+            // Check if we should use the cached version
+            if (!forceFresh && existing->isCached) {
+                // Check if the file has been modified since last load
+                char path[1024];
+                FILE* file = NULL;
+                
+                for (int i = 0; i < searchPathCount && !file; i++) {
+                    snprintf(path, sizeof(path), "%s%s.lyn", searchPaths[i], name);
+                    file = fopen(path, "r");
+                }
+                
+                if (file) {
+                    struct stat statBuf;
+                    fstat(fileno(file), &statBuf);
+                    time_t modificationTime = statBuf.st_mtime;
+                    fclose(file);
+                    
+                    if (modificationTime <= existing->lastModified) {
+                        logger_log(LOG_INFO, "Using cached version of module '%s'", name);
+                        return existing;
+                    } else {
+                        logger_log(LOG_INFO, "Module '%s' has been modified, reloading", name);
+                        // File has been modified, we need to reload
+                    }
+                } else {
+                    // Cannot open the file, but we have a cached version
+                    logger_log(LOG_WARNING, "Cannot open module file '%s.lyn', using cached version", name);
+                    return existing;
+                }
+            } else if (forceFresh) {
+                logger_log(LOG_INFO, "Forced reload of module '%s'", name);
+                // Need to unload the existing module first
+                // For now, we'll just reuse the existing slot
+                
+                // Free exports
+                if (existing->exports) {
+                    for (int j = 0; j < existing->exportCount; j++) {
+                        freeAstNode(existing->exports[j].node);
+                    }
+                    free(existing->exports);
+                    existing->exports = NULL;
+                    existing->exportCount = 0;
+                }
+                
+                // Free imports
+                if (existing->imports) {
+                    for (int j = 0; j < existing->importCount; j++) {
+                        if (existing->imports[j].symbols) {
+                            free(existing->imports[j].symbols);
+                        }
+                    }
+                    free(existing->imports);
+                    existing->imports = NULL;
+                    existing->importCount = 0;
+                }
+                
+                // Free dependencies
+                if (existing->dependencies) {
+                    for (int j = 0; j < existing->dependencyCount; j++) {
+                        free(existing->dependencies[j]);
+                    }
+                    free(existing->dependencies);
+                    existing->dependencies = NULL;
+                    existing->dependencyCount = 0;
+                }
+                
+                // Free AST
+                freeAst(existing->ast);
+                existing->ast = NULL;
+                
+                // Reset flags
+                existing->isLoaded = false;
+                existing->isLoading = true;
+                existing->isCached = false;
+                
+                // Reuse the existing module struct
+                return module_load_impl(name, existing);
+            } else {
+                logger_log(LOG_DEBUG, "Module '%s' already loaded, reusing instance", name);
+                return existing;
+            }
         } else if (existing->isLoading) {
             // Circular dependency detected
             logger_log(LOG_WARNING, "Circular dependency detected for module '%s'", name);
@@ -280,7 +361,13 @@ Module* module_load(const char* name) {
             return NULL;
         }
     }
+    
+    // Not loaded or needs reload, do a normal load
+    return module_load(name);
+}
 
+// Helper function for implementing module loading logic
+static Module* module_load_impl(const char* name, Module* module) {
     // Try to find the module in search paths
     char path[1024];
     FILE* file = NULL;
@@ -302,25 +389,37 @@ Module* module_load(const char* name) {
         return NULL;
     }
     
-    // Create new module
-    Module* module = calloc(1, sizeof(Module));
+    // Get file modification time for cache validation
+    struct stat statBuf;
+    fstat(fileno(file), &statBuf);
+    time_t modificationTime = statBuf.st_mtime;
+    
+    // Create new module if not reusing
     if (!module) {
-        char errMsg[1024];
-        snprintf(errMsg, sizeof(errMsg), "Failed to allocate memory for module '%s'", name);
-        logger_log(LOG_ERROR, "%s", errMsg);
-        error_report("Module", __LINE__, 0, errMsg, ERROR_MEMORY);
-        fclose(file);
-        return NULL;
-    }
-    
-    strncpy(module->name, name, sizeof(module->name) - 1);
-    strncpy(module->path, path, sizeof(module->path) - 1);
-    module->isLoading = true;
-    
-    // Register module in global table, even before loading is complete
-    // This allows circular dependency detection
-    if (moduleCount < MAX_MODULES) {
-        loadedModules[moduleCount++] = module;
+        module = calloc(1, sizeof(Module));
+        if (!module) {
+            char errMsg[1024];
+            snprintf(errMsg, sizeof(errMsg), "Failed to allocate memory for module '%s'", name);
+            logger_log(LOG_ERROR, "%s", errMsg);
+            error_report("Module", __LINE__, 0, errMsg, ERROR_MEMORY);
+            fclose(file);
+            return NULL;
+        }
+        
+        strncpy(module->name, name, sizeof(module->name) - 1);
+        strncpy(module->path, path, sizeof(module->path) - 1);
+        module->isLoading = true;
+        
+        // Initialize version
+        module->version.major = 1;
+        module->version.minor = 0;
+        module->version.patch = 0;
+        
+        // Register module in global table, even before loading is complete
+        // This allows circular dependency detection
+        if (moduleCount < MAX_MODULES) {
+            loadedModules[moduleCount++] = module;
+        }
     }
 
     // Read file content
@@ -391,23 +490,26 @@ Module* module_load(const char* name) {
         for (int i = 0; i < module->ast->program.statementCount; i++) {
             AstNode* node = module->ast->program.statements[i];
             const char* symbolName = NULL;
-            bool isPublic = true; // Default to public
+            ExportVisibility visibility = EXPORT_PRIVATE;
             
             // Determine name based on node type
             switch (node->type) {
                 case AST_FUNC_DEF:
                     symbolName = node->funcDef.name;
+                    visibility = EXPORT_PUBLIC; // Functions are public by default
                     break;
                 case AST_CLASS_DEF:
                     symbolName = node->classDef.name;
+                    visibility = EXPORT_PUBLIC; // Classes are public by default
                     break;
                 case AST_VAR_DECL:
                     symbolName = node->varDecl.name;
                     // Variables are private by default unless marked as export
-                    isPublic = false;
+                    visibility = EXPORT_PRIVATE;
                     break;
                 case AST_IMPORT:
-                    // Process imports
+                    // Process imports without using non-existent fields like isQualified and alias
+                    // Just import the module with the default settings
                     module_import(module, node->importStmt.moduleName);
                     continue;
                 default:
@@ -415,11 +517,15 @@ Module* module_load(const char* name) {
             }
             
             if (symbolName) {
-                module_add_export(module, symbolName, node, isPublic);
+                module_add_export(module, symbolName, node, visibility);
             }
         }
     }
 
+    // Update cache information
+    module->lastModified = modificationTime;
+    module->isCached = true;
+    
     // Module fully loaded
     module->isLoaded = true;
     module->isLoading = false;
@@ -430,14 +536,87 @@ Module* module_load(const char* name) {
 }
 
 /**
- * @brief Imports a module into another module
+ * @brief Loads a module from disk
  * 
- * @param target The module to import into
- * @param moduleName Name of the module to import
- * @return bool true if import was successful
+ * Searches for the module in the configured search paths, loads its content,
+ * parses it, and processes its exports and imports.
+ * 
+ * @param name Name of the module to load
+ * @return Module* Pointer to the loaded module, or NULL if loading failed
  */
-bool module_import(Module* target, const char* moduleName) {
-    return module_import_with_alias(target, moduleName, "", false);
+Module* module_load(const char* name) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)module_load);
+    
+    if (!name) {
+        logger_log(LOG_ERROR, "Attempted to load module with NULL name");
+        error_report("Module", __LINE__, 0, "NULL module name provided", ERROR_UNDEFINED);
+        return NULL;
+    }
+    
+    // Check if already loaded
+    Module* existing = find_loaded_module(name);
+    if (existing) {
+        if (existing->isLoaded) {
+            logger_log(LOG_DEBUG, "Module '%s' already loaded, reusing instance", name);
+            return existing;
+        } else if (existing->isLoading) {
+            // Circular dependency detected
+            logger_log(LOG_WARNING, "Circular dependency detected for module '%s'", name);
+            error_report("Module", __LINE__, 0, "Circular dependency detected", ERROR_RUNTIME);
+            return NULL;
+        }
+    }
+
+    return module_load_impl(name, NULL);
+}
+
+/**
+ * @brief Reloads a module if its source file has changed
+ * 
+ * @param module The module to check and potentially reload
+ * @return bool true if the module was reloaded
+ */
+bool module_hot_reload(Module* module) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)module_hot_reload);
+    
+    if (!module) {
+        logger_log(LOG_ERROR, "Attempted to hot reload NULL module");
+        error_report("Module", __LINE__, 0, "NULL module in hot_reload", ERROR_UNDEFINED);
+        return false;
+    }
+    
+    // Check if the file exists and get its modification time
+    FILE* file = NULL;
+    struct stat statBuf;
+    
+    file = fopen(module->path, "r");
+    if (!file) {
+        logger_log(LOG_WARNING, "Failed to open module file '%s' for hot reload", module->path);
+        return false;
+    }
+    
+    fstat(fileno(file), &statBuf);
+    time_t modificationTime = statBuf.st_mtime;
+    fclose(file);
+    
+    // Compare modification times
+    if (modificationTime <= module->lastModified) {
+        if (debug_level >= 2) {
+            logger_log(LOG_DEBUG, "Module '%s' unchanged, no need to reload", module->name);
+        }
+        return false;
+    }
+    
+    logger_log(LOG_INFO, "Module '%s' changed, reloading", module->name);
+    
+    // Reload the module
+    Module* reloaded = module_load_cached(module->name, true);
+    if (!reloaded) {
+        logger_log(LOG_ERROR, "Failed to reload module '%s'", module->name);
+        return false;
+    }
+    
+    return true;
 }
 
 /**
@@ -446,11 +625,11 @@ bool module_import(Module* target, const char* moduleName) {
  * @param target The module to import into
  * @param moduleName Name of the module to import
  * @param alias Optional alias for the imported module
- * @param isQualified Whether this is a qualified import
+ * @param mode Import mode (all, selective, qualified)
  * @return bool true if import was successful
  */
-bool module_import_with_alias(Module* target, const char* moduleName, const char* alias, bool isQualified) {
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)module_import_with_alias);
+bool module_import_with_options(Module* target, const char* moduleName, const char* alias, ImportMode mode) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)module_import_with_options);
     
     if (!target) {
         logger_log(LOG_ERROR, "Attempted to import into NULL target module");
@@ -474,8 +653,8 @@ bool module_import_with_alias(Module* target, const char* moduleName, const char
         return false;
     }
 
-    // Load the module if not already loaded
-    Module* imported = module_load(moduleName);
+    // Load the module if not already loaded, using caching if available
+    Module* imported = module_load_cached(moduleName, false);
     if (!imported) {
         char errMsg[1024];
         snprintf(errMsg, sizeof(errMsg), "Failed to load module '%s' for import", moduleName);
@@ -486,8 +665,8 @@ bool module_import_with_alias(Module* target, const char* moduleName, const char
     // Check for duplicate import
     for (int i = 0; i < target->importCount; i++) {
         if (target->imports[i].module == imported &&
-            strcmp(target->imports[i].alias, alias) == 0 && 
-            target->imports[i].isQualified == isQualified) {
+            strcmp(target->imports[i].alias, alias ? alias : "") == 0 && 
+            target->imports[i].mode == mode) {
             logger_log(LOG_WARNING, "Module '%s' already imported in '%s', skipping duplicate", 
                      moduleName, target->name);
             return true;  // Already imported, not an error
@@ -511,16 +690,96 @@ bool module_import_with_alias(Module* target, const char* moduleName, const char
     
     ImportedModule* newImport = &target->imports[target->importCount - 1];
     strncpy(newImport->name, moduleName, sizeof(newImport->name) - 1);
-    strncpy(newImport->alias, alias, sizeof(newImport->alias) - 1);
-    newImport->isQualified = isQualified;
+    strncpy(newImport->alias, alias ? alias : "", sizeof(newImport->alias) - 1);
+    newImport->mode = mode;
     newImport->module = imported;
+    newImport->symbols = NULL;
+    newImport->symbolCount = 0;
     
-    logger_log(LOG_INFO, "Module '%s'%s%s imported into '%s'%s", 
+    logger_log(LOG_INFO, "Module '%s'%s%s imported into '%s' (mode: %d)", 
               moduleName,
-              alias[0] ? " as " : "",
-              alias[0] ? alias : "",
+              alias && alias[0] ? " as " : "",
+              alias && alias[0] ? alias : "",
               target->name,
-              isQualified ? " (qualified)" : "");
+              mode);
+    return true;
+}
+
+/**
+ * @brief Imports a module into another module
+ * 
+ * @param target The module to import into
+ * @param moduleName Name of the module to import
+ * @return bool true if import was successful
+ */
+bool module_import(Module* target, const char* moduleName) {
+    return module_import_with_options(target, moduleName, "", IMPORT_ALL);
+}
+
+/**
+ * @brief Selectively imports symbols from a module
+ * 
+ * @param target The module to import into
+ * @param moduleName Name of the module to import from
+ * @param symbolNames Array of symbol names to import
+ * @param aliases Array of aliases for the symbols (can be NULL)
+ * @param count Number of symbols to import
+ * @return bool true if import was successful
+ */
+bool module_import_symbols(Module* target, const char* moduleName, 
+                          const char** symbolNames, const char** aliases, int count) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)module_import_symbols);
+    
+    if (!target || !moduleName || !symbolNames || count <= 0) {
+        logger_log(LOG_ERROR, "Invalid parameters for selective import");
+        error_report("Module", __LINE__, 0, "Invalid selective import parameters", ERROR_UNDEFINED);
+        return false;
+    }
+    
+    // First, import the module with selective mode
+    if (!module_import_with_options(target, moduleName, "", IMPORT_SELECTIVE)) {
+        return false;
+    }
+    
+    // Find the import we just added
+    ImportedModule* import = &target->imports[target->importCount - 1];
+    
+    // Allocate memory for the imported symbols
+    import->symbols = calloc(count, sizeof(ImportedSymbol));
+    if (!import->symbols) {
+        logger_log(LOG_ERROR, "Failed to allocate memory for imported symbols");
+        error_report("Module", __LINE__, 0, "Memory allocation failed", ERROR_MEMORY);
+        return false;
+    }
+    
+    import->symbolCount = count;
+    
+    // Add each symbol
+    for (int i = 0; i < count; i++) {
+        // Look up the symbol in the imported module
+        ExportedSymbol* symbol = module_find_export(import->module, symbolNames[i]);
+        if (!symbol) {
+            char errMsg[1024];
+            snprintf(errMsg, sizeof(errMsg), "Symbol '%s' not found in module '%s'", 
+                    symbolNames[i], moduleName);
+            logger_log(LOG_WARNING, "%s", errMsg);
+            continue;
+        }
+        
+        // Copy the symbol information
+        strncpy(import->symbols[i].name, symbolNames[i], sizeof(import->symbols[i].name) - 1);
+        strncpy(import->symbols[i].alias, 
+                aliases && aliases[i] ? aliases[i] : symbolNames[i], 
+                sizeof(import->symbols[i].alias) - 1);
+        import->symbols[i].symbol = symbol;
+        
+        logger_log(LOG_DEBUG, "Imported symbol '%s'%s%s from module '%s'", 
+                  symbolNames[i],
+                  aliases && aliases[i] ? " as " : "",
+                  aliases && aliases[i] ? aliases[i] : "",
+                  moduleName);
+    }
+    
     return true;
 }
 
@@ -539,8 +798,19 @@ ExportedSymbol* module_find_export(Module* module, const char* name) {
     }
     
     for (int i = 0; i < module->exportCount; i++) {
-        if (strcmp(module->exports[i].name, name) == 0 && module->exports[i].isPublic) {
-            return &module->exports[i];
+        if (strcmp(module->exports[i].name, name) == 0) {
+            // For internal visibility, we would need to check if the caller is in the same package
+            // For now, we just treat internal as public for simplicity
+            if (module->exports[i].visibility == EXPORT_PUBLIC || 
+                module->exports[i].visibility == EXPORT_INTERNAL) {
+                return &module->exports[i];
+            } else {
+                if (debug_level >= 3) {
+                    logger_log(LOG_DEBUG, "Symbol '%s' found in module '%s' but has private visibility",
+                              name, module->name);
+                }
+                return NULL;  // Symbol exists but is not accessible
+            }
         }
     }
     
@@ -583,18 +853,43 @@ AstNode* module_resolve_symbol(Module* module, const char* name) {
         return localSymbol->node;
     }
 
-    // 2. Search in unqualified imports
+    // 2. Search in imports
     for (int i = 0; i < module->importCount; i++) {
-        // Skip qualified imports as they require explicit namespace
-        if (module->imports[i].isQualified) continue;
+        ImportedModule* import = &module->imports[i];
         
-        ExportedSymbol* importedSymbol = module_find_export(module->imports[i].module, name);
-        if (importedSymbol) {
-            if (debug_level >= 3) {
-                logger_log(LOG_DEBUG, "Symbol '%s' found in imported module '%s'", 
-                          name, module->imports[i].name);
-            }
-            return importedSymbol->node;
+        // Handle different import modes
+        switch (import->mode) {
+            case IMPORT_ALL:
+                // Check all exports of the imported module
+                ExportedSymbol* importedSymbol = module_find_export(import->module, name);
+                if (importedSymbol) {
+                    if (debug_level >= 3) {
+                        logger_log(LOG_DEBUG, "Symbol '%s' found in imported module '%s' (all mode)", 
+                                  name, import->name);
+                    }
+                    return importedSymbol->node;
+                }
+                break;
+                
+            case IMPORT_SELECTIVE:
+                // Check only explicitly imported symbols
+                for (int j = 0; j < import->symbolCount; j++) {
+                    if (strcmp(import->symbols[j].alias, name) == 0) {
+                        if (debug_level >= 3) {
+                            logger_log(LOG_DEBUG, "Symbol '%s' found as alias for '%s' in selective import from module '%s'",
+                                      name, import->symbols[j].name, import->name);
+                        }
+                        return import->symbols[j].symbol->node;
+                    }
+                }
+                break;
+                
+            case IMPORT_QUALIFIED:
+                // Qualified imports need explicit qualification, so they're not checked here
+                break;
+                
+            default:
+                break;
         }
     }
     
@@ -623,20 +918,33 @@ AstNode* module_resolve_qualified_symbol(Module* module, const char* moduleName,
     
     // Find the imported module by name or alias
     for (int i = 0; i < module->importCount; i++) {
-        if (strcmp(module->imports[i].name, moduleName) == 0 || 
-            (module->imports[i].alias[0] && strcmp(module->imports[i].alias, moduleName) == 0)) {
+        ImportedModule* import = &module->imports[i];
+        
+        if (strcmp(import->name, moduleName) == 0 || 
+            (import->alias[0] && strcmp(import->alias, moduleName) == 0)) {
             
-            // Found the module, look for the symbol
-            ExportedSymbol* symbol = module_find_export(module->imports[i].module, symbolName);
-            if (symbol) {
-                return symbol->node;
+            if (import->mode == IMPORT_SELECTIVE) {
+                // For selective imports, check if the symbol was explicitly imported
+                for (int j = 0; j < import->symbolCount; j++) {
+                    if (strcmp(import->symbols[j].name, symbolName) == 0) {
+                        return import->symbols[j].symbol->node;
+                    }
+                }
+            } else {
+                // For all other import modes, just look for the symbol in the module
+                ExportedSymbol* symbol = module_find_export(import->module, symbolName);
+                if (symbol) {
+                    return symbol->node;
+                }
             }
             
-            break;
+            logger_log(LOG_WARNING, "Symbol '%s' not found in module '%s'", 
+                       symbolName, moduleName);
+            return NULL;
         }
     }
     
-    logger_log(LOG_WARNING, "Qualified symbol '%s.%s' not found in module '%s'", 
+    logger_log(LOG_WARNING, "Qualified symbol '%s.%s' not found in module '%s', module not imported", 
                moduleName, symbolName, module->name);
     return NULL;
 }
@@ -647,9 +955,9 @@ AstNode* module_resolve_qualified_symbol(Module* module, const char* moduleName,
  * @param module The module to add the export to
  * @param name Name of the exported symbol
  * @param node AST node for the exported symbol
- * @param isPublic Whether the export is public
+ * @param visibility Visibility level of the export
  */
-void module_add_export(Module* module, const char* name, AstNode* node, bool isPublic) {
+void module_add_export(Module* module, const char* name, AstNode* node, ExportVisibility visibility) {
     error_push_debug(__func__, __FILE__, __LINE__, (void*)module_add_export);
     
     if (!module) {
@@ -676,7 +984,7 @@ void module_add_export(Module* module, const char* name, AstNode* node, bool isP
             logger_log(LOG_WARNING, "Symbol '%s' already exported in module '%s', overwriting", 
                      name, module->name);
             module->exports[i].node = node;
-            module->exports[i].isPublic = isPublic;
+            module->exports[i].visibility = visibility;
             return;
         }
     }
@@ -697,10 +1005,78 @@ void module_add_export(Module* module, const char* name, AstNode* node, bool isP
     strncpy(newSymbol->name, name, sizeof(newSymbol->name) - 1);
     newSymbol->node = node;
     newSymbol->type = NULL;  // Can be inferred/assigned later
-    newSymbol->isPublic = isPublic;
+    newSymbol->visibility = visibility;
     
-    logger_log(LOG_DEBUG, "Symbol '%s' %sexported in module '%s'", 
-              name, isPublic ? "" : "(private) ", module->name);
+    const char* visibilityStr;
+    switch (visibility) {
+        case EXPORT_PUBLIC: visibilityStr = "public"; break;
+        case EXPORT_INTERNAL: visibilityStr = "internal"; break;
+        case EXPORT_PRIVATE: visibilityStr = "private"; break;
+        default: visibilityStr = "unknown"; break;
+    }
+    
+    logger_log(LOG_DEBUG, "Symbol '%s' exported in module '%s' with visibility '%s'", 
+              name, module->name, visibilityStr);
+}
+
+/**
+ * @brief Sets the version of a module
+ * 
+ * @param module The module to set the version for
+ * @param major Major version number
+ * @param minor Minor version number
+ * @param patch Patch version number
+ */
+void module_set_version(Module* module, int major, int minor, int patch) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)module_set_version);
+    
+    if (!module) {
+        logger_log(LOG_ERROR, "Attempted to set version for NULL module");
+        error_report("Module", __LINE__, 0, "NULL module in set_version", ERROR_UNDEFINED);
+        return;
+    }
+    
+    module->version.major = major;
+    module->version.minor = minor;
+    module->version.patch = patch;
+    
+    logger_log(LOG_INFO, "Set version of module '%s' to %d.%d.%d", 
+              module->name, major, minor, patch);
+}
+
+/**
+ * @brief Sets metadata for a module
+ * 
+ * @param module The module to set metadata for
+ * @param author Author name
+ * @param description Module description
+ * @param license License information
+ */
+void module_set_metadata(Module* module, const char* author, const char* description, const char* license) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)module_set_metadata);
+    
+    if (!module) {
+        logger_log(LOG_ERROR, "Attempted to set metadata for NULL module");
+        error_report("Module", __LINE__, 0, "NULL module in set_metadata", ERROR_UNDEFINED);
+        return;
+    }
+    
+    if (author) {
+        strncpy(module->metadata.author, author, sizeof(module->metadata.author) - 1);
+    }
+    
+    if (description) {
+        strncpy(module->metadata.description, description, sizeof(module->metadata.description) - 1);
+    }
+    
+    if (license) {
+        strncpy(module->metadata.license, license, sizeof(module->metadata.license) - 1);
+    }
+    
+    // Copy the version from the module to the metadata
+    module->metadata.version = module->version;
+    
+    logger_log(LOG_INFO, "Updated metadata for module '%s'", module->name);
 }
 
 /**
@@ -718,17 +1094,41 @@ void module_print_info(Module* module) {
     
     logger_log(LOG_INFO, "=== Module: %s ===", module->name);
     logger_log(LOG_INFO, "Path: %s", module->path);
-    logger_log(LOG_INFO, "Status: %s", 
-              module->isLoaded ? "Loaded" : (module->isLoading ? "Loading" : "Unloaded"));
+    logger_log(LOG_INFO, "Version: %d.%d.%d", 
+              module->version.major, module->version.minor, module->version.patch);
+    logger_log(LOG_INFO, "Status: %s%s", 
+              module->isLoaded ? "Loaded" : (module->isLoading ? "Loading" : "Unloaded"),
+              module->isCached ? " (Cached)" : "");
     logger_log(LOG_INFO, "Exports: %d", module->exportCount);
     logger_log(LOG_INFO, "Imports: %d", module->importCount);
     logger_log(LOG_INFO, "Dependencies: %d", module->dependencyCount);
+
+    if (module->metadata.author[0] || module->metadata.description[0] || module->metadata.license[0]) {
+        logger_log(LOG_INFO, "Metadata:");
+        if (module->metadata.author[0]) {
+            logger_log(LOG_INFO, "  Author: %s", module->metadata.author);
+        }
+        if (module->metadata.description[0]) {
+            logger_log(LOG_INFO, "  Description: %s", module->metadata.description);
+        }
+        if (module->metadata.license[0]) {
+            logger_log(LOG_INFO, "  License: %s", module->metadata.license);
+        }
+    }
 
     if (debug_level >= 2) {
         // Log detailed export information
         logger_log(LOG_DEBUG, "Exports:");
         for (int i = 0; i < module->exportCount; i++) {
             const char* symbolType = "unknown";
+            const char* visibilityStr;
+            
+            switch (module->exports[i].visibility) {
+                case EXPORT_PUBLIC: visibilityStr = "public"; break;
+                case EXPORT_INTERNAL: visibilityStr = "internal"; break;
+                case EXPORT_PRIVATE: visibilityStr = "private"; break;
+                default: visibilityStr = "unknown"; break;
+            }
             
             if (module->exports[i].node) {
                 switch (module->exports[i].node->type) {
@@ -739,20 +1139,38 @@ void module_print_info(Module* module) {
                 }
             }
             
-            logger_log(LOG_DEBUG, "  - %s (%s)%s", 
+            logger_log(LOG_DEBUG, "  - %s (%s) [%s]", 
                       module->exports[i].name, 
                       symbolType,
-                      module->exports[i].isPublic ? "" : " [private]");
+                      visibilityStr);
         }
         
         // Log detailed import information
         logger_log(LOG_DEBUG, "Imports:");
         for (int i = 0; i < module->importCount; i++) {
-            logger_log(LOG_DEBUG, "  - %s%s%s%s", 
+            const char* modeStr;
+            switch (module->imports[i].mode) {
+                case IMPORT_ALL: modeStr = "all"; break;
+                case IMPORT_SELECTIVE: modeStr = "selective"; break;
+                case IMPORT_QUALIFIED: modeStr = "qualified"; break;
+                default: modeStr = "unknown"; break;
+            }
+            
+            logger_log(LOG_DEBUG, "  - %s%s%s (mode: %s)", 
                       module->imports[i].name,
                       module->imports[i].alias[0] ? " as " : "",
                       module->imports[i].alias[0] ? module->imports[i].alias : "",
-                      module->imports[i].isQualified ? " (qualified)" : "");
+                      modeStr);
+                      
+            // Log selective imports if any
+            if (module->imports[i].mode == IMPORT_SELECTIVE && module->imports[i].symbolCount > 0) {
+                for (int j = 0; j < module->imports[i].symbolCount; j++) {
+                    logger_log(LOG_DEBUG, "    - %s%s%s", 
+                              module->imports[i].symbols[j].name,
+                              strcmp(module->imports[i].symbols[j].name, module->imports[i].symbols[j].alias) != 0 ? " as " : "",
+                              strcmp(module->imports[i].symbols[j].name, module->imports[i].symbols[j].alias) != 0 ? module->imports[i].symbols[j].alias : "");
+                }
+            }
         }
         
         // Log dependencies
@@ -765,15 +1183,39 @@ void module_print_info(Module* module) {
     // For console output in addition to logs
     printf("=== Module: %s ===\n", module->name);
     printf("Path: %s\n", module->path);
-    printf("Status: %s\n", 
-          module->isLoaded ? "Loaded" : (module->isLoading ? "Loading" : "Unloaded"));
+    printf("Version: %d.%d.%d\n", 
+          module->version.major, module->version.minor, module->version.patch);
+    printf("Status: %s%s\n", 
+          module->isLoaded ? "Loaded" : (module->isLoading ? "Loading" : "Unloaded"),
+          module->isCached ? " (Cached)" : "");
     printf("Exports: %d\n", module->exportCount);
     printf("Imports: %d\n", module->importCount);
     printf("Dependencies: %d\n", module->dependencyCount);
     
+    if (module->metadata.author[0] || module->metadata.description[0] || module->metadata.license[0]) {
+        printf("\nMetadata:\n");
+        if (module->metadata.author[0]) {
+            printf("  Author: %s\n", module->metadata.author);
+        }
+        if (module->metadata.description[0]) {
+            printf("  Description: %s\n", module->metadata.description);
+        }
+        if (module->metadata.license[0]) {
+            printf("  License: %s\n", module->metadata.license);
+        }
+    }
+    
     printf("\nExports:\n");
     for (int i = 0; i < module->exportCount; i++) {
         const char* symbolType = "unknown";
+        const char* visibilityStr;
+        
+        switch (module->exports[i].visibility) {
+            case EXPORT_PUBLIC: visibilityStr = "public"; break;
+            case EXPORT_INTERNAL: visibilityStr = "internal"; break;
+            case EXPORT_PRIVATE: visibilityStr = "private"; break;
+            default: visibilityStr = "unknown"; break;
+        }
         
         if (module->exports[i].node) {
             switch (module->exports[i].node->type) {
@@ -784,19 +1226,37 @@ void module_print_info(Module* module) {
             }
         }
         
-        printf("  - %s (%s)%s\n", 
+        printf("  - %s (%s) [%s]\n", 
               module->exports[i].name, 
               symbolType,
-              module->exports[i].isPublic ? "" : " [private]");
+              visibilityStr);
     }
     
     printf("\nImports:\n");
     for (int i = 0; i < module->importCount; i++) {
-        printf("  - %s%s%s%s\n", 
+        const char* modeStr;
+        switch (module->imports[i].mode) {
+            case IMPORT_ALL: modeStr = "all"; break;
+            case IMPORT_SELECTIVE: modeStr = "selective"; break;
+            case IMPORT_QUALIFIED: modeStr = "qualified"; break;
+            default: modeStr = "unknown"; break;
+        }
+        
+        printf("  - %s%s%s (mode: %s)\n", 
               module->imports[i].name,
               module->imports[i].alias[0] ? " as " : "",
               module->imports[i].alias[0] ? module->imports[i].alias : "",
-              module->imports[i].isQualified ? " (qualified)" : "");
+              modeStr);
+              
+        // Print selective imports if any
+        if (module->imports[i].mode == IMPORT_SELECTIVE && module->imports[i].symbolCount > 0) {
+            for (int j = 0; j < module->imports[i].symbolCount; j++) {
+                printf("    - %s%s%s\n", 
+                      module->imports[i].symbols[j].name,
+                      strcmp(module->imports[i].symbols[j].name, module->imports[i].symbols[j].alias) != 0 ? " as " : "",
+                      strcmp(module->imports[i].symbols[j].name, module->imports[i].symbols[j].alias) != 0 ? module->imports[i].symbols[j].alias : "");
+            }
+        }
     }
     
     printf("\nDependencies:\n");
@@ -832,4 +1292,20 @@ const char* module_get_name(Module* module) {
     }
     
     return module->name;
+}
+
+/**
+ * @brief Imports a module with an optional alias (backward compatibility)
+ * 
+ * @param target The module to import into
+ * @param moduleName Name of the module to import
+ * @param alias Optional alias for the imported module
+ * @param isQualified Whether this is a qualified import
+ * @return bool true if import was successful
+ */
+bool module_import_with_alias(Module* target, const char* moduleName, const char* alias, bool isQualified) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)module_import_with_alias);
+    
+    ImportMode mode = isQualified ? IMPORT_QUALIFIED : IMPORT_ALL;
+    return module_import_with_options(target, moduleName, alias, mode);
 }

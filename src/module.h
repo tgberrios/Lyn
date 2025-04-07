@@ -17,50 +17,108 @@
 #include "logger.h"
 #include "types.h"  // Added for access to the Type structure
 #include <stdbool.h>
+#include <time.h>
+
+/**
+ * @brief Visibility level for exported symbols
+ */
+typedef enum ExportVisibility {
+    EXPORT_PRIVATE,    ///< Symbol is only visible within the module
+    EXPORT_INTERNAL,   ///< Symbol is visible to modules in the same package
+    EXPORT_PUBLIC      ///< Symbol is visible to all modules
+} ExportVisibility;
+
+/**
+ * @brief Import mode for module imports
+ */
+typedef enum ImportMode {
+    IMPORT_ALL,        ///< Import the entire module
+    IMPORT_SELECTIVE,  ///< Import only specified symbols
+    IMPORT_QUALIFIED   ///< Import with namespace qualification
+} ImportMode;
 
 /**
  * @brief Structure representing an exported symbol
  */
 typedef struct ExportedSymbol {
-    char name[256];         ///< Name of the exported symbol
-    AstNode* node;          ///< Corresponding AST node
-    Type* type;             ///< Type of the symbol (optional)
-    bool isPublic;          ///< Whether the symbol is public or internal
+    char name[256];             ///< Name of the exported symbol
+    AstNode* node;              ///< Corresponding AST node
+    Type* type;                 ///< Type of the symbol (optional)
+    ExportVisibility visibility; ///< Visibility level of the symbol
 } ExportedSymbol;
+
+/**
+ * @brief Structure representing a selectively imported symbol
+ */
+typedef struct ImportedSymbol {
+    char name[256];             ///< Original name of the imported symbol
+    char alias[256];            ///< Alias for the symbol (if any)
+    ExportedSymbol* symbol;     ///< Pointer to the actual exported symbol
+} ImportedSymbol;
 
 /**
  * @brief Structure representing an imported module
  */
 typedef struct ImportedModule {
-    char name[256];         ///< Name of the imported module
-    char alias[256];        ///< Alias used (can be empty)
-    bool isQualified;       ///< Whether the import is qualified (requires namespace)
-    struct Module* module;  ///< Pointer to the imported module
+    char name[256];              ///< Name of the imported module
+    char alias[256];             ///< Alias used (can be empty)
+    ImportMode mode;             ///< Import mode
+    struct Module* module;       ///< Pointer to the imported module
+    ImportedSymbol* symbols;     ///< Array of selectively imported symbols
+    int symbolCount;             ///< Number of selectively imported symbols
 } ImportedModule;
+
+/**
+ * @brief Structure for module version information
+ */
+typedef struct ModuleVersion {
+    int major;                  ///< Major version number
+    int minor;                  ///< Minor version number
+    int patch;                  ///< Patch version number
+} ModuleVersion;
+
+/**
+ * @brief Module metadata structure
+ */
+typedef struct ModuleMetadata {
+    char author[256];           ///< Author name
+    char description[1024];     ///< Module description
+    ModuleVersion version;      ///< Module version
+    char license[256];          ///< License information
+} ModuleMetadata;
 
 /**
  * @brief Structure representing a module
  */
 typedef struct Module {
-    char name[256];         ///< Name of the module
-    char path[1024];        ///< Path to the module file
+    char name[256];             ///< Name of the module
+    char path[1024];            ///< Path to the module file
     
     // Namespace and exports system
-    ExportedSymbol* exports; ///< Exported symbols
-    int exportCount;        ///< Number of exported symbols
+    ExportedSymbol* exports;    ///< Exported symbols
+    int exportCount;            ///< Number of exported symbols
     
     // Imports system
-    ImportedModule* imports; ///< Imported modules
-    int importCount;        ///< Number of imported modules
+    ImportedModule* imports;    ///< Imported modules
+    int importCount;            ///< Number of imported modules
     
     // Dependencies
-    char** dependencies;    ///< List of dependent module names
-    int dependencyCount;    ///< Number of dependencies
+    char** dependencies;        ///< List of dependent module names
+    int dependencyCount;        ///< Number of dependencies
     
-    bool isLoaded;          ///< Whether the module has been fully loaded
-    bool isLoading;         ///< Used for circular dependency detection
+    // Module state
+    bool isLoaded;              ///< Whether the module has been fully loaded
+    bool isLoading;             ///< Used for circular dependency detection
     
-    AstNode* ast;           ///< AST of the module
+    // Cache information
+    time_t lastModified;        ///< Last modification time of the source file
+    bool isCached;              ///< Whether the module is cached
+    
+    // Versioning
+    ModuleVersion version;      ///< Module version
+    ModuleMetadata metadata;    ///< Module metadata
+    
+    AstNode* ast;               ///< AST of the module
 } Module;
 
 /**
@@ -96,6 +154,23 @@ int module_get_debug_level(void);
 Module* module_load(const char* name);
 
 /**
+ * @brief Loads a module with caching
+ * 
+ * @param name Name of the module to load
+ * @param forceFresh Whether to force a fresh load ignoring cache
+ * @return Module* Pointer to the loaded module, or NULL if loading failed
+ */
+Module* module_load_cached(const char* name, bool forceFresh);
+
+/**
+ * @brief Reloads a module if its source file has changed
+ * 
+ * @param module The module to check and potentially reload
+ * @return bool true if the module was reloaded
+ */
+bool module_hot_reload(Module* module);
+
+/**
  * @brief Imports a module into another module
  * 
  * @param target The module to import into
@@ -110,10 +185,23 @@ bool module_import(Module* target, const char* moduleName);
  * @param target The module to import into
  * @param moduleName Name of the module to import
  * @param alias Optional alias for the imported module
- * @param isQualified Whether this is a qualified import
+ * @param mode Import mode (all, selective, qualified)
  * @return bool true if import was successful
  */
-bool module_import_with_alias(Module* target, const char* moduleName, const char* alias, bool isQualified);
+bool module_import_with_options(Module* target, const char* moduleName, const char* alias, ImportMode mode);
+
+/**
+ * @brief Selectively imports symbols from a module
+ * 
+ * @param target The module to import into
+ * @param moduleName Name of the module to import from
+ * @param symbolNames Array of symbol names to import
+ * @param aliases Array of aliases for the symbols (can be NULL)
+ * @param count Number of symbols to import
+ * @return bool true if import was successful
+ */
+bool module_import_symbols(Module* target, const char* moduleName, 
+                          const char** symbolNames, const char** aliases, int count);
 
 /**
  * @brief Resolves a symbol name in a module
@@ -140,9 +228,29 @@ AstNode* module_resolve_qualified_symbol(Module* module, const char* moduleName,
  * @param module The module to add the export to
  * @param name Name of the exported symbol
  * @param node AST node for the exported symbol
- * @param isPublic Whether the export is public
+ * @param visibility Visibility level of the export
  */
-void module_add_export(Module* module, const char* name, AstNode* node, bool isPublic);
+void module_add_export(Module* module, const char* name, AstNode* node, ExportVisibility visibility);
+
+/**
+ * @brief Sets the version of a module
+ * 
+ * @param module The module to set the version for
+ * @param major Major version number
+ * @param minor Minor version number
+ * @param patch Patch version number
+ */
+void module_set_version(Module* module, int major, int minor, int patch);
+
+/**
+ * @brief Sets metadata for a module
+ * 
+ * @param module The module to set metadata for
+ * @param author Author name
+ * @param description Module description
+ * @param license License information
+ */
+void module_set_metadata(Module* module, const char* author, const char* description, const char* license);
 
 /**
  * @brief Prints detailed information about a module

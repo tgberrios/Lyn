@@ -1,0 +1,35 @@
+// Module Test - Basic functionality demonstration
+// Version: 1.0.0
+// Author: Claude
+
+// Programa principal que utiliza funciones básicas
+main
+    // Importamos el módulo de matemáticas
+    import math_lib
+
+    // Operaciones básicas sin módulos
+    print("=== Module System Test ===")
+    
+    // Variables y operaciones
+    a = 5
+    b = 3
+    result = a + b
+    print("5 + 3 = " + result)
+    
+    // Control de flujo básico
+    if a > b
+        print("a is greater than b")
+    else
+        print("a is not greater than b")
+    end
+    
+    // Bucle simple
+    count = 1
+    print("Counting to 5:")
+    while count <= 5
+        print(count)
+        count = count + 1
+    end
+    
+    print("=== Test completed! ===")
+end

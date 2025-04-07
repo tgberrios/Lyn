@@ -1,0 +1,106 @@
+// String Utilities - Advanced module system demo
+// Version: 1.0.0
+// Author: Claude
+// License: MIT
+
+// Import math library for use in metrics calculation
+import { MAX_CALCULATION_SIZE } from math_lib
+import math_lib as math
+
+// Export constant from math_lib
+MAX_STRING_LENGTH = MAX_CALCULATION_SIZE
+
+// Private helper function
+private func _isValidString(str)
+    return typeof(str) == "string" and str.length > 0
+end
+
+// Public functions
+func reverse(str)
+    if !_isValidString(str)
+        return "Error: Invalid input, expected non-empty string"
+    end
+    
+    result = ""
+    i = str.length - 1
+    while i >= 0
+        result = result + str[i]
+        i = i - 1
+    end
+    
+    return result
+end
+
+func repeat(str, n)
+    if !_isValidString(str)
+        return "Error: Invalid input, expected non-empty string"
+    end
+    
+    if !typeof(n) == "number" or n <= 0
+        return ""
+    end
+    
+    result = ""
+    i = 0
+    while i < n
+        result = result + str
+        i = i + 1
+    end
+    
+    return result
+end
+
+func capitalize(str)
+    if !_isValidString(str)
+        return "Error: Invalid input, expected non-empty string"
+    end
+    
+    if str.length == 1
+        return str.toUpperCase()
+    end
+    
+    return str[0].toUpperCase() + str.substring(1).toLowerCase()
+end
+
+func getMetrics(str)
+    if !_isValidString(str)
+        return "Error: Invalid input, expected non-empty string"
+    end
+    
+    // Calculate if string has numbers
+    hasNumbers = false
+    i = 0
+    while i < str.length
+        code = str.charCodeAt(i)
+        if code >= 48 and code <= 57
+            hasNumbers = true
+            break
+        end
+        i = i + 1
+    end
+    
+    // Calculate if string has special characters
+    hasSpecialChars = false
+    i = 0
+    while i < str.length
+        code = str.charCodeAt(i)
+        if (code >= 33 and code <= 47) or
+           (code >= 58 and code <= 64) or
+           (code >= 91 and code <= 96) or
+           (code >= 123 and code <= 126)
+            hasSpecialChars = true
+            break
+        end
+        i = i + 1
+    end
+    
+    // Calculate string complexity using math_lib
+    complexity = math.calculateComplex(str.length, hasNumbers ? 2 : 1, hasSpecialChars ? 3 : 1)
+    
+    return {
+        length: str.length,
+        hasNumbers: hasNumbers,
+        hasSpecialChars: hasSpecialChars,
+        complexity: complexity
+    }
+end 

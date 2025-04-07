@@ -1,0 +1,95 @@
+// Math Library Module
+// Version: 1.0.0
+// Author: Claude
+// License: MIT
+
+// Public function: Addition
+func add(a, b)
+    return a + b
+end
+
+// Public function: Subtraction
+func subtract(a, b)
+    return a - b
+end
+
+// Public function: Multiplication
+func multiply(a, b)
+    return a * b
+end
+
+// Public function: Division
+func divide(a, b)
+    if b == 0
+        error("Division by zero")
+    end
+    return a / b
+end
+
+// Internal function: Power (accessible within package)
+@internal
+func power(base, exponent)
+    result = 1
+    for i = 0 to exponent - 1
+        result = result * base
+    end
+    return result
+end
+
+// Private function: only accessible within this module
+@private
+func _validateNumber(n)
+    if typeof(n) != "number"
+        return false
+    end
+    return true
+end
+
+// Public function: Factorial
+func factorial(n)
+    if !_validateNumber(n) || n < 0
+        error("Invalid input: factorial requires non-negative number")
+    end
+    
+    if n == 0 || n == 1
+        return 1
+    end
+    
+    result = 1
+    for i = 2 to n
+        result = result * i
+    end
+    return result
+end
+
+// Public math constants class
+class MathConstants
+    PI = 3.14159265359
+    E = 2.71828182846
+    GOLDEN_RATIO = 1.61803398875
+    
+    func describe()
+        return "Mathematical constants for scientific calculations"
+    end
+end
+
+// Export a variable
+var MAX_CALCULATION_SIZE = 1000
+
+// Advanced utility function that uses private functions internally
+func calculateComplex(x, y, z)
+    if !_validateNumber(x) || !_validateNumber(y) || !_validateNumber(z)
+        error("Invalid input: all parameters must be numbers")
+    end
+    
+    // Using internal power function
+    powered = power(x, 2)
+    return powered + (y * z)
+end
+
+// Export constant object with predefined values
+var SPECIAL_VALUES = {
+    phi: 1.61803398875,
+    tau: 6.28318530718,
+    sqrt2: 1.41421356237
+} 
