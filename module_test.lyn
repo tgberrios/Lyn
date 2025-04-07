@@ -2,19 +2,27 @@
 // Version: 1.0.0
 // Author: Claude
 
-// Programa principal que utiliza funciones básicas
+// Programa principal que demuestra el uso básico de módulos
 main
     // Importamos el módulo de matemáticas
     import math_lib
-
-    // Operaciones básicas sin módulos
+    
     print("=== Module System Test ===")
     
-    // Variables y operaciones
+    // Operaciones básicas sin usar funciones importadas
     a = 5
     b = 3
     result = a + b
     print("5 + 3 = " + result)
+    
+    // Intentamos usar notación de punto para acceder a funciones del módulo
+    // Si el compilador está bien implementado, esto debería funcionar
+    result_add = math_lib.add(a, b)
+    print("math_lib.add(5, 3) = " + result_add)
+    
+    // Operaciones avanzadas
+    c = result * 2
+    print("(5 + 3) * 2 = " + c)
     
     // Control de flujo básico
     if a > b

@@ -1,106 +1,69 @@
-// String Utilities - Advanced module system demo
+// String Utils Module - Utilities for string manipulation
 // Version: 1.0.0
 // Author: Claude
 // License: MIT
 
-// Import math library for use in metrics calculation
-import { MAX_CALCULATION_SIZE } from math_lib
-import math_lib as math
-
-// Export constant from math_lib
-MAX_STRING_LENGTH = MAX_CALCULATION_SIZE
-
-// Private helper function
-private func _isValidString(str)
-    return typeof(str) == "string" and str.length > 0
-end
-
-// Public functions
-func reverse(str)
-    if !_isValidString(str)
-        return "Error: Invalid input, expected non-empty string"
-    end
+// Función para dar formato a cadenas de texto con placeholders
+func format(template, ...) 
+    result = template
     
-    result = ""
-    i = str.length - 1
-    while i >= 0
-        result = result + str[i]
-        i = i - 1
+    // Este es un ejemplo simplificado - en la implementación real se procesarían 
+    // los argumentos variables y se reemplazarían los placeholders
+    for i = 0 to args.length - 1
+        placeholder = "{" + i + "}"
+        result = replace(result, placeholder, args[i])
     end
     
     return result
 end
 
-func repeat(str, n)
-    if !_isValidString(str)
-        return "Error: Invalid input, expected non-empty string"
-    end
-    
-    if !typeof(n) == "number" or n <= 0
-        return ""
-    end
-    
-    result = ""
-    i = 0
-    while i < n
-        result = result + str
-        i = i + 1
-    end
-    
-    return result
+// Función para reemplazar texto en cadenas
+func replace(source, search, replacement)
+    // Implementación simplificada
+    return source.replace(search, replacement)
 end
 
-func capitalize(str)
-    if !_isValidString(str)
-        return "Error: Invalid input, expected non-empty string"
-    end
-    
-    if str.length == 1
-        return str.toUpperCase()
-    end
-    
-    return str[0].toUpperCase() + str.substring(1).toLowerCase()
+// Función para convertir a mayúsculas
+func toUpper(str)
+    return str.toUpperCase()
 end
 
-func getMetrics(str)
-    if !_isValidString(str)
-        return "Error: Invalid input, expected non-empty string"
+// Función para convertir a minúsculas
+func toLower(str)
+    return str.toLowerCase()
+end
+
+// Función para obtener la longitud
+func length(str)
+    return str.length
+end
+
+// Clase para manipulación avanzada de cadenas
+class StringUtils
+    // Constructor
+    func StringUtils()
+        // Inicialización
     end
     
-    // Calculate if string has numbers
-    hasNumbers = false
-    i = 0
-    while i < str.length
-        code = str.charCodeAt(i)
-        if code >= 48 and code <= 57
-            hasNumbers = true
-            break
+    // Métodos estáticos
+    static func join(strings, separator)
+        result = ""
+        for i = 0 to strings.length - 1
+            if i > 0
+                result = result + separator
+            end
+            result = result + strings[i]
         end
-        i = i + 1
+        return result
     end
     
-    // Calculate if string has special characters
-    hasSpecialChars = false
-    i = 0
-    while i < str.length
-        code = str.charCodeAt(i)
-        if (code >= 33 and code <= 47) or
-           (code >= 58 and code <= 64) or
-           (code >= 91 and code <= 96) or
-           (code >= 123 and code <= 126)
-            hasSpecialChars = true
-            break
-        end
-        i = i + 1
+    static func split(str, separator)
+        // Implementación simplificada
+        return str.split(separator)
     end
-    
-    // Calculate string complexity using math_lib
-    complexity = math.calculateComplex(str.length, hasNumbers ? 2 : 1, hasSpecialChars ? 3 : 1)
-    
-    return {
-        length: str.length,
-        hasNumbers: hasNumbers,
-        hasSpecialChars: hasSpecialChars,
-        complexity: complexity
-    }
-end 
+end
+
+// Exportamos constantes útiles
+var EMPTY_STRING = ""
+var SPACE = " "
+var NEW_LINE = "\n" 

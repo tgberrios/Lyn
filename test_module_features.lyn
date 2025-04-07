@@ -1,0 +1,67 @@
+// Test completo del sistema de módulos
+// Autor: Claude
+// Versión: 1.0.0
+
+main
+    print("=== Test Completo del Sistema de Módulos de Lyn ===")
+    
+    // 1. Importación básica
+    print("\n1. Importación básica:")
+    import math_lib
+    
+    a = 10
+    b = 5
+    
+    // Usando notación de punto
+    result = math_lib.add(a, b)
+    print("math_lib.add(10, 5) = " + result)
+    
+    // 2. Importación con alias
+    print("\n2. Importación con alias:")
+    import math_lib as m
+    
+    result = m.multiply(a, b)
+    print("m.multiply(10, 5) = " + result)
+    
+    // 3. Importación selectiva
+    print("\n3. Importación selectiva:")
+    import from math_lib {subtract, divide}
+    
+    result_sub = subtract(a, b)
+    result_div = divide(a, b)
+    print("subtract(10, 5) = " + result_sub)
+    print("divide(10, 5) = " + result_div)
+    
+    // 4. Importación selectiva con alias
+    print("\n4. Importación selectiva con alias:")
+    import from math_lib {add as suma, multiply as producto}
+    
+    result_suma = suma(a, b)
+    result_producto = producto(a, b)
+    print("suma(10, 5) = " + result_suma)
+    print("producto(10, 5) = " + result_producto)
+    
+    // 5. Importar módulo dinámico (si disponible)
+    print("\n5. Importación de módulo dinámico:")
+    import example_module
+    
+    // Intentar usar funciones del módulo dinámico
+    c = 3
+    try
+        power_result = example_module.power(a, c)
+        print("example_module.power(10, 3) = " + power_result)
+    catch
+        print("Módulo dinámico no disponible o función no encontrada")
+    end
+    
+    result_add = example_module.add(a, b)
+    print("example_module.add(10, 5) = " + result_add)
+    
+    // 6. Prueba de jerarquía de módulos (notación de puntos anidada)
+    print("\n6. Prueba de acceso a submódulos:")
+    
+    // Simular acceso a submódulo (no implementado completamente)
+    // util.string.format("Hola", "mundo")
+    
+    print("\n=== Prueba completa del sistema de módulos ===")
+end 

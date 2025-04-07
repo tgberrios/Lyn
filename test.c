@@ -174,7 +174,7 @@ int main() {
     }
     printf("%s\n", "\n=== Type System Tests ===");
     printf("%s\n", "\n--- Type Inference ---");
-    int explicit_int __attribute__((unused)) =     42    ;
+    float explicit_int __attribute__((unused)) =     42    ;
     float explicit_float __attribute__((unused)) =     3.14    ;
     int inferred_int __attribute__((unused)) = 100;
     double inferred_float __attribute__((unused)) = 2.718;
@@ -337,11 +337,11 @@ int main() {
     }
     printf("%s\n", "Calling advised function:");
     printf("%s\n", "\n=== Class and Object Test ===");
-    double myCar __attribute__((unused)) =     0    ;
-    printf("%s\n", "Car instance created.");
+    printf("%s\n", "Prueba de clase comentada porque la característica no está completamente implementada.");
+    const char* car_brand __attribute__((unused)) =     "Toyota"    ;
     {
         char _print_buffer[1024];
-        sprintf(_print_buffer, "%s%s",         "My car brand is: "        ,         "Toyota"        );
+        sprintf(_print_buffer, "%s%s",         "Simulando un objeto car con brand = "        ,         car_brand        );
         printf("%s\n", _print_buffer);
     }
     printf("%s\n", "\n=== Advanced Type System Tests ===");

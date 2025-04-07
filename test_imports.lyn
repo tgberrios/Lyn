@@ -1,0 +1,40 @@
+// Test de Importaciones - Prueba todas las formas de importación
+// Autor: Claude
+
+main
+    print("=== Test de Sistema de Importaciones ===")
+    
+    // 1. Importación básica
+    import math_lib
+    
+    a = 10
+    b = 5
+    
+    // Usando la notación de punto
+    result_add = math_lib.add(a, b)
+    print("1. Import básico: math_lib.add(10, 5) = " + result_add)
+    
+    // 2. Importación con alias
+    import math_lib as m
+    
+    result_mul = m.multiply(a, b)
+    print("2. Import con alias: m.multiply(10, 5) = " + result_mul)
+    
+    // 3. Importación selectiva
+    import from math_lib {subtract, divide}
+    
+    result_sub = subtract(a, b)
+    result_div = divide(a, b)
+    print("3. Import selectivo: subtract(10, 5) = " + result_sub)
+    print("   Import selectivo: divide(10, 5) = " + result_div)
+    
+    // 4. Importación selectiva con alias
+    import from math_lib {add as suma, multiply as producto}
+    
+    result_suma = suma(a, b)
+    result_producto = producto(a, b)
+    print("4. Import selectivo con alias: suma(10, 5) = " + result_suma)
+    print("   Import selectivo con alias: producto(10, 5) = " + result_producto)
+    
+    print("=== Test completado con éxito ===")
+end 

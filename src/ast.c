@@ -345,6 +345,17 @@ void freeAstNode(AstNode* node) {
             }
             break;
         case AST_IMPORT:
+            // Liberar memoria para importaciones selectivas
+            if (node->importStmt.hasSymbolList) {
+                for (int i = 0; i < node->importStmt.symbolCount; i++) {
+                    if (node->importStmt.symbols && node->importStmt.symbols[i])
+                        memory_free((void*)node->importStmt.symbols[i]);
+                    if (node->importStmt.aliases && node->importStmt.aliases[i])
+                        memory_free((void*)node->importStmt.aliases[i]);
+                }
+                memory_free((void*)node->importStmt.symbols);
+                memory_free((void*)node->importStmt.aliases);
+            }
             break;
         case AST_DO_WHILE_STMT:
             freeAstNode(node->doWhileStmt.condition);

@@ -1,34 +1,42 @@
-// Math Library Module
-// Version: 1.0.0
-// Author: Claude
-// License: MIT
+// math_lib.lyn - Basic Math Library
+// This module provides basic mathematical operations
 
-// Public function: Addition
-func add(a, b)
+main
+    // Este es un módulo que se utilizará para ser importado
+    // No necesita hacer nada en la sección principal
+    print("Math library initialized")
+end
+
+// Basic arithmetic operations
+function add(a, b)
     return a + b
 end
 
-// Public function: Subtraction
-func subtract(a, b)
+function subtract(a, b)
     return a - b
 end
 
-// Public function: Multiplication
-func multiply(a, b)
+function multiply(a, b)
     return a * b
 end
 
-// Public function: Division
-func divide(a, b)
+function divide(a, b)
     if b == 0
-        error("Division by zero")
+        print("Error: Division by zero")
+        return 0
     end
     return a / b
 end
 
+// Formatting function (simple implementation)
+function format(template, arg)
+    // Very simple implementation
+    return template + " " + arg
+end
+
 // Internal function: Power (accessible within package)
 @internal
-func power(base, exponent)
+function power(base, exponent)
     result = 1
     for i = 0 to exponent - 1
         result = result * base
@@ -38,7 +46,7 @@ end
 
 // Private function: only accessible within this module
 @private
-func _validateNumber(n)
+function _validateNumber(n)
     if typeof(n) != "number"
         return false
     end
@@ -46,7 +54,7 @@ func _validateNumber(n)
 end
 
 // Public function: Factorial
-func factorial(n)
+function factorial(n)
     if !_validateNumber(n) || n < 0
         error("Invalid input: factorial requires non-negative number")
     end
@@ -68,7 +76,7 @@ class MathConstants
     E = 2.71828182846
     GOLDEN_RATIO = 1.61803398875
     
-    func describe()
+    function describe()
         return "Mathematical constants for scientific calculations"
     end
 end
@@ -77,7 +85,7 @@ end
 var MAX_CALCULATION_SIZE = 1000
 
 // Advanced utility function that uses private functions internally
-func calculateComplex(x, y, z)
+function calculateComplex(x, y, z)
     if !_validateNumber(x) || !_validateNumber(y) || !_validateNumber(z)
         error("Invalid input: all parameters must be numbers")
     end

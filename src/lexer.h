@@ -45,6 +45,8 @@ typedef enum {
     TOKEN_IN,              ///< In operator keyword
     TOKEN_END,             ///< End block keyword
     TOKEN_IMPORT,          ///< Import statement keyword
+    TOKEN_FROM,            ///< 'from' keyword in import statement
+    TOKEN_AS,              ///< 'as' keyword in import statement
     TOKEN_UI,              ///< UI declaration keyword
     TOKEN_CSS,             ///< CSS declaration keyword
     TOKEN_REGISTER_EVENT,  ///< Event registration keyword

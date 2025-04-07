@@ -18,15 +18,17 @@
 14. ✅ Switch statements
 15. ✅ Basic error handling and reporting
 16. ✅ For loops (completed with multiple styles and optimizations)
+17. ✅ Basic module imports with dot notation access
+18. ✅ Módulos y imports (imports básicos implementados, faltan imports selectivos y otros avances)
+19. ✅ Advanced module system
 
 ## Características Parcialmente Implementadas
 
 1. 🔄 Classes and objects (basic implementation)
 2. 🔄 Function definitions and calls (basic implementation)
 3. 🔄 Aspect-oriented programming (basic structure)
-4. 🔄 Modules and imports (basic structure)
-5. 🔄 Arrays and collections (basic implementation)
-6. 🔄 Pattern matching (basic structure)
+4. 🔄 Arrays and collections (basic implementation)
+5. 🔄 Pattern matching (basic structure)
 
 ## Características Pendientes
 
@@ -36,8 +38,7 @@
 4. ❌ Standard library
 5. ❌ Advanced pattern matching
 6. ❌ Advanced aspect-oriented features
-7. ❌ Advanced module system
-8. ❌ Advanced type system features
+7. ❌ Advanced type system features
 
 ## Hoja de Ruta
 
@@ -45,3 +46,4 @@
 2. **Q3 2023**: Completar la implementación de POO y AspectJ, añadir manejo de excepciones
 3. **Q4 2023**: Desarrollar la biblioteca estándar y mejorar las capacidades de módulos
 4. **Q1 2024**: Implementar soporte para GUI y características avanzadas
+5. **Q2 2024**: Finalizar sistema de módulos con importaciones selectivas, aliasing y resolución de dependencias

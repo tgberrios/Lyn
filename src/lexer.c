@@ -94,6 +94,8 @@ static void initializeKeywords(void) {
     insertKeyword("in", TOKEN_IN);
     insertKeyword("end", TOKEN_END);
     insertKeyword("import", TOKEN_IMPORT);
+    insertKeyword("from", TOKEN_FROM);
+    insertKeyword("as", TOKEN_AS);
     insertKeyword("ui", TOKEN_UI);
     insertKeyword("css", TOKEN_CSS);
     insertKeyword("register_event", TOKEN_REGISTER_EVENT);
@@ -126,6 +128,7 @@ static void initializeKeywords(void) {
     insertKeyword("and", TOKEN_AND);
     insertKeyword("or", TOKEN_OR);
     insertKeyword("new", TOKEN_NEW);
+    insertKeyword("this", TOKEN_THIS);
     
     if (debug_level >= 2) {
         logger_log(LOG_DEBUG, "Initialized %d keywords", keyword_count);

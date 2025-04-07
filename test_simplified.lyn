@@ -1,0 +1,23 @@
+// Prueba de importación simplificada
+
+main
+    // Importación básica
+    import math_lib
+    
+    // Variables básicas
+    a = 10
+    b = 5
+    
+    // Usando notación de punto para llamar a la función add del módulo
+    result_add = math_lib.add(a, b)
+    
+    // Operación aritmética básica
+    result_mul = a * b
+    
+    // Imprimir resultados
+    print("Suma con módulo: " + result_add)
+    print("Multiplicación básica: " + result_mul)
+    
+    // Mensaje de finalización
+    print("Prueba completada")
+end 

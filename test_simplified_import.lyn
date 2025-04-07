@@ -1,0 +1,27 @@
+/**
+ * Prueba simplificada del sistema de módulos en Lyn
+ * Esta versión usa solo las características del sistema de módulos que sabemos funcionan
+ */
+
+main
+    print("=== Prueba Simplificada del Sistema de Módulos ===")
+    
+    // 1. Importación básica de un módulo 
+    import math_lib
+    
+    a = 10
+    b = 5
+    
+    // Uso de notación punto para acceder a funciones del módulo
+    result1 = math_lib.add(a, b)
+    print("math_lib.add(10, 5) = " + result1)
+    
+    result2 = math_lib.multiply(a, b)
+    print("math_lib.multiply(10, 5) = " + result2)
+    
+    // Operaciones avanzadas
+    c = result1 * result2
+    print("Resultado de operaciones concatenadas: " + c)
+    
+    print("Prueba completada con éxito!")
+end 

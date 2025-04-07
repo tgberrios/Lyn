@@ -154,8 +154,14 @@ typedef struct AstNode {
         
         // AST_IMPORT
         struct {
-            char moduleType[64];
-            char moduleName[256];
+            char moduleType[64];             // Tipo de módulo (normal, ui, css)
+            char moduleName[256];            // Nombre del módulo
+            char alias[256];                 // Alias del módulo (si existe)
+            bool hasAlias;                   // Indica si se usa un alias
+            bool hasSymbolList;              // Si es una importación con lista de símbolos
+            const char** symbols;            // Símbolos a importar
+            const char** aliases;            // Alias para los símbolos
+            int symbolCount;                 // Número de símbolos
         } importStmt;
         
         // AST_MODULE_DECL

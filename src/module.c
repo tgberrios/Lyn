@@ -18,6 +18,21 @@
 #include <string.h>
 #include <sys/stat.h>
 
+// Declaraciones para soporte de carga dinámica
+#ifdef _WIN32
+    #include <windows.h>
+    #define DYNLIB_HANDLE HMODULE
+    #define DYNLIB_LOAD(a) LoadLibrary(a)
+    #define DYNLIB_GETSYM(a, b) GetProcAddress(a, b)
+    #define DYNLIB_UNLOAD(a) FreeLibrary(a)
+#else
+    #include <dlfcn.h>
+    #define DYNLIB_HANDLE void*
+    #define DYNLIB_LOAD(a) dlopen(a, RTLD_LAZY)
+    #define DYNLIB_GETSYM(a, b) dlsym(a, b)
+    #define DYNLIB_UNLOAD(a) dlclose(a)
+#endif
+
 // Forward declarations
 static Module* module_load_impl(const char* name, Module* module);
 
@@ -196,22 +211,39 @@ Module* module_get_by_name(const char* name) {
  * @return bool true if a circular dependency is detected
  */
 bool module_detect_circular_dependency(Module* module, const char* dependencyName) {
-    error_push_debug(__func__, __FILE__, __LINE__, (void*)module_detect_circular_dependency);
-    
-    if (!module || !dependencyName) {
+    if (!module || !dependencyName || !*dependencyName) {
         return false;
     }
     
-    // Base case: module is already being loaded (we're in a cycle)
-    if (strcmp(module->name, dependencyName) == 0) {
+    logger_log(LOG_DEBUG, "Checking for circular dependency: %s -> %s", 
+               module->name, dependencyName);
+    
+    // Si el módulo actual está en proceso de carga, comprobar si estamos intentando
+    // importar el mismo módulo recursivamente
+    if (module->isLoading && strcmp(module->name, dependencyName) == 0) {
+        logger_log(LOG_WARNING, "Direct circular dependency detected: %s depends on itself", 
+                   module->name);
         return true;
     }
     
-    // If module is in loading state, we have a circular dependency
-    if (module->isLoading) {
-        logger_log(LOG_DEBUG, "Detected circular dependency: %s while loading %s", 
-                  module->name, dependencyName);
-        return true;
+    // Verificar toda la cadena de dependencias
+    for (int i = 0; i < module->dependencyCount; i++) {
+        // Comprobamos si alguna dependencia directa coincide con el nombre buscado
+        if (strcmp(module->dependencies[i], dependencyName) == 0) {
+            logger_log(LOG_WARNING, "Circular dependency detected: %s -> %s", 
+                       module->name, dependencyName);
+            return true;
+        }
+        
+        // Comprobamos recursivamente las dependencias de cada dependencia
+        Module* depModule = module_get_by_name(module->dependencies[i]);
+        if (depModule) {
+            if (module_detect_circular_dependency(depModule, dependencyName)) {
+                logger_log(LOG_WARNING, "Indirect circular dependency detected: %s -> %s through %s", 
+                           module->name, dependencyName, module->dependencies[i]);
+                return true;
+            }
+        }
     }
     
     return false;
@@ -567,7 +599,36 @@ Module* module_load(const char* name) {
         }
     }
 
-    return module_load_impl(name, NULL);
+    // Crear un módulo para intentar cargarlo dinámicamente
+    Module* module = calloc(1, sizeof(Module));
+    if (!module) {
+        logger_log(LOG_ERROR, "Failed to allocate memory for module structure");
+        error_report("Module", __LINE__, 0, "Memory allocation failed", ERROR_MEMORY);
+        return NULL;
+    }
+    
+    strncpy(module->name, name, sizeof(module->name) - 1);
+    module->isLoading = true;
+    
+    // Register module in global table before loading
+    if (moduleCount < MAX_MODULES) {
+        loadedModules[moduleCount++] = module;
+    }
+    
+    // Primero intentar cargar dinámicamente
+    logger_log(LOG_DEBUG, "Attempting to load module '%s' dynamically", name);
+    if (module_load_dynamic(module)) {
+        // Éxito en la carga dinámica
+        module->isLoaded = true;
+        module->isLoading = false;
+        logger_log(LOG_INFO, "Module '%s' loaded dynamically with %d exports", 
+                  name, module->exportCount);
+        return module;
+    }
+    
+    // Si la carga dinámica falla, intentar el método tradicional
+    logger_log(LOG_DEBUG, "Dynamic loading failed, attempting to load module '%s' from source", name);
+    return module_load_impl(name, module);
 }
 
 /**
@@ -1308,4 +1369,149 @@ bool module_import_with_alias(Module* target, const char* moduleName, const char
     
     ImportMode mode = isQualified ? IMPORT_QUALIFIED : IMPORT_ALL;
     return module_import_with_options(target, moduleName, alias, mode);
+}
+
+/**
+ * @brief Carga dinámicamente un módulo desde una biblioteca compartida
+ * 
+ * @param module El módulo cuyas funciones se intentarán cargar dinámicamente
+ * @return bool true si tuvo éxito, false si falló
+ */
+bool module_load_dynamic(Module* module) {
+    error_push_debug(__func__, __FILE__, __LINE__, (void*)module_load_dynamic);
+    
+    if (!module) {
+        logger_log(LOG_ERROR, "Attempted to load NULL module dynamically");
+        return false;
+    }
+    
+    char filename[1024];
+    const char* extensions[] = {
+    #ifdef _WIN32
+        ".dll"
+    #elif __APPLE__
+        ".dylib", ".so"
+    #else
+        ".so", ".dylib"
+    #endif
+    };
+    
+    // Intentar diferentes extensiones
+    DYNLIB_HANDLE handle = NULL;
+    for (int i = 0; i < sizeof(extensions) / sizeof(extensions[0]); i++) {
+        // Construir el nombre del archivo
+        snprintf(filename, sizeof(filename), "%s%s", module->name, extensions[i]);
+        
+        // Intentar cargar la biblioteca
+        handle = DYNLIB_LOAD(filename);
+        if (handle) {
+            break;
+        }
+        
+        // Intentar en directorio de módulos
+        snprintf(filename, sizeof(filename), "modules/%s%s", module->name, extensions[i]);
+        handle = DYNLIB_LOAD(filename);
+        if (handle) {
+            break;
+        }
+        
+        // Intentar en directorio lib
+        snprintf(filename, sizeof(filename), "lib/%s%s", module->name, extensions[i]);
+        handle = DYNLIB_LOAD(filename);
+        if (handle) {
+            break;
+        }
+    }
+    
+    if (!handle) {
+        #ifdef _WIN32
+        DWORD error = GetLastError();
+        logger_log(LOG_WARNING, "Could not load module '%s' dynamically. Error: %lu", module->name, error);
+        #else
+        logger_log(LOG_WARNING, "Could not load module '%s' dynamically: %s", module->name, dlerror());
+        #endif
+        return false;
+    }
+    
+    logger_log(LOG_INFO, "Successfully loaded module '%s' dynamically", module->name);
+    
+    // Obtener información del módulo
+    typedef ModuleInfo* (*GetModuleInfoFunc)();
+    GetModuleInfoFunc getInfo = (GetModuleInfoFunc)DYNLIB_GETSYM(handle, "getModuleInfo");
+    
+    if (getInfo) {
+        ModuleInfo* info = getInfo();
+        if (info) {
+            // Actualizar la información del módulo
+            module->version.major = info->version.major;
+            module->version.minor = info->version.minor;
+            module->version.patch = info->version.patch;
+            
+            if (info->author && strlen(info->author) > 0) {
+                strncpy(module->metadata.author, info->author, sizeof(module->metadata.author) - 1);
+            }
+            
+            if (info->description && strlen(info->description) > 0) {
+                strncpy(module->metadata.description, info->description, sizeof(module->metadata.description) - 1);
+            }
+            
+            if (info->license && strlen(info->license) > 0) {
+                strncpy(module->metadata.license, info->license, sizeof(module->metadata.license) - 1);
+            }
+            
+            logger_log(LOG_INFO, "Extracted module info: version %d.%d.%d, author: %s", 
+                      info->version.major, info->version.minor, info->version.patch, 
+                      info->author ? info->author : "unknown");
+        }
+    }
+    
+    // Cargar el AST del módulo (si está disponible)
+    typedef AstNode* (*GetModuleAstFunc)();
+    GetModuleAstFunc getAst = (GetModuleAstFunc)DYNLIB_GETSYM(handle, "getModuleAst");
+    
+    if (getAst) {
+        AstNode* ast = getAst();
+        if (ast) {
+            // Si ya teníamos un AST, liberarlo primero
+            if (module->ast) {
+                freeAst(module->ast);
+            }
+            
+            // Usar el AST del módulo dinámico
+            module->ast = ast;
+            logger_log(LOG_INFO, "Loaded AST from dynamic module '%s'", module->name);
+        }
+    }
+    
+    // Cargar los símbolos exportados
+    typedef ExportDefinition* (*GetExportsFunc)(int*);
+    GetExportsFunc getExports = (GetExportsFunc)DYNLIB_GETSYM(handle, "getExports");
+    
+    if (getExports) {
+        int exportCount = 0;
+        ExportDefinition* exports = getExports(&exportCount);
+        
+        if (exports && exportCount > 0) {
+            for (int i = 0; i < exportCount; i++) {
+                // Crear un nodo temporal para este símbolo
+                AstNode* symbolNode = createAstNode(AST_IDENTIFIER);
+                strncpy(symbolNode->identifier.name, exports[i].name, sizeof(symbolNode->identifier.name) - 1);
+                
+                // Agregar a las exportaciones del módulo
+                module_add_export(module, exports[i].name, symbolNode, 
+                                 exports[i].visibility == 1 ? EXPORT_PUBLIC : 
+                                 (exports[i].visibility == 2 ? EXPORT_INTERNAL : EXPORT_PRIVATE));
+                
+                logger_log(LOG_DEBUG, "Added export '%s' from dynamic module", exports[i].name);
+            }
+            
+            logger_log(LOG_INFO, "Loaded %d exports from dynamic module '%s'", exportCount, module->name);
+        }
+    }
+    
+    // Guardar el handle para usarlo más tarde
+    module->dynamicHandle = handle;
+    module->isDynamicallyLoaded = true;
+    
+    return true;
 }

@@ -1,0 +1,49 @@
+/**
+ * Prueba de importaciones selectivas y alias en Lyn
+ * Este archivo demuestra las funcionalidades avanzadas del sistema de módulos
+ */
+
+main
+    print("=== Prueba de Importaciones Avanzadas ===")
+    
+    // 1. Importación básica de un módulo completo
+    import math_lib
+    
+    a = 10
+    b = 5
+    
+    // Uso básico de módulo
+    result1 = math_lib.add(a, b)
+    print("math_lib.add(10, 5) = " + result1)
+    
+    // 2. Importación con alias de módulo
+    import math_lib as m
+    
+    // Uso de módulo con alias
+    result2 = m.multiply(a, b)
+    print("m.multiply(10, 5) = " + result2)
+    
+    // 3. Importación selectiva de funciones específicas
+    from math_lib import add, subtract
+    
+    // Uso directo de funciones importadas selectivamente
+    result3 = add(a, b)
+    result4 = subtract(a, b)
+    print("add(10, 5) = " + result3)
+    print("subtract(10, 5) = " + result4)
+    
+    // 4. Importación selectiva con alias de función
+    from math_lib import multiply as mul, divide as div
+    
+    // Uso de funciones con alias
+    result5 = mul(a, b)
+    result6 = div(a, b)
+    print("mul(10, 5) = " + result5)
+    print("div(10, 5) = " + result6)
+    
+    // 5. Detección de dependencias circulares
+    // Si intentáramos importar un módulo que a su vez importa este, 
+    // el sistema debe detectarlo y evitar el bucle infinito
+    
+    print("\nTodas las pruebas de importación completadas con éxito!")
+end 

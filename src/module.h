@@ -88,6 +88,26 @@ typedef struct ModuleMetadata {
 } ModuleMetadata;
 
 /**
+ * @brief Información básica sobre un módulo, usada en la carga dinámica
+ */
+typedef struct ModuleInfo {
+    ModuleVersion version;     ///< Versión del módulo
+    const char* author;        ///< Autor del módulo
+    const char* description;   ///< Descripción del módulo
+    const char* license;       ///< Licencia del módulo
+} ModuleInfo;
+
+/**
+ * @brief Definición de un símbolo exportado, usada en la carga dinámica
+ */
+typedef struct ExportDefinition {
+    char name[256];           ///< Nombre del símbolo
+    int visibility;           ///< Visibilidad (0=privado, 1=público, 2=interno)
+    void* symbol;             ///< Puntero al símbolo real (función, variable, etc.)
+    char type[64];            ///< Tipo del símbolo (opcional para type checking)
+} ExportDefinition;
+
+/**
  * @brief Structure representing a module
  */
 typedef struct Module {
@@ -109,6 +129,8 @@ typedef struct Module {
     // Module state
     bool isLoaded;              ///< Whether the module has been fully loaded
     bool isLoading;             ///< Used for circular dependency detection
+    bool isDynamicallyLoaded;   ///< Whether the module was loaded dynamically
+    void* dynamicHandle;        ///< Handle for dynamically loaded library
     
     // Cache information
     time_t lastModified;        ///< Last modification time of the source file
@@ -315,5 +337,13 @@ Module* module_get_by_name(const char* name);
  * @param count Number of paths in the array
  */
 void module_set_search_paths(const char* paths[], int count);
+
+/**
+ * @brief Carga dinámicamente un módulo desde una biblioteca compartida
+ * 
+ * @param module El módulo cuyas funciones se intentarán cargar dinámicamente
+ * @return bool true si tuvo éxito, false si falló
+ */
+bool module_load_dynamic(Module* module);
 
 #endif // LYN_MODULE_H

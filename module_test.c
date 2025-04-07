@@ -153,6 +153,53 @@ int main() {
     float* float_array __attribute__((unused)) = NULL;
     double* mixed_array __attribute__((unused)) = NULL;
     const char* day_name __attribute__((unused)) = "";
+    // Importando módulo: math_lib
+    // Comprobación de dependencias circulares
+    // Si este módulo ya se está cargando, evitar dependencia circular
+    // Estructura para funciones del módulo math_lib
+    typedef struct {
+        double (*add)(int contextID, double a, double b);
+        double (*subtract)(int contextID, double a, double b);
+        double (*multiply)(int contextID, double a, double b);
+        double (*divide)(int contextID, double a, double b);
+        const char* (*version)(int contextID);
+    } math_lib_Module;
+    // Implementaciones predeterminadas para el módulo math_lib
+    double math_lib_add(int contextID, double a, double b) {
+        // Implementación predeterminada
+        return a + b;
+    }
+    double math_lib_subtract(int contextID, double a, double b) {
+        // Implementación predeterminada
+        return a - b;
+    }
+    double math_lib_multiply(int contextID, double a, double b) {
+        // Implementación predeterminada
+        return a * b;
+    }
+    double math_lib_divide(int contextID, double a, double b) {
+        // Implementación predeterminada
+        if (b == 0) {
+            fprintf(stderr, "Error: División por cero\n");
+            return 0;
+        }
+        return a / b;
+    }
+    const char* math_lib_version(int contextID) {
+        return "1.0.0";
+    }
+    // Instancia de la estructura del módulo
+    math_lib_Module math_lib = {
+        .add = math_lib_add,
+        .subtract = math_lib_subtract,
+        .multiply = math_lib_multiply,
+        .divide = math_lib_divide,
+        .version = math_lib_version,
+    };
+    // Inicialización del sistema de módulos
+    #include <dlfcn.h>
+    #include <dirent.h>
+    static int moduleContextID = 0;
     printf("%s\n", "=== Module System Test ===");
     int a __attribute__((unused)) = 5;
     int b __attribute__((unused)) = 3;
@@ -161,6 +208,19 @@ int main() {
     {
         char _print_buffer[1024];
         sprintf(_print_buffer, "%s%g",         "5 + 3 = "        ,         result        );
+        printf("%s\n", _print_buffer);
+    }
+    double result_add __attribute__((unused)) =     math_lib_add(    0    ,     a    ,     b    )    ;
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%g",         "math_lib.add(5, 3) = "        ,         result_add        );
+        printf("%s\n", _print_buffer);
+    }
+    double c __attribute__((unused));
+    c =     (    result     *     2    )    ;
+    {
+        char _print_buffer[1024];
+        sprintf(_print_buffer, "%s%g",         "(5 + 3) * 2 = "        ,         c        );
         printf("%s\n", _print_buffer);
     }
     if (    (    a     >     b    )    ) {

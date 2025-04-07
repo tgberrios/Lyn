@@ -1,0 +1,38 @@
+// Prueba de Importaciones Selectivas
+// Demuestra el uso de importaciones selectivas y alias
+
+main
+    // Importación selectiva básica
+    import from math_lib {add, multiply}
+    
+    // Importación con alias
+    import math_lib as math
+    
+    // Importación selectiva con alias para los símbolos
+    import from math_lib {subtract as resta, divide as dividir}
+    
+    print("=== Prueba de Importaciones Selectivas ===")
+    
+    a = 10
+    b = 2
+    
+    // Usando símbolos importados directamente
+    result_add = add(a, b)
+    print("add(10, 2) = " + result_add)
+    
+    result_multiply = multiply(a, b)
+    print("multiply(10, 2) = " + result_multiply)
+    
+    // Usando símbolos con alias
+    result_subtract = resta(a, b)
+    print("resta(10, 2) = " + result_subtract)
+    
+    result_divide = dividir(a, b)
+    print("dividir(10, 2) = " + result_divide)
+    
+    // Usando notación de punto con alias de módulo
+    result_math = math.add(a * 2, b * 3)
+    print("math.add(20, 6) = " + result_math)
+    
+    print("=== Prueba completada ===")
+end 

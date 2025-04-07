@@ -1,0 +1,23 @@
+/**
+ * Prueba simplificada de módulos en Lyn
+ */
+
+main
+    print("=== Prueba de Módulos en Lyn ===")
+    
+    // Importación básica
+    import math_lib
+    
+    a = 10
+    b = 5
+    
+    // Uso básico
+    result1 = math_lib.add(a, b)
+    print("math_lib.add(10, 5) = " + result1)
+    
+    // Operaciones avanzadas
+    c = result1 * 2
+    print("(10 + 5) * 2 = " + c)
+    
+    print("Prueba completada con éxito!")
+end 

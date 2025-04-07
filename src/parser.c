@@ -434,6 +434,86 @@ static AstNode *parseStatement(void) {
         result = parseTryCatchStmt();
     } else if (currentToken.type == TOKEN_THROW) {
         result = parseThrowStmt();
+    } else if (currentToken.type == TOKEN_FROM) {
+        // Manejar sintaxis "from module import symbol1, symbol2..."
+        advanceToken(); // consume 'from'
+        
+        if (currentToken.type != TOKEN_IDENTIFIER)
+            parserError("Expected module name after 'from'", currentToken);
+            
+        char moduleName[256];
+        strncpy(moduleName, currentToken.lexeme, sizeof(moduleName) - 1);
+        moduleName[sizeof(moduleName) - 1] = '\0';
+        
+        advanceToken(); // consume module name
+        
+        if (currentToken.type != TOKEN_IMPORT)
+            parserError("Expected 'import' after module name in 'from' statement", currentToken);
+        
+        // Crear nodo de importación
+        AstNode* importNode = createAstNode(AST_IMPORT);
+        parser_stats.nodes_created++;
+        
+        // Configurar campos
+        strncpy(importNode->importStmt.moduleName, moduleName, sizeof(importNode->importStmt.moduleName) - 1);
+        importNode->importStmt.hasSymbolList = true;
+        importNode->importStmt.symbolCount = 0;
+        importNode->importStmt.symbols = NULL;
+        importNode->importStmt.aliases = NULL;
+        
+        advanceToken(); // consume 'import'
+        
+        // Procesar lista de símbolos
+        do {
+            if (currentToken.type != TOKEN_IDENTIFIER)
+                parserError("Expected identifier in import list", currentToken);
+            
+            // Incrementar contador de símbolos
+            importNode->importStmt.symbolCount++;
+            
+            // Reasignar memoria para los arreglos de símbolos y alias
+            importNode->importStmt.symbols = (const char**)memory_realloc(
+                (void*)importNode->importStmt.symbols, 
+                importNode->importStmt.symbolCount * sizeof(char*)
+            );
+            
+            importNode->importStmt.aliases = (const char**)memory_realloc(
+                (void*)importNode->importStmt.aliases, 
+                importNode->importStmt.symbolCount * sizeof(char*)
+            );
+            
+            if (!importNode->importStmt.symbols || !importNode->importStmt.aliases) {
+                parserError("Memory allocation error in import statement", currentToken);
+            }
+            
+            // Guardar nombre del símbolo
+            importNode->importStmt.symbols[importNode->importStmt.symbolCount - 1] = memory_strdup(currentToken.lexeme);
+            importNode->importStmt.aliases[importNode->importStmt.symbolCount - 1] = NULL; // Por defecto no hay alias
+            
+            advanceToken(); // consume nombre del símbolo
+            
+            // Verificar si hay un 'as' para alias
+            if (currentToken.type == TOKEN_AS) {
+                advanceToken(); // consume 'as'
+                
+                if (currentToken.type != TOKEN_IDENTIFIER)
+                    parserError("Expected identifier after 'as' in import statement", currentToken);
+                
+                // Guardar el alias
+                importNode->importStmt.aliases[importNode->importStmt.symbolCount - 1] = memory_strdup(currentToken.lexeme);
+                
+                advanceToken(); // consume el alias
+            }
+            
+            // Si hay coma, hay más símbolos por importar
+            if (currentToken.type == TOKEN_COMMA) {
+                advanceToken(); // consume ','
+            } else {
+                break; // Final de la lista de símbolos
+            }
+        } while (1);
+        
+        result = importNode;
     } else if (currentToken.type == TOKEN_CLASS) {
         result = parseClassDef();
     } else if (currentToken.type == TOKEN_IMPORT) {
@@ -1135,13 +1215,109 @@ static AstNode* parseModuleDecl(void) {
 static AstNode* parseImport(void) {
     advanceToken(); // consume 'import'
     
-    if (currentToken.type != TOKEN_STRING && currentToken.type != TOKEN_IDENTIFIER)
-        parserError("Expected module name", currentToken);
-    
     AstNode* importNode = createAstNode(AST_IMPORT);
-    strncpy(importNode->importStmt.moduleName, currentToken.lexeme, sizeof(importNode->importStmt.moduleName));
+    parser_stats.nodes_created++;
     
-    advanceToken(); // consume module name
+    // Inicializar campos
+    importNode->importStmt.hasAlias = false;
+    importNode->importStmt.hasSymbolList = false;
+    importNode->importStmt.symbolCount = 0;
+    importNode->importStmt.symbols = NULL;
+    importNode->importStmt.aliases = NULL;
+    memset(importNode->importStmt.alias, 0, sizeof(importNode->importStmt.alias));
+    
+    // Caso: from module import symbol1, symbol2, symbol3 as alias3...
+    if (currentToken.type == TOKEN_FROM) {
+        advanceToken(); // consume 'from'
+        
+        if (currentToken.type != TOKEN_IDENTIFIER)
+            parserError("Expected module name after 'from'", currentToken);
+        
+        // Guardamos el nombre del módulo
+        strncpy(importNode->importStmt.moduleName, currentToken.lexeme, sizeof(importNode->importStmt.moduleName) - 1);
+        advanceToken(); // consume module name
+        
+        // Esperamos la palabra clave 'import'
+        if (currentToken.type != TOKEN_IMPORT)
+            parserError("Expected 'import' after module name in selective import", currentToken);
+        advanceToken(); // consume 'import'
+        
+        // Configuramos como importación selectiva
+        importNode->importStmt.hasSymbolList = true;
+        
+        // Procesar la lista de símbolos
+        do {
+            if (currentToken.type != TOKEN_IDENTIFIER)
+                parserError("Expected identifier in import list", currentToken);
+            
+            // Incrementar contador de símbolos
+            importNode->importStmt.symbolCount++;
+            
+            // Reasignar memoria para los arreglos de símbolos y alias
+            importNode->importStmt.symbols = (const char**)memory_realloc(
+                (void*)importNode->importStmt.symbols, 
+                importNode->importStmt.symbolCount * sizeof(char*)
+            );
+            
+            importNode->importStmt.aliases = (const char**)memory_realloc(
+                (void*)importNode->importStmt.aliases, 
+                importNode->importStmt.symbolCount * sizeof(char*)
+            );
+            
+            if (!importNode->importStmt.symbols || !importNode->importStmt.aliases) {
+                parserError("Memory allocation error in import statement", currentToken);
+            }
+            
+            // Guardar nombre del símbolo
+            importNode->importStmt.symbols[importNode->importStmt.symbolCount - 1] = memory_strdup(currentToken.lexeme);
+            importNode->importStmt.aliases[importNode->importStmt.symbolCount - 1] = NULL; // Por defecto no hay alias
+            
+            advanceToken(); // consume nombre del símbolo
+            
+            // Verificar si hay un 'as' para alias
+            if (currentToken.type == TOKEN_AS) {
+                advanceToken(); // consume 'as'
+                
+                if (currentToken.type != TOKEN_IDENTIFIER)
+                    parserError("Expected identifier after 'as' in import statement", currentToken);
+                
+                // Guardar el alias
+                importNode->importStmt.aliases[importNode->importStmt.symbolCount - 1] = memory_strdup(currentToken.lexeme);
+                
+                advanceToken(); // consume el alias
+            }
+            
+            // Si hay coma, hay más símbolos por importar
+            if (currentToken.type == TOKEN_COMMA) {
+                advanceToken(); // consume ','
+            } else {
+                break; // Final de la lista de símbolos
+            }
+        } while (1);
+    }
+    // Caso normal: import module o import module as alias
+    else if (currentToken.type == TOKEN_IDENTIFIER) {
+        // Guardamos el nombre del módulo
+        strncpy(importNode->importStmt.moduleName, currentToken.lexeme, sizeof(importNode->importStmt.moduleName) - 1);
+        advanceToken(); // consume module name
+        
+        // Comprobamos si hay un alias
+        if (currentToken.type == TOKEN_AS) {
+            advanceToken(); // consume 'as'
+            
+            if (currentToken.type != TOKEN_IDENTIFIER)
+                parserError("Expected identifier after 'as' in import statement", currentToken);
+            
+            // Guardamos el alias y marcamos hasAlias
+            strncpy(importNode->importStmt.alias, currentToken.lexeme, sizeof(importNode->importStmt.alias) - 1);
+            importNode->importStmt.hasAlias = true;
+            
+            advanceToken(); // consume alias
+        }
+    } else {
+        parserError("Expected module name in import statement", currentToken);
+    }
+    
     return importNode;
 }
 
